@@ -1,4 +1,4 @@
-"""Erzeugt die geglaetteten Schriften fuer das Display (src/schriften.h).
+"""Erzeugt die geglaetteten Schriften fuer das Display (src/schriften.h und src/schriften.cpp).
 
 Schrift: Lato (Lukasz Dziedzic, SIL Open Font License 1.1 - darf eingebettet werden),
 aus C:\\Windows\\Fonts.
@@ -48,8 +48,10 @@ def glyph(font, ch):
     return bw, bh, x0, -y0, round(adv / FAKTOR), bytes(daten)
 
 
+kopf = ["// Erzeugt von werkzeuge/schriften_erzeugen.py - nicht von Hand aendern.",
+        "// Schrift: Lato (SIL Open Font License 1.1)", "#pragma once", '#include "gfx.h"', ""]
 aus = ["// Erzeugt von werkzeuge/schriften_erzeugen.py - nicht von Hand aendern.",
-       "// Schrift: Lato (SIL Open Font License 1.1)", "#pragma once", '#include "gfx.h"', ""]
+       "// Schrift: Lato (SIL Open Font License 1.1)", '#include "schriften.h"', ""]
 for name, groesse, schnitt in SCHRIFTEN:
     font = ImageFont.truetype(str(ORDNER / f"Lato-{schnitt}.ttf"), groesse * FAKTOR)
     asc, desc = font.getmetrics()
@@ -66,9 +68,12 @@ for name, groesse, schnitt in SCHRIFTEN:
     for t in tab:
         aus.append("  {%d,%d,%d,%d,%d,%d,%d}," % t)
     aus.append("};")
-    aus.append(f"static const Schrift {name} = {{{name}_GLYPHS, {name}_BITS, {len(tab)}, "
+    kopf.append(f"extern const Schrift {name};  // {groesse} px {schnitt}")
+    aus.append(f"const Schrift {name} = {{{name}_GLYPHS, {name}_BITS, {len(tab)}, "
                f"{round(asc / FAKTOR)}, {round(desc / FAKTOR)}}};")
     aus.append("")
     print(f"{name}: {groesse} px {schnitt}, {len(tab)} Zeichen, {len(bits)} Bytes")
 
-Path(__file__).resolve().parent.parent.joinpath("src", "schriften.h").write_text("\n".join(aus), encoding="utf-8")
+src = Path(__file__).resolve().parent.parent / "src"
+(src / "schriften.cpp").write_text("\n".join(aus) + "\n", encoding="utf-8")
+(src / "schriften.h").write_text("\n".join(kopf) + "\n", encoding="utf-8")
