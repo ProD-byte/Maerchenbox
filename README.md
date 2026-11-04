@@ -67,6 +67,21 @@ Nach dem Märchen der Brüder Grimm.
 | 3:20 | Die Edelsteine, der Bär, der Prankenschlag – der Königssohn |
 | 4:08 | Doppelhochzeit; die zwei Rosenbäumchen vor dem Fenster |
 
+## Der Wolf und die sieben jungen Geißlein (5 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die Mutter geht in den Wald: „An seiner rauen Stimme und an seinen schwarzen Füßen …“ |
+| 0:30 | Der Wolf klopft: „Deine Stimme ist rau, du bist der Wolf!“ |
+| 0:52 | Kreide beim Krämer; die schwarze Pfote im Fenster |
+| 1:14 | Teig beim Bäcker, Mehl beim Müller: „Wenn du es nicht tust, so fresse ich dich!“ |
+| 1:40 | Die weiße Pfote, sie machen auf; sieben Verstecke, sechs werden gefressen |
+| 2:30 | Die Mutter kommt heim: „Liebe Mutter, ich stecke im Uhrkasten!“ |
+| 3:04 | Auf der Wiese: Bauch auf, die Geißlein springen heraus, Wackersteine hinein |
+| 3:56 | Am Brunnen: „Was rumpelt und pumpelt …“ – „Der Wolf ist tot!“ |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -129,6 +144,7 @@ pio run -e ostb2st -t upload
 - `src/fuerchten.cpp` – Von einem, der auszog, das Fürchten zu lernen
 - `src/aschenputtel.cpp` – Aschenputtel
 - `src/rosenrot.cpp` – Schneeweißchen und Rosenrot
+- `src/geisslein.cpp` – Der Wolf und die sieben jungen Geißlein
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
 Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `figuren.h`), in `maerchen.h` bekannt machen und in `LISTE` in `src/main.cpp` eintragen.
