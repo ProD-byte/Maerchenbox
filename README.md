@@ -43,7 +43,7 @@ Nach dem Märchen der Brüder Grimm, gezeichnet im Spieluhr-Stil (ohne Blut).
 | Start 1× | Start / Stopp | Märchen starten bzw. Einstellung ausführen |
 | Start 2× | nächstes Märchen | – |
 | Start lang | Märchenbuch | Buch schließen |
-| Laut / Leise | Lautstärke (wird gemerkt) | umblättern |
+| Laut / Leise | Lautstärke (wird gemerkt) | umblättern (im Kreis: nach dem letzten kommt wieder das erste) |
 
 Belegung am Gerät (so liegt es am besten in der Hand):
 

@@ -58,6 +58,7 @@ float kombiFortschritt = 0; // 0..1 waehrend Lauter + Leiser gehalten werden
 bool gedreht = false;       // Bildschirm und Knoepfe um 180 Grad gedreht
 int buchSeite = 0;
 int blattNach = 0;          // Ziel beim Umblaettern
+bool blattVor = true;       // Richtung: vorwaerts (rechte Seite klappt nach links)
 uint32_t blattSeit = 0;     // 0 = blaettert gerade nicht
 uint32_t buchAuf = 0;       // Beginn des Aufklappens (0 = schon offen)
 constexpr uint32_t BLATT_MS = 520, AUF_MS = 1750;
@@ -425,7 +426,7 @@ static void buchBild(Gfx &g, float t) {
   einband(g, 6, BY - 6, 272, BH + 12);
   if (blattSeit) {
     float k = klemme((jetzt - blattSeit) / (float)BLATT_MS);
-    bool vor = blattNach > buchSeite;
+    bool vor = blattVor;
     int links = vor ? buchSeite : blattNach, rechts = vor ? blattNach : buchSeite;
     linkeSeite(g, links, t);
     rechteSeite(g, rechts, t);
@@ -671,7 +672,8 @@ static void sendeBildschirmfoto() {
   uint32_t altBlatt = blattSeit, altAuf = buchAuf;
   int altNach = blattNach;
   if (server.hasArg("blatt") && buchSeite < SEITEN - 1) {
-    blattNach = buchSeite + 1;
+    blattNach = (buchSeite + 1) % SEITEN;
+    blattVor = true;
     blattSeit = bildMs - (uint32_t)(server.arg("blatt").toFloat() * BLATT_MS);
   }
   if (server.hasArg("auf")) buchAuf = bildMs - server.arg("auf").toInt();
@@ -862,8 +864,10 @@ static void buchOeffnen() {
 static void blaettern(int d) {
   buchAuf = 0;
   if (blattSeit) { buchSeite = blattNach; blattSeit = 0; }
-  int ziel = buchSeite + d;
-  if (ziel < 0 || ziel >= SEITEN) return;
+  // im Kreis: nach dem letzten Maerchen kommt wieder das erste
+  if (SEITEN < 2) return;
+  int ziel = ((buchSeite + d) % SEITEN + SEITEN) % SEITEN;
+  blattVor = d > 0;
   blattNach = ziel;
   blattSeit = millis();
   uiKlang = 1;
