@@ -811,3 +811,12 @@ void eimer(Gfx &g, float x, float y, float s, float kipp) {
   R(-10, -16, a); R(10, -16, b);
   g.kurve(a[0], a[1], (a[0] + b[0]) / 2 - sn * 12 * s, (a[1] + b[1]) / 2 - c * 12 * s, b[0], b[1], 1.5f, OUT);
 }
+
+void fisch(Gfx &g, float x, float y, float s, float w, uint8_t a) {
+  g.ellipse(x, y, 6 * s, 3.2f * s, FARBE(0xFF9A3C), a, w);
+  float c = cosf(w), sn = sinf(w);
+  float sch[] = {x - 5 * s * c, y - 5 * s * sn, x - 10 * s * c - 4 * s * sn, y - 10 * s * sn + 4 * s * c,
+                 x - 10 * s * c + 4 * s * sn, y - 10 * s * sn - 4 * s * c};
+  g.polygon(sch, 3, FARBE(0xFF7A1C), a);
+  g.kreis(x + 3 * s * c, y + 3 * s * sn - 1 * s, 1 * s, SCHWARZ, a);
+}

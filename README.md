@@ -52,6 +52,21 @@ Nach dem Märchen der Brüder Grimm.
 | 3:26 | Schuhprobe: Zehe ab, Ferse ab – „Rucke di guh, Blut ist im Schuh“ – die rechte Braut |
 | 4:22 | Hochzeit; die Tauben strafen die falschen Schwestern |
 
+## Schneeweißchen und Rosenrot (5 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die Hütte mit dem weißen und dem roten Rosenbäumchen; „Wir wollen uns nicht verlassen“; Tiere; der Engel |
+| 0:34 | Winterabend: der Bär klopft an, Schnee abkehren, „Schneeweißchen, Rosenrot, schlägst dir den Freier tot“ |
+| 1:14 | Frühling: der Bär muss fort, das Fell reißt am Türhaken, Gold schimmert |
+| 1:36 | Der Zwerg mit dem Bart im Baumstamm |
+| 2:12 | Der Zwerg an der Angelschnur mit dem großen Fisch |
+| 2:48 | Der Zwerg und der Adler |
+| 3:20 | Die Edelsteine, der Bär, der Prankenschlag – der Königssohn |
+| 4:08 | Doppelhochzeit; die zwei Rosenbäumchen vor dem Fenster |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -113,6 +128,7 @@ pio run -e ostb2st -t upload
 - `src/schneiderlein.cpp` – Das tapfere Schneiderlein
 - `src/fuerchten.cpp` – Von einem, der auszog, das Fürchten zu lernen
 - `src/aschenputtel.cpp` – Aschenputtel
+- `src/rosenrot.cpp` – Schneeweißchen und Rosenrot
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
 Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `figuren.h`), in `maerchen.h` bekannt machen und in `LISTE` in `src/main.cpp` eintragen.

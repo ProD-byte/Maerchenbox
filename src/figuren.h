@@ -123,3 +123,4 @@ void frau(Gfx &g, float x, float y, float s, float dir, const FrauPose &p, float
 // weisse Taube; flug >= 0 schlaegt mit den Fluegeln, pick = 0..1 pickt
 void taube(Gfx &g, float x, float y, float s, float dir, float flug = -1, float pick = 0);
 void eimer(Gfx &g, float x, float y, float s, float kipp);  // Wassereimer, kipp in Bogenmass
+void fisch(Gfx &g, float x, float y, float s, float w, uint8_t a = 255);  // kleiner Fisch, w = Drehung

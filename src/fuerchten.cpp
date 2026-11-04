@@ -268,14 +268,6 @@ static void truhe(Gfx &g, float x, float y, float s, float t, float auf) {
   g.kreis(x, y - 12 * s, 2.5f * s, GOLD);
 }
 
-static void fisch(Gfx &g, float x, float y, float s, float w, uint8_t a = 255) {
-  g.ellipse(x, y, 6 * s, 3.2f * s, FARBE(0xFF9A3C), a, w);
-  float c = cosf(w), sn = sinf(w);
-  float sch[] = {x - 5 * s * c, y - 5 * s * sn, x - 10 * s * c - 4 * s * sn, y - 10 * s * sn + 4 * s * c,
-                 x - 10 * s * c + 4 * s * sn, y - 10 * s * sn - 4 * s * c};
-  g.polygon(sch, 3, FARBE(0xFF7A1C), a);
-  g.kreis(x + 3 * s * c, y + 3 * s * sn - 1 * s, 1 * s, SCHWARZ, a);
-}
 
 
 static void brrr(Gfx &g, float x, float y, float t, float staerke) {
