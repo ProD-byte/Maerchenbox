@@ -7,12 +7,12 @@
 // =====================================================================
 
 // Arm vom Schultergelenk; gibt die Handposition zurueck
-void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy) {
+void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy, Farbe aermel) {
   float l = 15 * s;
   hx = sx + sinf(winkel) * l * dir;
   hy = sy + cosf(winkel) * l;
   g.kontur(1.4f * s, OUT);
-  g.linie(sx, sy, hx, hy, 6.5f * s, HEMD);
+  g.linie(sx, sy, hx, hy, 6.5f * s, aermel);
   g.kreis(hx, hy, 3.8f * s, HAUT);
   g.konturAus();
 }
@@ -23,20 +23,22 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
                           float *handY, int teil) {
   auto PX = [&](float dx) { return x + dx * s * dir; };
   auto PY = [&](float dy) { return y + dy * s; };
+  static const Aussehen STANDARD;
+  const Aussehen &L = p.aussehen ? *p.aussehen : STANDARD;
   float hx, hy;
   if (teil == 2) {
-    arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy);
+    arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy, L.hemd);
   } else {
   // Beine
   float sw = p.lauf >= 0 ? sinf(p.lauf * 6.2831853f) * 7 : 0;
   g.kontur(1.4f * s, OUT);
-  g.linie(PX(-4), PY(-22), PX(-4 - sw), PY(-5), 6 * s, HOSE);
-  g.linie(PX(4), PY(-22), PX(4 + sw), PY(-5), 6 * s, HOSE);
+  g.linie(PX(-4), PY(-22), PX(-4 - sw), PY(-5), 6 * s, L.hose);
+  g.linie(PX(4), PY(-22), PX(4 + sw), PY(-5), 6 * s, L.hose);
   g.ellipse(PX(-3 - sw), PY(-3), 6 * s, 3.5f * s, SCHUH);
   g.ellipse(PX(5 + sw), PY(-3), 6 * s, 3.5f * s, SCHUH);
   // hinterer Arm
   g.konturAus();
-  if (teil == 0) arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy);
+  if (teil == 0) arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy, L.hemd);
   if (p.ranzen) {
     g.kontur(1.3f * s, OUT);
     g.ellipse(PX(-12), PY(-33), 7 * s, 9 * s, FARBE(0xB0703A));
@@ -45,9 +47,9 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
   }
   // Koerper
   g.kontur(1.4f * s, OUT);
-  g.ellipse(PX(0), PY(-31), 12.5f * s, 14 * s, WESTE);
+  g.ellipse(PX(0), PY(-31), 12.5f * s, 14 * s, L.weste);
   g.konturAus();
-  g.ellipse(PX(2), PY(-33), 4 * s, 9 * s, HEMD);
+  g.ellipse(PX(2), PY(-33), 4 * s, 9 * s, L.hemd);
   g.kreis(PX(1), PY(-36), 1.3f * s, GOLD);
   g.kreis(PX(1), PY(-30), 1.3f * s, GOLD);
   if (p.guertel) {
@@ -57,7 +59,7 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
   // Kopf
   float kx = PX(1), ky = PY(-60);
   g.kontur(1.5f * s, OUT);
-  g.ellipse(PX(-4), PY(-64), 16 * s, 14 * s, HAAR);
+  g.ellipse(PX(-4), PY(-64), 16 * s, 14 * s, L.haar);
   g.kreis(kx, ky, 17 * s, HAUT);
   g.konturAus();
   g.ellipse(PX(-13), PY(-60), 4 * s, 5 * s, HAUT);  // Ohr
@@ -85,18 +87,38 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
   } else {
     g.bogen(PX(5), PY(-53), 4.5f * s, 0.5f, 2.6f, 1.8f * s, OUT);
   }
-  // Zipfelmuetze mit Feder
-  g.kontur(1.5f * s, OUT);
-  float m[] = {PX(-16), PY(-68), PX(16), PY(-70), PX(9), PY(-84), PX(-4), PY(-93), PX(-16), PY(-99), PX(-10), PY(-86)};
-  g.polygon(m, 6, HUT);
-  g.konturAus();
-  g.ellipse(PX(0), PY(-69), 17.5f * s, 4 * s, HUT_D);
-  g.kreis(PX(-16), PY(-99), 3 * s, GOLD);
-  g.kurve(PX(8), PY(-72), PX(16), PY(-90), PX(24), PY(-96), 3 * s, FEDER);
+  if (L.halstuch) {
+    float ht[] = {PX(-9), PY(-45), PX(11), PY(-45), PX(1), PY(-36)};
+    g.polygon(ht, 3, L.halstuch);
+  }
+  if (L.muetze == 0) {  // Zipfelmuetze mit Feder
+    g.kontur(1.5f * s, OUT);
+    float m[] = {PX(-16), PY(-68), PX(16), PY(-70), PX(9), PY(-84), PX(-4), PY(-93), PX(-16), PY(-99), PX(-10), PY(-86)};
+    g.polygon(m, 6, L.hut);
+    g.konturAus();
+    g.ellipse(PX(0), PY(-69), 17.5f * s, 4 * s, L.hutD);
+    g.kreis(PX(-16), PY(-99), 3 * s, GOLD);
+    g.kurve(PX(8), PY(-72), PX(16), PY(-90), PX(24), PY(-96), 3 * s, L.feder);
+  } else if (L.muetze == 1) {  // Strubbelhaare
+    g.kontur(1.3f * s, OUT);
+    g.ellipse(PX(0), PY(-72), 16 * s, 7 * s, L.haar);
+    g.konturAus();
+    // drei geschwungene Locken
+    g.kurve(PX(-10), PY(-74), PX(-14), PY(-84), PX(-6), PY(-86), 4.5f * s, L.haar);
+    g.kurve(PX(-1), PY(-76), PX(0), PY(-88), PX(8), PY(-86), 4.5f * s, L.haar);
+    g.kurve(PX(8), PY(-74), PX(14), PY(-82), PX(18), PY(-78), 4 * s, L.haar);
+  } else {  // Schlafmuetze, haengt nach hinten
+    g.kontur(1.5f * s, OUT);
+    float m[] = {PX(-16), PY(-66), PX(16), PY(-70), PX(6), PY(-86), PX(-14), PY(-88), PX(-26), PY(-74), PX(-14), PY(-80)};
+    g.polygon(m, 6, L.hut);
+    g.konturAus();
+    g.ellipse(PX(0), PY(-68), 17.5f * s, 4 * s, WEISS);
+    g.kreis(PX(-26), PY(-73), 4 * s, WEISS);
+  }
   }
   if (teil == 1) return;
   // vorderer Arm
-  arm(g, PX(9), PY(-38), s, dir, p.armV, hx, hy);
+  arm(g, PX(9), PY(-38), s, dir, p.armV, hx, hy, L.hemd);
   if (p.tuch > 0) {
     float q[] = {hx, hy, hx + 14 * s * dir, hy - 10 * s, hx + 20 * s * dir, hy + 4 * s, hx + 4 * s * dir, hy + 12 * s};
     g.polygon(q, 4, FARBE(0xE0533F));
@@ -343,12 +365,14 @@ void zzz(Gfx &g, float x, float y, float t, uint8_t a) {
 // Der Riese
 // =====================================================================
 
+static Farbe riesenHaut = RIESE_HAUT;  // Hautfarbe des gerade gezeichneten Riesen
+
 void riesenArm(Gfx &g, float sx, float sy, float s, float dir, float w, Farbe hemd, float *hx,
                       float *hy) {
   float x = sx + sinf(w) * 46 * s * dir, y = sy + cosf(w) * 46 * s;
   g.kontur(1.8f, OUT);
   g.linie(sx, sy, x, y, 17 * s, hemd);
-  g.kreis(x, y, 10 * s, RIESE_HAUT);
+  g.kreis(x, y, 10 * s, riesenHaut);
   g.konturAus();
   if (hx) *hx = x;
   if (hy) *hy = y;
@@ -359,9 +383,11 @@ void riese(Gfx &g, float x, float y, float s, float dir, const RiesePose &p, flo
                   float *handY) {
   auto PX = [&](float dx) { return x + dx * s * dir; };
   auto PY = [&](float dy) { return y + dy * s; };
-  Farbe hemd = p.farbe ? FARBE(0x5C7FB8) : FARBE(0x6E9A3C);
-  Farbe hose = p.farbe ? FARBE(0x4A3B6B) : FARBE(0x6B4A2E);
-  Farbe bart = p.farbe ? FARBE(0x5B4636) : RIESE_BART;
+  // 0 gruen, 1 blau, 2 blasser Geist mit weissem Bart
+  Farbe hemd = p.farbe == 2 ? FARBE(0xB9C3DA) : p.farbe ? FARBE(0x5C7FB8) : FARBE(0x6E9A3C);
+  Farbe hose = p.farbe == 2 ? FARBE(0x8D98B8) : p.farbe ? FARBE(0x4A3B6B) : FARBE(0x6B4A2E);
+  Farbe bart = p.farbe == 2 ? FARBE(0xF4F6FA) : p.farbe ? FARBE(0x5B4636) : RIESE_BART;
+  riesenHaut = p.farbe == 2 ? FARBE(0xDCE2EE) : RIESE_HAUT;
   float koerperY = p.sitzt ? -62 : -82;
   // Beine
   g.kontur(1.8f, OUT);
@@ -391,12 +417,12 @@ void riese(Gfx &g, float x, float y, float s, float dir, const RiesePose &p, flo
   auto KX = [&](float dx, float dy) { return kx + (dx * cosf(kw) - dy * sinf(kw)) * s * dir; };
   auto KY = [&](float dx, float dy) { return ky + (dx * sinf(kw) + dy * cosf(kw)) * s; };
   g.kontur(1.8f, OUT);
-  g.kreis(KX(0, 0), KY(0, 0), 28 * s, RIESE_HAUT);
+  g.kreis(KX(0, 0), KY(0, 0), 28 * s, riesenHaut);
   g.ellipse(KX(0, 20), KY(0, 20), 26 * s, 18 * s, bart);
   g.konturAus();
   // Haare
   for (int i = 0; i < 5; i++) g.kreis(KX(-18 + i * 9, -24 + (i == 2) * -3), KY(-18 + i * 9, -24), 9 * s, bart);
-  g.ellipse(KX(-26, 0), KY(-26, 0), 6 * s, 8 * s, RIESE_HAUT);  // Ohr
+  g.ellipse(KX(-26, 0), KY(-26, 0), 6 * s, 8 * s, riesenHaut);  // Ohr
   // Augen
   for (int i = 0; i < 2; i++) {
     float ex = KX(i ? 14 : -4, -4), ey = KY(i ? 14 : -4, -4);

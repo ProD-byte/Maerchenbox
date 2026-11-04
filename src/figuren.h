@@ -27,6 +27,14 @@ constexpr Farbe STEIN = FARBE(0xA3A8B5), STEIN_D = FARBE(0x7D8392);
 constexpr Farbe RIESE_HAUT = FARBE(0xF2B48C), RIESE_BART = FARBE(0xB5652E);
 
 // ---------- Figuren ----------
+// Aussehen der Grundfigur (Standard = das Schneiderlein)
+struct Aussehen {
+  Farbe weste = WESTE, hemd = HEMD, hose = HOSE, haar = HAAR;
+  Farbe hut = HUT, hutD = HUT_D, feder = FEDER;
+  int muetze = 0;            // 0 Zipfelmuetze mit Feder, 1 keine (Strubbelhaare), 2 Schlafmuetze
+  Farbe halstuch = 0;        // 0 = keins
+};
+
 struct Pose {
   float lauf = -1;      // Laufphase 0..1, -1 = steht
   float armV = 0.4f;    // vorderer Arm: Winkel (0 = haengt, 1.57 = waagrecht nach vorn, 3 = hoch)
@@ -38,6 +46,7 @@ struct Pose {
   bool guertel = false;
   bool ranzen = false;  // Beutel auf dem Ruecken (Kaese und Vogel)
   float tuch = 0;       // 1 = haelt ein rotes Tuch in der vorderen Hand
+  const Aussehen *aussehen = nullptr;  // nullptr = Schneiderlein
 };
 struct RiesePose {
   bool sitzt = false;
@@ -47,10 +56,10 @@ struct RiesePose {
   bool zu = false;                   // Augen zu (schlafen)
   float boese = 0, staunt = 0;
   float kopf = 0;                    // Kopf neigen (Bogenmass)
-  int farbe = 0;                     // 0 gruen, 1 blau (zweiter Riese)
+  int farbe = 0;                     // 0 gruen, 1 blau (zweiter Riese), 2 blasser Geist
 };
 
-void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy);
+void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy, Farbe aermel = HEMD);
 void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, float *handX = nullptr,
                           float *handY = nullptr, int teil = 0);
 void bauersfrau(Gfx &g, float x, float y, float winke);

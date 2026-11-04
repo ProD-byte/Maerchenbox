@@ -42,7 +42,7 @@ constexpr int TASTE_A = 39, TASTE_B = 0, TASTE_C = 40;  // die drei Knoepfe (GPI
 constexpr uint8_t ES8311_ADDR = 0x18;
 
 // ---------- Maerchen ----------
-static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN};
+static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN};
 constexpr int ANZAHL = sizeof(LISTE) / sizeof(LISTE[0]);
 
 // ---------- Zustand ----------
@@ -435,7 +435,7 @@ static void buchBild(Gfx &g, float t) {
     rechteSeite(g, buchSeite, t);
   }
   // Lesebaendchen
-  float lb[] = {218, BY - 6, 226, BY - 6, 226, BY + 34, 222, BY + 29, 218, BY + 34};
+  float lb[] = {254, BY - 6, 262, BY - 6, 262, BY + 30, 258, BY + 25, 254, BY + 30};
   g.polygon(lb, 5, FARBE(0xC0392B));
 }
 
@@ -653,6 +653,8 @@ static void sendeBildschirmfoto() {
   bool mitZeit = server.hasArg("t");
   float t = mitZeit ? server.arg("t").toFloat() : (zustand == SPIELT ? hoerZeit() : 0);
   Zustand alt = zustand;
+  int altAuswahl = auswahl;
+  if (server.hasArg("m")) auswahl = constrain(server.arg("m").toInt(), 0, ANZAHL - 1);
   if (mitZeit) zustand = SPIELT;
   uint16_t *tmp = fotoPuffer;
   static uint8_t zeile[lcd::W * 3];
@@ -689,6 +691,7 @@ static void sendeBildschirmfoto() {
     }
   }
   zustand = alt;
+  auswahl = altAuswahl;
   blattSeit = altBlatt; buchAuf = altAuf; blattNach = altNach;
 }
 static void tasteVonFern();
@@ -728,7 +731,8 @@ static void sendeMesstest() {
   for (float zt : zeiten) {
     char n[24];
     snprintf(n, sizeof n, "szene t=%.0f", zt);
-    miss(n, [zt](Gfx &g) { LISTE[0]->bild(g, zt); });
+    int mi = server.hasArg("m") ? constrain(server.arg("m").toInt(), 0, ANZAHL - 1) : 0;
+    miss(n, [zt, mi](Gfx &g) { LISTE[mi]->bild(g, zt); });
   }
   server.send(200, "text/plain", aus);
 }

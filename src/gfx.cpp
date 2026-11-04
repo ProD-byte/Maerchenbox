@@ -65,18 +65,25 @@ void Gfx::ausschnitt(float x, float y, float w, float h) {
   if (ky1 > H) ky1 = H;
 }
 
-void Gfx::iris(float cx, float cy, float r, Farbe c) {
+// Blende: alles ausserhalb des Kreises einfarbig; zeilenweise direkt (schnell), Kreisrand weich
+IRAM_ATTR void Gfx::iris(float cx, float cy, float r, Farbe c) {
   if (r > 400) return;
-  int k = 0;
-  const float R[10] = {-10, -10, W + 10, -10, W + 10, H + 10, -10, H + 10, -10, -10};
-  for (int i = 0; i < 5; i++) { pts[2 * k] = R[2 * i]; pts[2 * k + 1] = R[2 * i + 1]; k++; }
-  if (r < 0.5f) r = 0.5f;
-  const int N = 48;
-  for (int i = 0; i <= N; i++) {
-    float t = i * 6.2831853f / N;
-    pts[2 * k] = cx + cosf(t) * r; pts[2 * k + 1] = cy + sinf(t) * r; k++;
+  const uint16_t v = tausch(c);
+  for (int y = y0; y < y1; y++) {
+    uint16_t *z = buf + (y - y0) * W;
+    float dy = y + 0.5f - cy;
+    if (fabsf(dy) >= r) {
+      for (int x = 0; x < W; x++) z[x] = v;
+      continue;
+    }
+    float dx = sqrtf(r * r - dy * dy);
+    float l = cx - dx, rr = cx + dx;
+    int il = (int)floorf(l), ir = (int)floorf(rr);
+    for (int x = 0; x < il && x < W; x++) z[x] = v;
+    if (il >= 0 && il < W) mische(z[il], c, (uint32_t)((1 - (l - il)) * 256));
+    if (ir >= 0 && ir < W) mische(z[ir], c, (uint32_t)((rr - ir) * 256));
+    for (int x = ir + 1 < 0 ? 0 : ir + 1; x < W; x++) z[x] = v;
   }
-  fuellePoly(pts, k, c, 255);
 }
 
 IRAM_ATTR void Gfx::zeile(int y, int xa, int xb, Farbe c, uint8_t a) {

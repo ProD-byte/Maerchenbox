@@ -20,6 +20,21 @@ gespeicherten Bilder oder Töne: Jedes Märchen ist Programmcode (`src/schneider
 
 Mit `?t=` beim Bildschirmfoto lässt sich jede Stelle ansehen, z. B. `bild.bmp?t=195`.
 
+## Von einem, der auszog, das Fürchten zu lernen (5 Minuten)
+
+Kindgerecht erzählt: niedliche Gespenster, Katzen und ein freundliches Skelett.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Zu Hause: der Bruder zittert vor der Eule, Hans weiß nicht, was Gruseln ist |
+| 0:36 | Glockenturm: das Laken-Gespenst purzelt die Treppe hinunter |
+| 1:12 | Wanderung zum Spukschloss, der König zeigt den Aushang |
+| 1:44 | 1. Nacht: schwarze Katzen spielen Karten und werden verscheucht |
+| 2:30 | 2. Nacht: ein Skelett fällt den Kamin herunter, Kegeln mit Kürbis |
+| 3:16 | 3. Nacht: das fahrende Bett, der alte Bart im Amboss, drei Schatzkisten |
+| 4:00 | Hochzeit |
+| 4:24 | Ein Eimer kaltes Wasser mit Fischlein: Brrr! Ende |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -64,7 +79,7 @@ pio run -e ostb2st -t upload
 
 ## Hilfen für die Entwicklung (im Heimnetz)
 
-- `http://maerchenbox.local/bild.bmp` – Bildschirmfoto, mit `?t=42` das Märchen bei 42 s,
+- `http://maerchenbox.local/bild.bmp` – Bildschirmfoto, mit `?t=42` das Märchen bei 42 s, `&m=1` zweites Märchen,
   im Buch mit `?blatt=0.5` mitten im Umblättern, `?auf=1200` beim Aufklappen (ms)
 - `http://maerchenbox.local/taste?k=kurz|doppel|lang|laut|leise|einstellungen` – Knopf drücken
 - `http://maerchenbox.local/status` – Zustand, Bilder/s, Zeichenzeit, letzte Tastendrücke
@@ -76,10 +91,13 @@ pio run -e ostb2st -t upload
 - `src/lcd.*` – NV3023-Display, Streifen per DMA
 - `src/synth.*` – Spieluhr-Synthesizer (Noten, Glocken, Rauschen, Hall)
 - `src/maerchen.h` – Schnittstelle eines Märchens: Bild zur Zeit t, Töne, Startbild, Vorschau fürs Buch
+- `src/figuren.*` – gemeinsame Figuren, Kulissen und Effekte (Schneiderlein-Figur mit `Aussehen` einkleidbar)
+- `src/melodien.h` – gemeinsame Spieluhr-Melodien
 - `src/schneiderlein.cpp` – Das tapfere Schneiderlein
+- `src/fuerchten.cpp` – Von einem, der auszog, das Fürchten zu lernen
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
-Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen`, eintragen in `LISTE` in `src/main.cpp`.
+Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `figuren.h`), in `maerchen.h` bekannt machen und in `LISTE` in `src/main.cpp` eintragen.
 
 ## Pins (aus der Xiaozhi-Firmware ausgelesen)
 

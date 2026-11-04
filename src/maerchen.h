@@ -14,3 +14,4 @@ struct Maerchen {
 };
 
 extern const Maerchen SCHNEIDERLEIN;
+extern const Maerchen FUERCHTEN;
