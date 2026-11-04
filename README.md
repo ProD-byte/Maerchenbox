@@ -36,6 +36,22 @@ Nach dem Märchen der Brüder Grimm, gezeichnet im Spieluhr-Stil (ohne Blut).
 | 4:04 | Hochzeit: „Wenn mir nur gruselte!“ |
 | 4:22 | Gründlinge aus dem Bach: „Ach, was gruselt mir! Jetzt weiß ich, was Gruseln ist!“ |
 
+## Aschenputtel (5 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die Mutter stirbt: „Bleib fromm und gut“; Schnee wie ein weißes Tuch auf dem Grab |
+| 0:28 | Stiefmutter und Schwestern; grauer Kittel und Holzschuhe, Schlafen in der Asche |
+| 0:54 | Der Vater bringt Kleider, Perlen – und das Haselreis, das auf dem Grab zum Baum wächst |
+| 1:24 | Die Linsen in der Asche: „Die guten ins Töpfchen, die schlechten ins Kröpfchen“ |
+| 1:56 | „Bäumchen, rüttel dich und schüttel dich, wirf Gold und Silber über mich!“ |
+| 2:20 | Ball; Flucht ins Taubenhaus (1. Abend) und auf den Birnbaum (2. Abend) |
+| 3:02 | 3. Abend: goldenes Kleid, die Treppe mit Pech, der goldene Schuh |
+| 3:26 | Schuhprobe: Zehe ab, Ferse ab – „Rucke di guh, Blut ist im Schuh“ – die rechte Braut |
+| 4:22 | Hochzeit; die Tauben strafen die falschen Schwestern |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -92,10 +108,11 @@ pio run -e ostb2st -t upload
 - `src/lcd.*` – NV3023-Display, Streifen per DMA
 - `src/synth.*` – Spieluhr-Synthesizer (Noten, Glocken, Rauschen, Hall)
 - `src/maerchen.h` – Schnittstelle eines Märchens: Bild zur Zeit t, Töne, Startbild, Vorschau fürs Buch
-- `src/figuren.*` – gemeinsame Figuren, Kulissen und Effekte (Schneiderlein-Figur mit `Aussehen` einkleidbar)
+- `src/figuren.*` – gemeinsame Figuren, Kulissen und Effekte (Grundfigur mit `Aussehen`, Frauenfigur mit `FrauLook`)
 - `src/melodien.h` – gemeinsame Spieluhr-Melodien
 - `src/schneiderlein.cpp` – Das tapfere Schneiderlein
 - `src/fuerchten.cpp` – Von einem, der auszog, das Fürchten zu lernen
+- `src/aschenputtel.cpp` – Aschenputtel
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
 Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `figuren.h`), in `maerchen.h` bekannt machen und in `LISTE` in `src/main.cpp` eintragen.

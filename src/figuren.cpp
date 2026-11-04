@@ -109,6 +109,13 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
     g.kurve(PX(-10), PY(-74), PX(-14), PY(-84), PX(-6), PY(-86), 4.5f * s, L.haar);
     g.kurve(PX(-1), PY(-76), PX(0), PY(-88), PX(8), PY(-86), 4.5f * s, L.haar);
     g.kurve(PX(8), PY(-74), PX(14), PY(-82), PX(18), PY(-78), 4 * s, L.haar);
+  } else if (L.muetze == 3) {  // Krone (Prinz)
+    g.kontur(1.3f * s, OUT);
+    g.ellipse(PX(-2), PY(-70), 16 * s, 8 * s, L.haar);
+    float k[] = {PX(-12), PY(-72), PX(-12), PY(-86), PX(-6), PY(-79), PX(0), PY(-89), PX(6), PY(-79), PX(12), PY(-86), PX(12), PY(-72)};
+    g.polygon(k, 7, GOLD);
+    g.konturAus();
+    g.kreis(PX(0), PY(-77), 2 * s, FARBE(0xE8473D));
   } else {  // Schlafmuetze, haengt nach hinten
     g.kontur(1.5f * s, OUT);
     float m[] = {PX(-16), PY(-66), PX(16), PY(-70), PX(6), PY(-86), PX(-14), PY(-88), PX(-26), PY(-74), PX(-14), PY(-80)};
@@ -452,11 +459,13 @@ void riese(Gfx &g, float x, float y, float s, float dir, const RiesePose &p, flo
 // =====================================================================
 // Einhorn, Wildschwein, Koenig, Prinzessin
 // =====================================================================
-void einhorn(Gfx &g, float x, float y, float s, float lauf, float dir, float senken, float zappel) {
+void einhorn(Gfx &g, float x, float y, float s, float lauf, float dir, float senken, float zappel, bool pferd) {
   auto PX = [&](float dx) { return x + dx * s * dir; };
   auto PY = [&](float dy) { return y + dy * s; };
   const Farbe fell = FARBE(0xFFFFFF), schatten = FARBE(0xE6E1F5);
-  const Farbe regen[] = {FARBE(0xFF6B8A), FARBE(0xFFB347), FARBE(0xFFE066), FARBE(0x7ED957), FARBE(0x6EC6FF), FARBE(0xB28DFF)};
+  const Farbe regenbogen[] = {FARBE(0xFF6B8A), FARBE(0xFFB347), FARBE(0xFFE066), FARBE(0x7ED957), FARBE(0x6EC6FF), FARBE(0xB28DFF)};
+  const Farbe grau[] = {FARBE(0xE6E6EE), FARBE(0xD6D8E2), FARBE(0xE6E6EE), FARBE(0xD6D8E2), FARBE(0xE6E6EE), FARBE(0xD6D8E2)};
+  const Farbe *regen = pferd ? grau : regenbogen;
   // Schweif
   for (int i = 0; i < 4; i++) g.kurve(PX(-30), PY(-46), PX(-46), PY(-40 + i * 4), PX(-44 + sinf(lauf * 6 + i) * 4), PY(-20 + i * 3), 5 * s, regen[i]);
   // Beine (Galopp)
@@ -479,12 +488,14 @@ void einhorn(Gfx &g, float x, float y, float s, float lauf, float dir, float sen
   g.kreis(kx + 1 * s * dir, ky - 3 * s, 2.6f * s, SCHWARZ);
   g.kreis(kx + 2 * s * dir, ky - 4 * s, 1 * s, WEISS);
   // Horn
+  if (!pferd) {
   float hornW = lerp(-1.0f, -0.2f, hk);
   float hx = kx + cosf(hornW) * 30 * s * dir, hy = ky + sinf(hornW) * 30 * s - 4 * s;
   float horn[] = {kx + 2 * s * dir, ky - 9 * s, kx + 8 * s * dir, ky - 5 * s, hx, hy};
   g.kontur(1.2f, OUT);
   g.polygon(horn, 3, GOLD);
   g.konturAus();
+  }
   // Maehne
   for (int i = 0; i < 6; i++) {
     float u = i / 5.0f;
@@ -655,3 +666,148 @@ void blende(Gfx &g, float u, float dauer, float cx, float cy) {
   else if (u > dauer - 1.2f) g.iris(cx, cy, lerp(330, 0, sanft((u - (dauer - 1.2f)) / 1.2f)));
 }
 
+
+// =====================================================================
+// Frauenfigur (Aschenputtel, Stiefmutter, Schwestern, spaeter Rotkaeppchen, Gretel ...)
+// =====================================================================
+void frau(Gfx &g, float x, float y, float s, float dir, const FrauPose &p, float *handX, float *handY) {
+  static const FrauLook STANDARD;
+  const FrauLook &L = p.look ? *p.look : STANDARD;
+  auto PX = [&](float dx) { return x + dx * s * dir; };
+  auto PY = [&](float dy) { return y + dy * s; };
+  float sw = p.lauf >= 0 ? sinf(p.lauf * 6.2831853f) * 5 : 0;
+  float wehen = p.drehen + sw * 0.3f;
+  // Fuesse
+  g.kontur(1.2f * s, OUT);
+  g.ellipse(PX(-4 - sw * 0.6f), PY(-2.5f), 5 * s, 3 * s, L.schuh);
+  g.ellipse(PX(5 + sw * 0.6f), PY(-2.5f), 5 * s, 3 * s, L.schuh);
+  g.konturAus();
+  // hinterer Arm
+  float hx, hy;
+  arm(g, PX(-7), PY(-52), s * 0.95f, dir, -p.armH, hx, hy, L.kleid, L.haut);
+  // Haare hinten (lang / Zopf)
+  if (L.frisur == 0) {
+    g.kontur(1.3f * s, OUT);
+    g.ellipse(PX(-3), PY(-62), 16 * s, 22 * s, L.haar);
+    g.konturAus();
+  } else if (L.frisur == 1) {
+    for (int i = 0; i < 4; i++) g.kreis(PX(-12 - i * 1.5f), PY(-62 + i * 7), (4.5f - i * 0.5f) * s, L.haar);
+  }
+  // Rock
+  float rb = 20 * L.rockBreite;
+  float rock[] = {PX(-9), PY(-42), PX(9), PY(-42), PX(rb + wehen), PY(-6), PX(rb * 0.5f + wehen), PY(-3), PX(0 + wehen * 0.5f), PY(-5),
+                  PX(-rb * 0.5f + wehen), PY(-3), PX(-rb + wehen), PY(-6)};
+  g.kontur(1.4f * s, OUT);
+  g.polygon(rock, 7, L.kleid);
+  g.ellipse(PX(0), PY(-48), 9.5f * s, 10 * s, L.kleid);
+  g.konturAus();
+  if (L.schuerze) {
+    float sch[] = {PX(-6), PY(-40), PX(6), PY(-40), PX(10 + wehen), PY(-10), PX(-10 + wehen), PY(-10)};
+    g.polygon(sch, 4, L.schuerze);
+  }
+  if (L.flicken) {
+    g.rechteck(PX(-12) < PX(-6) ? PX(-12) : PX(-6), PY(-22), 6 * s, 6 * s, mischeFarbe(L.kleid, OUT, 0.25f));
+    g.rechteck(PX(4) < PX(10) ? PX(4) : PX(10), PY(-14), 6 * s, 5 * s, mischeFarbe(L.kleid, WEISS, 0.3f));
+  }
+  if (L.glanz) {  // Gold- und Silberglanz
+    for (int i = 0; i < 6; i++) {
+      float gx = PX(-12 + zufall(i + 40) * 24), gy = PY(-40 + zufall(i + 50) * 34);
+      float f = 0.5f + 0.5f * sinf(p.zeit * 5 + i * 1.7f);
+      g.stern(gx, gy, 1.6f + f * 2 * s, 0.7f, 4, 0, WEISS, (uint8_t)(120 + 130 * f));
+    }
+  }
+  g.rechteck(PX(-9) < PX(9) ? PX(-9) : PX(9), PY(-40), 18 * s, 2.5f * s, mischeFarbe(L.kleid, OUT, 0.25f));  // Guertel
+  // Kopf
+  float kx = PX(1), ky = PY(-71);
+  g.kontur(1.4f * s, OUT);
+  g.kreis(kx, ky, 15 * s, L.haut);
+  g.konturAus();
+  // Augen
+  for (int i = 0; i < 2; i++) {
+    float ex = PX(i ? 8.5f : -1.5f), ey = PY(-72);
+    if (p.zu) g.bogen(ex, ey + 1 * s, 2.8f * s, 3.5f, 5.9f, 1.6f * s, OUT);
+    else {
+      g.ellipse(ex, ey, 2.8f * s, 3.7f * s, SCHWARZ);
+      g.kreis(ex + (p.blick + 1) * 1.1f * s * dir, ey - 1.3f * s, 1.1f * s, WEISS);
+      g.linie(ex + 1.5f * s * dir, ey - 3.5f * s, ex + 3.5f * s * dir, ey - 5 * s, 1 * s, OUT);  // Wimper
+    }
+    if (p.boese > 0) {
+      float b = p.boese * (i ? 1 : -1);
+      g.linie(ex - 3 * s, ey - (6.5f + b * 1.5f) * s, ex + 3 * s, ey - (6.5f - b * 1.5f) * s, 1.6f * s, OUT);
+    }
+    if (p.weint) {
+      float k = fmodf(p.zeit * 1.3f + i * 0.5f, 1);
+      g.kreis(ex, ey + (4 + k * 10) * s, 1.4f * s, FARBE(0x8FD8FF), (uint8_t)(255 * (1 - k)));
+    }
+  }
+  if (L.wangen) {
+    g.kreis(PX(-5), PY(-65), 3 * s, WANGE, 130);
+    g.kreis(PX(12), PY(-65), 2.6f * s, WANGE, 130);
+  }
+  if (p.mund > 0.05f) g.ellipse(PX(4), PY(-63), 2.6f * s, (1 + p.mund * 2.5f) * s, FARBE(0x8A2A2A));
+  else if (p.boese > 0.5f) g.bogen(PX(4), PY(-60), 3.5f * s, 3.7f, 5.7f, 1.5f * s, OUT);
+  else g.bogen(PX(4), PY(-65.5f), 3.6f * s, 0.5f, 2.6f, 1.5f * s, OUT);
+  // Haare vorn / Kopfschmuck
+  if (L.frisur == 3) {  // Kopftuch
+    g.kontur(1.2f * s, OUT);
+    float t[] = {PX(-16), PY(-70), PX(-12), PY(-84), PX(1), PY(-89), PX(14), PY(-84), PX(16), PY(-74), PX(8), PY(-80), PX(-6), PY(-80)};
+    g.polygon(t, 7, L.tuch ? L.tuch : FARBE(0x8E7E6A));
+    g.konturAus();
+    g.kreis(PX(-16), PY(-72), 3 * s, L.tuch ? L.tuch : FARBE(0x8E7E6A));
+  } else {
+    g.kontur(1.2f * s, OUT);
+    g.ellipse(PX(1), PY(-81), 15 * s, 7 * s, L.haar);
+    g.konturAus();
+    g.ellipse(PX(-12), PY(-74), 4 * s, 7 * s, L.haar);
+    if (L.frisur == 2) {  // Dutt
+      g.kontur(1.2f * s, OUT);
+      g.kreis(PX(-4), PY(-90), 7 * s, L.haar);
+      g.konturAus();
+    }
+  }
+  if (L.krone) {
+    float k[] = {PX(-8), PY(-83), PX(-8), PY(-93), PX(-3), PY(-87), PX(1), PY(-95), PX(5), PY(-87), PX(10), PY(-93), PX(10), PY(-83)};
+    g.kontur(1, OUT);
+    g.polygon(k, 7, GOLD);
+    g.konturAus();
+  }
+  if (L.blume) g.kreis(PX(-10), PY(-82), 3 * s, L.blume);
+  // vorderer Arm
+  arm(g, PX(8), PY(-52), s * 0.95f, dir, p.armV, hx, hy, L.kleid, L.haut);
+  if (handX) *handX = hx;
+  if (handY) *handY = hy;
+}
+
+// weisse Taube (fliegt: fluegel 0..1 schlaegt, sitzt: fluegel < 0)
+void taube(Gfx &g, float x, float y, float s, float dir, float flug, float pick) {
+  g.kontur(1 * s, OUT);
+  if (flug >= 0) {
+    float w = sinf(flug * 22) * 0.9f;
+    g.ellipse(x - 2 * s * dir, y - 4 * s - w * 5 * s, 8 * s, 3 * s, FARBE(0xE8ECF4), 255, -0.6f * dir + w * dir);
+  }
+  g.ellipse(x, y, 8 * s, 5.5f * s, WEISS);
+  float k = y - 5 * s + pick * 5 * s;
+  g.kreis(x + 6 * s * dir, k, 4 * s, WEISS);
+  g.konturAus();
+  g.ellipse(x - 2 * s * dir, y - 1 * s, 5 * s, 3 * s, FARBE(0xE0E6F0));
+  float sch[] = {x + 9 * s * dir, k - 0.5f * s, x + 13 * s * dir, k + 1 * s, x + 9 * s * dir, k + 1.5f * s};
+  g.polygon(sch, 3, FARBE(0xF2A93B));
+  g.kreis(x + 7 * s * dir, k - 1 * s, 0.9f * s, SCHWARZ);
+  float sw[] = {x - 7 * s * dir, y - 1 * s, x - 13 * s * dir, y - 4 * s, x - 13 * s * dir, y + 2 * s};
+  g.polygon(sw, 3, WEISS);
+}
+
+void eimer(Gfx &g, float x, float y, float s, float kipp) {
+  float c = cosf(kipp), sn = sinf(kipp);
+  auto R = [&](float dx, float dy, float *o) { o[0] = x + (dx * c - dy * sn) * s; o[1] = y + (dx * sn + dy * c) * s; };
+  float q[8];
+  R(-10, -16, q); R(10, -16, q + 2); R(8, 0, q + 4); R(-8, 0, q + 6);
+  g.kontur(1.3f, OUT);
+  g.polygon(q, 4, FARBE(0x9AA6B8));
+  g.konturAus();
+  R(-10, -16, q); R(10, -16, q + 2); R(10, -13, q + 4); R(-10, -13, q + 6);
+  g.polygon(q, 4, FARBE(0x6EC6FF));
+  float a[2], b[2];
+  R(-10, -16, a); R(10, -16, b);
+  g.kurve(a[0], a[1], (a[0] + b[0]) / 2 - sn * 12 * s, (a[1] + b[1]) / 2 - c * 12 * s, b[0], b[1], 1.5f, OUT);
+}

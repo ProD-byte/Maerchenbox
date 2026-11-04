@@ -277,20 +277,6 @@ static void fisch(Gfx &g, float x, float y, float s, float w, uint8_t a = 255) {
   g.kreis(x + 3 * s * c, y + 3 * s * sn - 1 * s, 1 * s, SCHWARZ, a);
 }
 
-static void eimer(Gfx &g, float x, float y, float s, float kipp) {
-  float c = cosf(kipp), sn = sinf(kipp);
-  auto R = [&](float dx, float dy, float *o) { o[0] = x + (dx * c - dy * sn) * s; o[1] = y + (dx * sn + dy * c) * s; };
-  float q[8];
-  R(-10, -16, q); R(10, -16, q + 2); R(8, 0, q + 4); R(-8, 0, q + 6);
-  g.kontur(1.3f, OUT);
-  g.polygon(q, 4, FARBE(0x9AA6B8));
-  g.konturAus();
-  R(-10, -16, q); R(10, -16, q + 2); R(10, -13, q + 4); R(-10, -13, q + 6);
-  g.polygon(q, 4, FARBE(0x6EC6FF));
-  float a[2], b[2];
-  R(-10, -16, a); R(10, -16, b);
-  g.kurve(a[0], a[1], (a[0] + b[0]) / 2 - sn * 12 * s, (a[1] + b[1]) / 2 - c * 12 * s, b[0], b[1], 1.5f, OUT);
-}
 
 static void brrr(Gfx &g, float x, float y, float t, float staerke) {
   // Zitterlinien links und rechts
@@ -1163,20 +1149,6 @@ static void bild(Gfx &g, float t) {
   else szeneGruseln(g, t - F9);
 }
 
-// =====================================================================
-// Musik und Geraeusche
-// =====================================================================
-static const Ton3 MEL_SPUK[] = {
-  {69, .5, 45}, {0, .5, 0}, {72, .5, 0}, {0, .5, 0}, {76, .5, 0}, {75, .5, 0}, {76, 1, 0},
-  {74, .5, 41}, {0, .5, 0}, {71, .5, 0}, {0, .5, 0}, {68, .5, 0}, {71, .5, 0}, {69, 1, 0},
-  {69, .5, 45}, {72, .5, 0}, {76, .5, 0}, {81, .5, 0}, {80, .5, 40}, {76, .5, 0}, {77, .5, 0}, {74, .5, 0},
-  {71, .5, 40}, {68, .5, 0}, {71, .5, 0}, {74, .5, 0}, {69, 2, 45}};
-static const Ton3 MEL_KEGEL[] = {
-  {72, .5, 48}, {76, .25, 0}, {79, .25, 0}, {84, .5, 0}, {79, .5, 0}, {77, .5, 53}, {81, .25, 0}, {84, .25, 0},
-  {81, .5, 0}, {77, .5, 0}, {76, .5, 55}, {79, .5, 0}, {74, .5, 0}, {77, .5, 0}, {72, 1, 48}, {0, 1, 0}};
-static const Ton3 MEL_WIEGE[] = {
-  {72, 1.5, 53}, {69, .5, 0}, {72, 2, 0}, {74, 1, 46}, {72, 1, 0}, {69, 2, 0}, {70, 1, 48}, {67, 1, 0},
-  {69, 1, 53}, {65, 1, 0}, {67, 4, 48}};
 
 static void schlag(Synth &s, float x, float tief = 1) {  // dumpfer Schlag
   s.ton(x, 110 * tief, 0.35f, 0.002f, 0.3f, SINUS, GERAEUSCH, 55 * tief);

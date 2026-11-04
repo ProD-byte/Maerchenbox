@@ -31,7 +31,7 @@ constexpr Farbe RIESE_HAUT = FARBE(0xF2B48C), RIESE_BART = FARBE(0xB5652E);
 struct Aussehen {
   Farbe weste = WESTE, hemd = HEMD, hose = HOSE, haar = HAAR;
   Farbe hut = HUT, hutD = HUT_D, feder = FEDER;
-  int muetze = 0;            // 0 Zipfelmuetze mit Feder, 1 keine (Strubbelhaare), 2 Schlafmuetze
+  int muetze = 0;            // 0 Zipfelmuetze mit Feder, 1 keine (Strubbelhaare), 2 Schlafmuetze, 3 Krone
   Farbe halstuch = 0;        // 0 = keins
   Farbe haut = HAUT;
   bool wangen = true;        // rote Baeckchen
@@ -91,7 +91,9 @@ void riesenArm(Gfx &g, float sx, float sy, float s, float dir, float w, Farbe he
                       float *hy = nullptr);
 void riese(Gfx &g, float x, float y, float s, float dir, const RiesePose &p, float *handX = nullptr,
                   float *handY = nullptr);
-void einhorn(Gfx &g, float x, float y, float s, float lauf, float dir, float senken = 0, float zappel = 0);
+// pferd = true: weisses Pferd ohne Horn (z. B. fuer den Prinzen)
+void einhorn(Gfx &g, float x, float y, float s, float lauf, float dir, float senken = 0, float zappel = 0,
+             bool pferd = false);
 void wildschwein(Gfx &g, float x, float y, float s, float lauf, float dir, float wut = 1);
 void koenig(Gfx &g, float x, float y, float s, float dir, float winke);
 void prinzessin(Gfx &g, float x, float y, float s, float dir, float winke);
@@ -99,3 +101,25 @@ void kapelle(Gfx &g, float x, float y, float tuer, float wackel);
 void schloss(Gfx &g, float x, float y, float t, float nacht);
 void feuerwerk(Gfx &g, float x, float y, float u, Farbe c);
 void blende(Gfx &g, float u, float dauer, float cx = 142, float cy = 120);
+
+// ---------- Frauenfigur ----------
+struct FrauLook {
+  Farbe kleid = FARBE(0xE86FA8), schuerze = 0, haar = FARBE(0xF2C14E), haut = HAUT, schuh = SCHUH;
+  int frisur = 0;            // 0 lang offen, 1 Zopf, 2 Dutt, 3 Kopftuch
+  Farbe tuch = 0;            // Farbe des Kopftuchs (0 = grau-braun)
+  Farbe blume = 0;           // Blume im Haar (0 = keine)
+  bool krone = false, wangen = true, flicken = false, glanz = false;
+  float rockBreite = 1;      // 1 = normal, 1.4 = Ballkleid
+};
+struct FrauPose {
+  float lauf = -1, armV = 0.4f, armH = 0.2f, mund = 0, boese = 0, blick = 0;
+  bool zu = false, weint = false;
+  float drehen = 0;          // Rock schwingt (Tanzen)
+  float zeit = 0;            // fuer Glitzern und Traenen
+  const FrauLook *look = nullptr;
+};
+// (x, y) = Boden, s = 1: ca. 95 px hoch, dir = +1 schaut nach rechts
+void frau(Gfx &g, float x, float y, float s, float dir, const FrauPose &p, float *handX = nullptr, float *handY = nullptr);
+// weisse Taube; flug >= 0 schlaegt mit den Fluegeln, pick = 0..1 pickt
+void taube(Gfx &g, float x, float y, float s, float dir, float flug = -1, float pick = 0);
+void eimer(Gfx &g, float x, float y, float s, float kipp);  // Wassereimer, kipp in Bogenmass
