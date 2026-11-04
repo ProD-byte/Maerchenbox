@@ -5,6 +5,30 @@
 #include "figuren.h"
 #include "melodien.h"
 #include <stdio.h>
+#include <initializer_list>
+
+// ---------- Sprechblasen ----------
+static float aufzu(float u, float a, float b) { return federnd(seg(u, a, a + 0.4f)) * (1 - seg(u, b - 0.3f, b)); }
+
+// Sprechblase mit einer oder mehreren Zeilen (Bildschirmkoordinaten), Spitze zeigt nach (sx, sy)
+static void blase(Gfx &g, float x, float y, std::initializer_list<const char *> zeilen, float k, float sx, float sy,
+                  Farbe f = FARBE(0xFFFFFF)) {
+  if (k <= 0.05f) return;
+  int w = 0, n = 0;
+  for (const char *z : zeilen) { int b = g.textBreite(SCHRIFT_K, z); if (b > w) w = b; n++; }
+  float bw = (w + 18) * k, bh = (8 + n * 18) * k;
+  if (x - bw / 2 < 3) x = 3 + bw / 2;
+  if (x + bw / 2 > 281) x = 281 - bw / 2;
+  float sp[] = {x - 6, y + bh / 2 - 2, x + 6, y + bh / 2 - 2, sx, sy};
+  g.kontur(1.4f, FARBE(0x3A2418));
+  g.rundRechteck(x - bw / 2, y - bh / 2, bw, bh, 9 * k, f);
+  g.konturAus();
+  g.polygon(sp, 3, f);
+  if (k > 0.85f) {
+    int i = 0;
+    for (const char *z : zeilen) g.text(SCHRIFT_K, z, x, y - bh / 2 + 18 + i++ * 18, FARBE(0x3A2418), 1);
+  }
+}
 
 // =====================================================================
 // Kulissen
@@ -89,7 +113,7 @@ static void jacke(Gfx &g) {
 // Ablauf (Sekunden)
 // =====================================================================
 static const float T_SZENE2 = 34, T_KLATSCH = 46.8f, T_ZAEHL = 48, T_FREUDE = 52, T_GUERTEL = 56, T_STOLZ = 64,
-                   DAUER = 300;
+                   DAUER = 376;
 static void teil2(Gfx &g, float t);                // Szenen ab dem Aufbruch (schneiderlein_teil2.inc)
 static void ton2(Synth &s, float t0, float t1);
 static const float BROT_X = 236, BROT_Y = TISCH_Y + 1;
@@ -129,9 +153,9 @@ static void bild(Gfx &g, float t) {
       g.rechteck(i * 10, bandY + 3, 5, 1.5f, GOLD, 200);
       g.rechteck(i * 10 + 3, bandY + 40, 5, 1.5f, GOLD, 200);
     }
-    const char *spruch = "7 auf einen Streich!";
-    int n = (int)klemme((u - 0.6f) / 0.32f, 0, 20);
-    char teil[24];
+    const char *spruch = "Siebene auf einen Streich!";
+    int n = (int)klemme((u - 0.6f) / 0.26f, 0, 26);
+    char teil[32];
     snprintf(teil, sizeof teil, "%.*s", n, spruch);
     int voll = g.textBreite(SCHRIFT_M, spruch);
     float tx = 142 - voll / 2.0f;
@@ -139,7 +163,7 @@ static void bild(Gfx &g, float t) {
     g.text(SCHRIFT_M, teil, tx, bandY + 29, GOLD);
     // Nadel mit Faden an der Schreibstelle
     float nx = tx + g.textBreite(SCHRIFT_M, teil) + 4, ny = bandY + 14 + sinf(u * 18) * 6;
-    if (n < 20) {
+    if (n < 26) {
       g.kurve(nx, ny, nx + 30, ny - 50, nx + 60, ny - 70, 1.4f, GOLD);
       g.linie(nx - 3, ny + 8, nx + 6, ny - 14, 2.2f, FARBE(0xC7D0DC));
     }
@@ -220,15 +244,7 @@ static void bild(Gfx &g, float t) {
                    (uint8_t)(230 * huepf(ph)));
     }
 
-  // Sprechblase der Frau mit Musglas
-  if (t > 12 && t < 15.5f) {
-    float b = federnd(seg(t, 12, 12.5f)) * (1 - seg(t, 15, 15.5f));
-    float bx = 92, by = 28;
-    g.kontur(1.4f, OUT);
-    g.ellipse(bx, by, 24 * b, 15 * b, WEISS);
-    g.konturAus();
-    if (b > 0.5f) musglas(g, bx, by + 8, b * 0.8f);
-  }
+
   // Glas fliegt zum Tisch, Muenze zurueck
   float glasU = seg(t, 15, 16.6f);
   if (t > 15 && t < 34) {
@@ -305,6 +321,11 @@ static void bild(Gfx &g, float t) {
   }
   // Iris am Anfang
   g.kameraAus();
+  blase(g, 92, 24, {"Gut Mus feil! Gut Mus feil!"}, aufzu(t, 12, 14.6f), 84, 60);
+  blase(g, 170, 40, {"Hier herauf, liebe Frau!"}, aufzu(t, 14.4f, 16.6f), 196, 96);
+  blase(g, 180, 40, {"Das soll mir schmecken -", "erst den Wams fertig machen!"}, aufzu(t, 25.6f, 29.4f), 196, 96);
+  blase(g, 150, 40, {"Wer hat euch eingeladen?"}, aufzu(t, 40.2f, 42.8f), 206, 96);
+  blase(g, 120, 30, {"Bist du so ein Kerl?", "Das soll die ganze Stadt erfahren!"}, aufzu(t, T_FREUDE + 0.2f, T_FREUDE + 3.8f), 170, 70);
   if (t < 2.5f) g.iris(190, 120, lerp(0, 300, sanft(seg(t, 0, 2.5f))));
   // Uebergang zur Guertel-Nahaufnahme
   if (t > T_GUERTEL - 0.6f) g.rechteck(0, 0, 284, 240, FARBE(0xF8E2B8), (uint8_t)(255 * seg(t, T_GUERTEL - 0.6f, T_GUERTEL)));
@@ -366,8 +387,8 @@ static void ton(Synth &s, float t0, float t1) {
   }
   if (bei(T_ZAEHL + 3.6f, t0, t1)) { s.glocke(T_ZAEHL + 3.6f, 84); s.note(T_ZAEHL + 3.6f, 76); s.note(T_ZAEHL + 3.6f, 79); }
   // Guertel sticken: je Buchstabe ein Pling
-  for (int i = 0; i < 20; i++) {
-    float x = T_GUERTEL + 0.6f + i * 0.32f;
+  for (int i = 0; i < 26; i++) {
+    float x = T_GUERTEL + 0.6f + i * 0.26f;
     if (bei(x, t0, t1)) s.ton(x, 2600 + (i % 5) * 200, 0.05f, 0.002f, 0.08f);
   }
   if (bei(T_GUERTEL + 7.2f, t0, t1)) for (int k = 0; k < 4; k++) s.glocke(T_GUERTEL + 7.2f + k * 0.15f, 72 + k * 4, 0.8f);

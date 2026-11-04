@@ -4,21 +4,25 @@ Spieluhr-Filme für das Xiaozhi-Board `ostb-2st-wifi-double-mic`. Die Box zeichn
 live mit bis zu 30 Bildern pro Sekunde und erzeugt die Spieluhr-Musik selbst. Es gibt keine
 gespeicherten Bilder oder Töne: Jedes Märchen ist Programmcode (`src/schneiderlein.cpp`).
 
-## Das tapfere Schneiderlein (5 Minuten)
+## Das tapfere Schneiderlein (gut 6 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
 
 | Zeit | Szene |
 |---|---|
-| 0:00 | Werkstatt: nähen, Mus kaufen, Brot streichen |
-| 0:34 | Sieben auf einen Streich, Gürtel sticken |
-| 1:04 | Aufbruch mit Käse und Vogel, Wanderung zum Berg |
-| 1:40 | Der Riese: Stein gegen Käse, Steinwurf gegen Vogel |
-| 2:22 | Der Riese trägt den Baum, das Schneiderlein sitzt in den Ästen |
-| 2:50 | Nacht im Wald: Steine, Zank, die Riesen fliehen |
-| 3:28 | Das Einhorn rennt sein Horn in den Baum |
-| 3:54 | Das Wildschwein in der Kapelle |
-| 4:20 | Hochzeit mit Glocken und Feuerwerk, Ende |
-
-Mit `?t=` beim Bildschirmfoto lässt sich jede Stelle ansehen, z. B. `bild.bmp?t=195`.
+| 0:00 | Werkstatt: „Gut Mus feil!“, „Hier herauf, liebe Frau!“, Brot mit Mus |
+| 0:34 | „Wer hat euch eingeladen?“ – Klatsch, sieben Fliegen; „Bist du so ein Kerl?“ |
+| 0:56 | Gürtel „Siebene auf einen Streich!“ – „Die ganze Welt soll's erfahren!“ |
+| 1:04 | Aufbruch mit Käse und Vogel |
+| 1:40 | Der Riese: „Guten Tag, Kamerad!“, Stein und Käse, Steinwurf und Vogel |
+| 2:22 | Der Baum: der Riese trägt, das Schneiderlein sitzt in den Ästen |
+| 2:50 | Riesenhöhle: das Bett ist zu groß, die Eisenstange, die Riesen fliehen |
+| 3:20 | Königshof: „Was will der große Kriegsheld hier mitten im Frieden?“, der König, hundert Reiter |
+| 3:46 | Die zwei Riesen: Steine, Zank, ausgerissene Bäume, „Das Werk ist vollbracht!“ |
+| 4:24 | Das Einhorn: „Sachte, sachte …“, „Jetzt hab ich das Vöglein!“ |
+| 4:50 | Das Wildschwein in der Kapelle |
+| 5:16 | Hochzeit |
+| 5:40 | Schlafkammer: „Junge, mach mir den Wams …“ – die Diener fliehen; er bleibt sein Leben lang König |
 
 ## Von einem, der auszog, das Fürchten zu lernen (5 Minuten)
 
