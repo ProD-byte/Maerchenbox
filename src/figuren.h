@@ -33,6 +33,8 @@ struct Aussehen {
   Farbe hut = HUT, hutD = HUT_D, feder = FEDER;
   int muetze = 0;            // 0 Zipfelmuetze mit Feder, 1 keine (Strubbelhaare), 2 Schlafmuetze
   Farbe halstuch = 0;        // 0 = keins
+  Farbe haut = HAUT;
+  bool wangen = true;        // rote Baeckchen
 };
 
 struct Pose {
@@ -59,7 +61,8 @@ struct RiesePose {
   int farbe = 0;                     // 0 gruen, 1 blau (zweiter Riese), 2 blasser Geist
 };
 
-void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy, Farbe aermel = HEMD);
+void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy, Farbe aermel = HEMD,
+         Farbe haut = HAUT);
 void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, float *handX = nullptr,
                           float *handY = nullptr, int teil = 0);
 void bauersfrau(Gfx &g, float x, float y, float winke);

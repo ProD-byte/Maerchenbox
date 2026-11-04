@@ -22,18 +22,19 @@ Mit `?t=` beim Bildschirmfoto lässt sich jede Stelle ansehen, z. B. `bild.bmp?t
 
 ## Von einem, der auszog, das Fürchten zu lernen (5 Minuten)
 
-Kindgerecht erzählt: niedliche Gespenster, Katzen und ein freundliches Skelett.
+Nach dem Märchen der Brüder Grimm, gezeichnet im Spieluhr-Stil (ohne Blut).
 
 | Zeit | Szene |
 |---|---|
-| 0:00 | Zu Hause: der Bruder zittert vor der Eule, Hans weiß nicht, was Gruseln ist |
-| 0:36 | Glockenturm: das Laken-Gespenst purzelt die Treppe hinunter |
-| 1:12 | Wanderung zum Spukschloss, der König zeigt den Aushang |
-| 1:44 | 1. Nacht: schwarze Katzen spielen Karten und werden verscheucht |
-| 2:30 | 2. Nacht: ein Skelett fällt den Kamin herunter, Kegeln mit Kürbis |
-| 3:16 | 3. Nacht: das fahrende Bett, der alte Bart im Amboss, drei Schatzkisten |
-| 4:00 | Hochzeit |
-| 4:24 | Ein Eimer kaltes Wasser mit Fischlein: Brrr! Ende |
+| 0:00 | Zu Hause: „Es gruselt mir!“, Hans will das Gruseln lernen, der Küster kommt |
+| 0:30 | Glockenturm: „Wer da?“, der Küster als Gespenst fällt die Treppe hinab; 50 Taler vom Vater |
+| 1:00 | Der Galgen mit den sieben Gehenkten: ans Feuer gesetzt, die Kleider brennen, wieder aufgehängt |
+| 1:36 | Wirtshaus und König: drei Nächte im verwunschenen Schloss; Feuer, Drehbank, Schnitzbank |
+| 1:54 | 1. Nacht: „Miau, uns friert!“, Pfoten in der Schnitzbank, Katzen und Hunde mit glühenden Ketten, das Bett fährt |
+| 2:36 | 2. Nacht: der halbe Mann aus dem Schornstein, Kegeln mit Totenbeinen und Totenköpfen |
+| 3:14 | 3. Nacht: der tote Vetter im Sarg, der Alte mit dem Bart im Amboss, drei Kisten Gold |
+| 4:04 | Hochzeit: „Wenn mir nur gruselte!“ |
+| 4:22 | Gründlinge aus dem Bach: „Ach, was gruselt mir! Jetzt weiß ich, was Gruseln ist!“ |
 
 ## Bedienung
 

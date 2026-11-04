@@ -7,13 +7,13 @@
 // =====================================================================
 
 // Arm vom Schultergelenk; gibt die Handposition zurueck
-void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy, Farbe aermel) {
+void arm(Gfx &g, float sx, float sy, float s, float dir, float winkel, float &hx, float &hy, Farbe aermel, Farbe haut) {
   float l = 15 * s;
   hx = sx + sinf(winkel) * l * dir;
   hy = sy + cosf(winkel) * l;
   g.kontur(1.4f * s, OUT);
   g.linie(sx, sy, hx, hy, 6.5f * s, aermel);
-  g.kreis(hx, hy, 3.8f * s, HAUT);
+  g.kreis(hx, hy, 3.8f * s, haut);
   g.konturAus();
 }
 
@@ -27,7 +27,7 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
   const Aussehen &L = p.aussehen ? *p.aussehen : STANDARD;
   float hx, hy;
   if (teil == 2) {
-    arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy, L.hemd);
+    arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy, L.hemd, L.haut);
   } else {
   // Beine
   float sw = p.lauf >= 0 ? sinf(p.lauf * 6.2831853f) * 7 : 0;
@@ -38,7 +38,7 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
   g.ellipse(PX(5 + sw), PY(-3), 6 * s, 3.5f * s, SCHUH);
   // hinterer Arm
   g.konturAus();
-  if (teil == 0) arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy, L.hemd);
+  if (teil == 0) arm(g, PX(-8), PY(-38), s, dir, p.armH * -1, hx, hy, L.hemd, L.haut);
   if (p.ranzen) {
     g.kontur(1.3f * s, OUT);
     g.ellipse(PX(-12), PY(-33), 7 * s, 9 * s, FARBE(0xB0703A));
@@ -60,9 +60,9 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
   float kx = PX(1), ky = PY(-60);
   g.kontur(1.5f * s, OUT);
   g.ellipse(PX(-4), PY(-64), 16 * s, 14 * s, L.haar);
-  g.kreis(kx, ky, 17 * s, HAUT);
+  g.kreis(kx, ky, 17 * s, L.haut);
   g.konturAus();
-  g.ellipse(PX(-13), PY(-60), 4 * s, 5 * s, HAUT);  // Ohr
+  g.ellipse(PX(-13), PY(-60), 4 * s, 5 * s, L.haut);  // Ohr
   // Augen
   for (int i = 0; i < 2; i++) {
     float ex = PX(i ? 9.5f : -1.5f), ey = PY(-61);
@@ -79,8 +79,10 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
               ey - (7 + b * (inn > 0 ? -1.5f : 1.5f)) * s, 1.8f * s, OUT);
     }
   }
-  g.kreis(PX(-4), PY(-53), 3.5f * s, WANGE, 140);
-  g.kreis(PX(14), PY(-53), 3 * s, WANGE, 140);
+  if (L.wangen) {
+    g.kreis(PX(-4), PY(-53), 3.5f * s, WANGE, 140);
+    g.kreis(PX(14), PY(-53), 3 * s, WANGE, 140);
+  }
   // Mund
   if (p.mund > 0.05f) {
     g.ellipse(PX(5), PY(-50), 3.5f * s, (1.5f + p.mund * 3) * s, FARBE(0x8A2A2A));
@@ -118,7 +120,7 @@ void schneiderlein(Gfx &g, float x, float y, float s, float dir, const Pose &p, 
   }
   if (teil == 1) return;
   // vorderer Arm
-  arm(g, PX(9), PY(-38), s, dir, p.armV, hx, hy, L.hemd);
+  arm(g, PX(9), PY(-38), s, dir, p.armV, hx, hy, L.hemd, L.haut);
   if (p.tuch > 0) {
     float q[] = {hx, hy, hx + 14 * s * dir, hy - 10 * s, hx + 20 * s * dir, hy + 4 * s, hx + 4 * s * dir, hy + 12 * s};
     g.polygon(q, 4, FARBE(0xE0533F));
