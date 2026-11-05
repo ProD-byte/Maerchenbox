@@ -437,4 +437,16 @@ static void titelbild(Gfx &g, float t) {
 // Vorschau im Maerchenbuch: das winkende Schneiderlein auf der Wiese
 static void vorschau(Gfx &g, float t) { titelSzene(g, t); }
 
-const Maerchen SCHNEIDERLEIN = {"Das tapfere Schneiderlein", DAUER, FARBE(0x3DAE5B), bild, ton, titelbild, vorschau};
+static void symbol(Gfx &g, float x, float y, float t) {
+  Pose p;
+  p.armV = 2.2f + sinf(t * 3) * 0.4f;
+  p.guertel = true;
+  p.mund = 0.4f;
+  schneiderlein(g, x - 22, y, 0.62f, 1, p);
+  for (int i = 0; i < 7; i++) {
+    float a = t * 1.5f + i * 0.9f;
+    fliege(g, x + 26 + cosf(a) * 20, y - 44 + sinf(a * 1.3f) * 16, t + i, 0, i);
+  }
+}
+
+const Maerchen SCHNEIDERLEIN = {"Das tapfere Schneiderlein", DAUER, FARBE(0x3DAE5B), bild, ton, titelbild, vorschau, symbol, LIED(MEL_A, 0.36f)};

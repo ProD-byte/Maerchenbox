@@ -86,6 +86,50 @@ Nach dem Märchen der Brüder Grimm.
 | 3:04 | Auf der Wiese: Bauch auf, die Geißlein springen heraus, Wackersteine hinein |
 | 3:56 | Am Brunnen: „Was rumpelt und pumpelt …“ – „Der Wolf ist tot!“ |
 
+## Rapunzel (5 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | „Ach, wenn ich keine Rapunzeln … so sterbe ich!“; über die Mauer; die Zauberin: „Du musst mir das Kind geben“ |
+| 0:40 | „Sie soll Rapunzel heißen“; zwölf Jahre später in den Turm ohne Tür und Treppe |
+| 1:02 | „Rapunzel, Rapunzel, lass mir dein Haar herunter!“ – die Zauberin steigt hinauf |
+| 1:36 | Der Königssohn hört den Gesang, steigt hinauf; „Ja“; die Leiter aus Seide |
+| 2:20 | „Frau Gothel, wie kommt es nur …“ – „Ach du gottloses Kind!“, ritsch, ratsch; in die Wüstenei |
+| 2:56 | „Der schöne Vogel sitzt nicht mehr im Nest“ – der Sprung in die Dornen (nur angedeutet) |
+| 3:36 | Blind und einige Jahre im Elend |
+| 4:12 | Ihre Stimme, zwei Tränen, er kann wieder sehen; mit den Zwillingen heim in sein Reich |
+
+## Schneewittchen (5 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Am Fenster aus Ebenholz: drei Tropfen Blut im Schnee – „Hätt ich ein Kind so weiß wie Schnee …“ |
+| 0:30 | „Spieglein, Spieglein an der Wand“ – sieben Jahre später: „… tausendmal schöner als Ihr“ |
+| 0:56 | Der Jäger: „Ach, lieber Jäger, lass mir mein Leben!“; der wilde Wald |
+| 1:26 | Bei den sieben Zwergen: „Wer hat auf meinem Stühlchen gesessen?“ …; „Ja, von Herzen gern!“ |
+| 2:20 | „Schöne Ware feil!“ – der Schnürriemen und der giftige Kamm |
+| 3:00 | Der Apfel: „Den roten Backen iss du, den weißen will ich essen“ |
+| 3:40 | Der gläserne Sarg; der Königssohn; das Apfelstück fährt aus dem Hals: „Ach Gott, wo bin ich?“ |
+| 4:26 | Hochzeit; die böse Königin muss in den glühenden Schuhen davontanzen (nur angedeutet) |
+
+## Cinderella (knapp 5 Minuten)
+
+Nach dem Märchen von Charles Perrault („Cendrillon“), mit Patin, Kürbis und gläsernem Pantöffelchen.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | In der Asche am Herd; der Ball des Königssohns: „Ach, ihr spottet meiner“ |
+| 0:34 | Die Patin: Kürbis → Kutsche, Mäuse → Pferde, Ratte → Kutscher, Eidechsen → Diener; Kleid aus Gold und Silber; „Nicht länger als bis Mitternacht!“ |
+| 1:36 | Fahrt zum Schloss |
+| 1:54 | Auf dem Ball: „Ah, wie schön sie ist!“ |
+| 2:26 | Zwölf Schläge; das Pantöffelchen auf der Treppe; alles wird wieder, wie es war |
+| 3:12 | Die Schuhprobe: zu klein für die Schwestern; „Hier ist das andere!“ |
+| 4:16 | Sie verzeiht den Schwestern; Hochzeit |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -107,7 +151,9 @@ auch wenn das Bild um 180° gedreht ist (dann tauschen die Knöpfe oben und unte
 | 40 | unten | Leiser | Lauter |
 
 Das Menü ist ein Märchenbuch: Beim Einschalten klappt es auf, jedes Märchen ist eine Doppelseite
-(links ein bewegtes Bild, rechts Titel und Startknopf), sonst nichts – Kinder können nichts verstellen.
+(links ein bewegtes Bild und darunter ein großes Erkennungszeichen – Apfel, Glasschuh, Turm mit Zopf …, rechts Titel
+und Startknopf), sonst nichts – Kinder können nichts verstellen. Solange eine Seite offen ist, spielt leise die
+Melodie des Märchens, so erkennen auch Kinder, die noch nicht lesen, ihr Märchen.
 
 **Einstellungen (für Eltern): Lauter und Leiser zusammen 3 Sekunden halten.** Dort: Höchste Lautstärke
 (30 / 50 / 70 / 100 %, ab Werk 50 % = halb so laut; die 10 Stufen der Kinder liegen darunter), Bild drehen
@@ -150,6 +196,9 @@ pio run -e ostb2st -t upload
 - `src/aschenputtel.cpp` – Aschenputtel
 - `src/rosenrot.cpp` – Schneeweißchen und Rosenrot
 - `src/geisslein.cpp` – Der Wolf und die sieben jungen Geißlein
+- `src/rapunzel.cpp` – Rapunzel
+- `src/schneewittchen.cpp` – Schneewittchen
+- `src/cinderella.cpp` – Cinderella (nach Perrault)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
 Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `figuren.h`), in `maerchen.h` bekannt machen und in `LISTE` in `src/main.cpp` eintragen.

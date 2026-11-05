@@ -890,4 +890,11 @@ static void titelbild(Gfx &g, float t) {
 
 static void vorschau(Gfx &g, float t) { titelSzene(g, t); }
 
-const Maerchen GEISSLEIN = {"Der Wolf und die sieben jungen Geißlein", GDAUER, FARBE(0x8E8676), bild, ton, titelbild, vorschau};
+static void symbol(Gfx &g, float x, float y, float t) {
+  WolfPose w;
+  w.mund = 0.2f + 0.2f * sinf(t * 2);
+  wolf(g, x + 22, y, 0.5f, -1, w, t);
+  for (int i = 0; i < 2; i++) kind(g, i, x - 40 + i * 18, y, 1, t, -1, huepf(fmodf(t * 0.9f + i * 0.5f, 1)) * 0.6f);
+}
+
+const Maerchen GEISSLEIN = {"Der Wolf und die sieben jungen Geißlein", GDAUER, FARBE(0x8E8676), bild, ton, titelbild, vorschau, symbol, LIED(MEL_GEISS, 0.36f)};

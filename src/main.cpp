@@ -42,7 +42,7 @@ constexpr int TASTE_A = 39, TASTE_B = 0, TASTE_C = 40;  // die drei Knoepfe (GPI
 constexpr uint8_t ES8311_ADDR = 0x18;
 
 // ---------- Maerchen ----------
-static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN, &ASCHENPUTTEL, &ROSENROT, &GEISSLEIN};
+static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN, &ASCHENPUTTEL, &ROSENROT, &GEISSLEIN, &RAPUNZEL_M, &SCHNEEWITTCHEN, &CINDERELLA};
 constexpr int ANZAHL = sizeof(LISTE) / sizeof(LISTE[0]);
 
 // ---------- Zustand ----------
@@ -69,6 +69,7 @@ uint32_t blattSeit = 0;     // 0 = blaettert gerade nicht
 uint32_t buchAuf = 0;       // Beginn des Aufklappens (0 = schon offen)
 constexpr uint32_t BLATT_MS = 520, AUF_MS = 1750;
 uint32_t bildMs = 0;        // Uhr fuer das ganze Bild (alle Streifen gleich)
+volatile int8_t buchLied = -1;  // Seite, deren Melodie im Buch leise spielt (-1 = keine)
 volatile uint8_t uiKlang = 0;  // 1 = umblaettern, 2 = aufklappen, 3 = los
 int lautstaerke = 7;        // 0..10
 constexpr int MAXLAUT = 10;
@@ -206,6 +207,28 @@ static void audioTask(void *) {
         }
         uiBis = synth.zeit() + 2.6f;
       }
+      // leise Erkennungsmelodie der offenen Seite
+      static int liedAktiv = -1;
+      static float liedStart = 0;
+      int bl = buchLied;
+      if (bl != liedAktiv) {
+        liedAktiv = bl;
+        if (bl >= 0) {
+          if (!uiAktiv) { synth.start(); digitalWrite(PIN_PA, HIGH); uiAktiv = true; }
+          liedStart = synth.zeit() + 0.7f;
+        }
+      }
+      if (liedAktiv >= 0 && uiAktiv && LISTE[liedAktiv]->lied) {
+        const Maerchen *lm = LISTE[liedAktiv];
+        float t0 = synth.zeit(), t1 = t0 + BLOCK / (float)Synth::RATE;
+        float runde = 0;
+        for (int i = 0; i < lm->liedN; i++) runde += lm->lied[i].laenge;
+        float ende = liedStart + 2 * runde * lm->liedSchlag;  // zweimal, dann ist Ruhe
+        if (t0 < ende) {
+          spieleMelodie(synth, Melodie{lm->lied, lm->liedN}, liedStart, ende, lm->liedSchlag, t0, t1, 0.4f);
+          if (uiBis < t1 + 2.5f) uiBis = t1 + 2.5f;
+        }
+      }
       if (!uiAktiv) { vTaskDelay(pdMS_TO_TICKS(5)); continue; }
       synth.render(mono, BLOCK);
       for (int i = 0; i < BLOCK; i++) stereo[2 * i] = stereo[2 * i + 1] = mono[i];
@@ -313,6 +336,21 @@ static void startKnopf(Gfx &g, float x, float y, float t, float r = 15) {
 
 static void linkeSeite(Gfx &g, int seite, float t) {
   seitenGrund(g, true);
+  if (seite < ANZAHL) {
+    // grosses bewegtes Bild und darunter das Erkennungszeichen (fuer Kinder, die noch nicht lesen)
+    g.rundRechteck(17, 25, 122, 104, 7, GOLD_D);
+    g.rundRechteck(19, 27, 118, 100, 6, GOLD);
+    g.ansicht(20, 28, 116.0f / 284);
+    g.ausschnitt(0, 0, 284, 239);
+    LISTE[seite]->vorschau(g, t);
+    g.ausschnittAus();
+    g.kameraAus();
+    g.ausschnitt(BX, 132, BW - 4, 88);
+    if (LISTE[seite]->symbol) LISTE[seite]->symbol(g, 78, 212, t);
+    g.ausschnittAus();
+    g.kameraAus();
+    return;
+  }
   // Rahmen fuer das Bild
   g.rundRechteck(23, 41, 110, 94, 6, GOLD_D);
   g.rundRechteck(25, 43, 106, 90, 5, GOLD);
@@ -1030,6 +1068,7 @@ void loop() {
   // Buch: Umblaettern / Aufklappen fertig?
   if (blattSeit && millis() - blattSeit >= BLATT_MS) { buchSeite = blattNach; blattSeit = 0; }
   if (buchAuf && millis() - buchAuf >= AUF_MS) buchAuf = 0;
+  buchLied = (zustand == MENUE && !blattSeit && !buchAuf) ? buchSeite : -1;
   // Display aus, wenn lange nichts passiert
   if (zustand == TITEL && lcd::lichtAn() && millis() - zustandSeit > 90000 && millis() - letzteTaste > 90000) lcd::licht(false);
   if (zustand == MENUE && millis() - zustandSeit > 60000 && millis() - letzteTaste > 60000) wechsle(TITEL);

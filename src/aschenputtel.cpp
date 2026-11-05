@@ -921,4 +921,10 @@ static void titelbild(Gfx &g, float t) {
 
 static void vorschau(Gfx &g, float t) { titelSzene(g, t); }
 
-const Maerchen ASCHENPUTTEL = {"Aschenputtel", ADAUER, FARBE(0xF2C94E), bild, ton, titelbild, vorschau};
+static void symbol(Gfx &g, float x, float y, float t) {
+  schuh(g, x, y - 8 - fabsf(sinf(t * 2)) * 4, 2.2f, GOLD);
+  glitzern(g, x, y - 18, 24, t, 4, 200);
+  for (int i = 0; i < 2; i++) taube(g, x - 36 + i * 72, y - 46 + sinf(t * 2.4f + i * 2) * 5, 1.4f, i ? -1 : 1, fmodf(t * 1.6f + i * 0.5f, 1));
+}
+
+const Maerchen ASCHENPUTTEL = {"Aschenputtel", ADAUER, FARBE(0xF2C94E), bild, ton, titelbild, vorschau, symbol, LIED(MEL_ASCHE, 0.42f)};

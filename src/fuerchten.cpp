@@ -1287,5 +1287,10 @@ static void titelbild(Gfx &g, float t) {
 
 static void vorschau(Gfx &g, float t) { titelSzene(g, t); }
 
+static void symbol(Gfx &g, float x, float y, float t) {
+  kerze(g, x - 38, y - 2, t);
+  gespenst(g, x + 12, y - 12 + sinf(t * 2) * 5, 0.85f, t, 1);
+}
+
 const Maerchen FUERCHTEN = {"Von einem, der auszog, das Fürchten zu lernen", FDAUER, FARBE(0x5B3D8F), bild, ton,
-                            titelbild, vorschau};
+                            titelbild, vorschau, symbol, LIED(MEL_WANDER, 0.36f)};

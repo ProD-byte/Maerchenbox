@@ -885,4 +885,12 @@ static void titelbild(Gfx &g, float t) {
 
 static void vorschau(Gfx &g, float t) { titelSzene(g, t); }
 
-const Maerchen ROSENROT = {"Schneeweißchen und Rosenrot", RDAUER, FARBE(0xE8283F), bild, ton, titelbild, vorschau};
+static void symbol(Gfx &g, float x, float y, float t) {
+  rosenbusch(g, x - 42, y, 0.7f, WEISS, t);
+  rosenbusch(g, x + 42, y, 0.7f, FARBE(0xE8283F), t);
+  BaerPose b;
+  b.mund = 0.3f;
+  baer(g, x, y, 0.55f, 1, b, t);
+}
+
+const Maerchen ROSENROT = {"Schneeweißchen und Rosenrot", RDAUER, FARBE(0xE8283F), bild, ton, titelbild, vorschau, symbol, LIED(MEL_ROSEN, 0.4f)};

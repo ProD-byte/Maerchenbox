@@ -105,7 +105,7 @@ void blende(Gfx &g, float u, float dauer, float cx = 142, float cy = 120);
 // ---------- Frauenfigur ----------
 struct FrauLook {
   Farbe kleid = FARBE(0xE86FA8), schuerze = 0, haar = FARBE(0xF2C14E), haut = HAUT, schuh = SCHUH;
-  int frisur = 0;            // 0 lang offen, 1 Zopf, 2 Dutt, 3 Kopftuch
+  int frisur = 0;            // 0 lang offen, 1 Zopf, 2 Dutt, 3 Kopftuch, 4 kurz
   Farbe tuch = 0;            // Farbe des Kopftuchs (0 = grau-braun)
   Farbe blume = 0;           // Blume im Haar (0 = keine)
   bool krone = false, wangen = true, flicken = false, glanz = false;
