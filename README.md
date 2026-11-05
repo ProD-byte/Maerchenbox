@@ -294,6 +294,20 @@ Nach dem Märchen von Hans Christian Andersen.
 | 1:26 | Die ganze Nacht kein Auge zugetan |
 | 1:46 | „… dass ich ganz braun und blau bin!“ – Hochzeit; die Erbse in der Kunstkammer |
 
+## Rumpelstilzchen (knapp 4 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der Müller prahlt vor dem König; die Kammer voller Stroh |
+| 0:28 | „Guten Abend, Jungfer Müllerin, warum weint Sie so sehr?“ – das Halsband – schnurr, schnurr, schnurr |
+| 1:14 | Der Ring; in der dritten Nacht: „… dein erstes Kind!“ |
+| 1:42 | Ein Jahr später: „Etwas Lebendes ist mir lieber …“ – drei Tage Zeit |
+| 2:12 | Kaspar, Melchior, Balzer … Rippenbiest, Hammelswade, Schnürbein – „So heiß ich nicht!“ |
+| 2:44 | Das Feuer im Wald: „Ach, wie gut, dass niemand weiß, dass ich Rumpelstilzchen heiß!“ |
+| 3:14 | Kunz? Heinz? „Heißt du etwa Rumpelstilzchen?“ – „Das hat dir der Teufel gesagt!“ |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -392,6 +406,7 @@ pio run -e ostb2st -t upload
 - `src/suessebrei.cpp` – Der süße Brei
 - `src/entlein.cpp` – Das hässliche Entlein (Andersen)
 - `src/erbse.cpp` – Die Prinzessin auf der Erbse (Andersen)
+- `src/rumpelstilzchen.cpp` – Rumpelstilzchen
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
