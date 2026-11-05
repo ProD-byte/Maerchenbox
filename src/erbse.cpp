@@ -209,7 +209,7 @@ static void szeneNacht(Gfx &g, float u) {
   erbse(g, 180, 194, 2.4f, u);
   g.kreis(180, 194, 6, FARBE(0x9AE87A), (uint8_t)(80 + 60 * sinf(u * 3)));
   g.kameraAus();
-  vers(g, {"Die ganze Nacht konnte sie", "kein Auge zutun."}, aufzu(u, 1, 18));
+  vers(g, {"Die ganze Nacht konnte sie", "kein Auge zutun."}, aufzu(u, 0.6f, 6.6f));  // danach sieht man sie oben liegen
   blende(g, u, 20, 170, 60);
 }
 
