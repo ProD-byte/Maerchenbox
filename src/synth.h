@@ -32,6 +32,11 @@ class Synth {
 
   static float mtof(float m);
 
+  // Zeitlupe: ton() und rauschen() bekommen Filmzeit; daraus wird Klangzeit = s0 + (t - f0) / tempo.
+  // Ab Werk 1:1. Das Abspielen setzt es je Block neu.
+  void abbildung(float f0, float s0, float tempo) { abF0 = f0; abS0 = s0; abTempo = tempo; }
+  void abbildungAus() { abF0 = 0; abS0 = 0; abTempo = 1; }
+
  private:
   struct Stimme {
     bool aktiv, rausch;
@@ -44,6 +49,8 @@ class Synth {
   };
   Stimme st[STIMMEN];
   uint32_t pos = 0;
+  float abF0 = 0, abS0 = 0, abTempo = 1;
+  float wann(float t) const { return abS0 + (t - abF0) / abTempo; }
   Stimme *frei(uint32_t start);
   void filterSetzen(Stimme &s);
   // Hall

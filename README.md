@@ -156,7 +156,9 @@ und Startknopf), sonst nichts – Kinder können nichts verstellen. Solange eine
 Melodie des Märchens, so erkennen auch Kinder, die noch nicht lesen, ihr Märchen.
 
 **Einstellungen (für Eltern): Lauter und Leiser zusammen 3 Sekunden halten.** Dort: Höchste Lautstärke
-(30 / 50 / 70 / 100 %, ab Werk 50 % = halb so laut; die 10 Stufen der Kinder liegen darunter), Bild drehen
+(30 / 50 / 70 / 100 %, ab Werk 50 % = halb so laut; die 10 Stufen der Kinder liegen darunter), Lesetempo
+(normal / langsam / sehr langsam, ab Werk langsam: solange eine Sprechblase zu lesen ist, laufen Bild und Musik
+in Zeitlupe, halb bzw. ein Drittel so schnell), Bild drehen
 (180°, oben bleibt Lauter, wird gemerkt), WLAN einrichten, zurück zum Buch. Lauter/Leiser wählen,
 Start führt aus; nach einer Minute ohne Taste geht es von selbst zurück ins Buch.
 

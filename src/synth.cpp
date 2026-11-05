@@ -41,6 +41,7 @@ static uint32_t abSample(float t, uint32_t pos) {
 
 void Synth::ton(float t, float f, float spitze, float a, float d, Welle w, Bus bus, float f2) {
   if (spitze <= 0) return;
+  t = wann(t);
   Stimme &s = *frei(0);
   memset(&s, 0, sizeof s);
   s.aktiv = true;
@@ -72,6 +73,7 @@ IRAM_ATTR void Synth::filterSetzen(Stimme &s) {
 
 void Synth::rauschen(float t, float dauer, Filter typ, float f, float spitze, float q, float a, float f2, Bus bus) {
   if (spitze <= 0) return;
+  t = wann(t);
   Stimme &s = *frei(0);
   memset(&s, 0, sizeof s);
   s.aktiv = true;

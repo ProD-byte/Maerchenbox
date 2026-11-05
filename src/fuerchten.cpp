@@ -309,7 +309,7 @@ static void blase(Gfx &g, float x, float y, const char *txt, float k, float sx, 
   g.rundRechteck(x - bw / 2, y - bh / 2, bw, bh, 10 * k, f);
   g.konturAus();
   g.polygon(sp, 3, f);
-  if (k > 0.8f) g.text(SCHRIFT_K, txt, x, y + 5, OUT, 1);
+  if (k > 0.8f) { g.text(SCHRIFT_K, txt, x, y + 5, OUT, 1); blaseLesbar = 1; }
 }
 static float aufzu(float u, float a, float b) { return federnd(seg(u, a, a + 0.4f)) * (1 - seg(u, b - 0.3f, b)); }
 

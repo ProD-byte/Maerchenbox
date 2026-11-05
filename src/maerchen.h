@@ -3,6 +3,9 @@
 #include "gfx.h"
 #include "synth.h"
 
+// wird von jeder Sprechblase gesetzt, die gerade lesbar ist (fuer die Zeitlupe beim Lesen)
+extern volatile uint8_t blaseLesbar;
+
 #define LIED(x, schlag) x, (int)(sizeof(x) / sizeof(x[0])), schlag
 
 struct Maerchen {

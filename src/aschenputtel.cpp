@@ -100,6 +100,7 @@ static void blase(Gfx &g, float x, float y, std::initializer_list<const char *> 
   g.konturAus();
   g.polygon(sp, 3, f);
   if (k > 0.85f) {
+    blaseLesbar = 1;
     int i = 0;
     for (const char *z : zeilen) g.text(SCHRIFT_K, z, x, y - bh / 2 + 18 + i++ * 18, OUT, 1);
   }

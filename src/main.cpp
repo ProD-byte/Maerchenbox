@@ -51,9 +51,9 @@ Zustand zustand = TITEL;
 int auswahl = 0;            // aktuelles Maerchen
 // Maerchenbuch: nur die Maerchen (Seite 0..ANZAHL-1). Die Einstellungen sind versteckt:
 // Lauter + Leiser 3 s gleichzeitig halten. SEITE_DREHEN / SEITE_WLAN sind nur Bilder dafuer.
-constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2;
+constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3;
 constexpr uint32_t KOMBI_MS = 3000;
-int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 Hoechstlautstaerke, 2 WLAN, 3 zurueck
+int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 Hoechstlautstaerke, 2 Lesetempo, 3 WLAN, 4 zurueck
 // Hoechstlautstaerke (nur von den Eltern einstellbar): Stufe 0..3, ab Werk 1 = halb so laut wie voll
 // (etwa -10 dB, so viel wird als "halb so laut" empfunden). Die 10 Kinder-Stufen liegen darunter.
 constexpr int GRENZEN = 4;
@@ -90,6 +90,13 @@ volatile bool anfStart = false, anfStopp = false;
 volatile bool maerchenEnde = false;
 volatile const Maerchen *audioMaerchen = nullptr;
 volatile float audioZeit = 0;       // Maerchenzeit am Ende des zuletzt erzeugten Blocks
+volatile float filmTempo = 1;       // 1 = normal; kleiner, solange eine Sprechblase zu lesen ist
+volatile uint8_t blaseLesbar = 0;   // von den Sprechblasen gesetzt (beim Zeichnen)
+volatile bool blaseOffen = false;   // im letzten Bild war eine Sprechblase lesbar
+constexpr int LESEN_STUFEN = 3;
+static const float LESE_TEMPO[LESEN_STUFEN] = {1.0f, 0.5f, 0.33f};
+static const char *const LESE_TEXT[LESEN_STUFEN] = {"Lesen: normal", "Lesen: langsam", "Lesen: sehr langsam"};
+int lesen = 1;              // ab Werk: langsam
 volatile uint32_t audioZeitUs = 0;  // wann das war
 constexpr int BLOCK = 256;
 constexpr float LATENZ = 8 * 256 / (float)Synth::RATE;  // DMA-Puffer zwischen Erzeugen und Hoeren
@@ -183,6 +190,8 @@ static void audioTask(void *) {
     if (anfStart) {
       anfStart = false;
       synth.start();
+      synth.abbildungAus();
+      filmTempo = 1;
       audioZeit = 0;
       audioZeitUs = micros();
       digitalWrite(PIN_PA, HIGH);
@@ -191,6 +200,7 @@ static void audioTask(void *) {
     static bool uiAktiv = false;
     static float uiBis = 0;
     if (!audioLaeuft) {
+      synth.abbildungAus();
       uint8_t k = uiKlang;
       if (k) {
         uiKlang = 0;
@@ -239,7 +249,14 @@ static void audioTask(void *) {
     }
     uiAktiv = false;
     const Maerchen *m = (const Maerchen *)audioMaerchen;
-    float t0 = synth.zeit(), t1 = t0 + BLOCK / (float)Synth::RATE;
+    // Zeitlupe beim Lesen: das Tempo gleitet sanft zum Ziel
+    float ziel = blaseOffen ? LESE_TEMPO[lesen] : 1.0f;
+    float tempo = filmTempo + (ziel - filmTempo) * 0.06f;
+    if (fabsf(tempo - ziel) < 0.002f) tempo = ziel;
+    filmTempo = tempo;
+    float s0 = synth.zeit(), dt = BLOCK / (float)Synth::RATE;
+    float t0 = audioZeit, t1 = t0 + dt * tempo;  // Filmzeit
+    synth.abbildung(t0, s0, tempo);
     m->ton(synth, t0, t1);
     synth.render(mono, BLOCK);
     for (int i = 0; i < BLOCK; i++) stereo[2 * i] = stereo[2 * i + 1] = mono[i];
@@ -253,10 +270,11 @@ static void audioTask(void *) {
 
 // Zeit im Maerchen, die gerade zu hoeren ist (fuer das Bild)
 static float hoerZeit() {
-  float t = audioZeit + (micros() - audioZeitUs) / 1e6f;
-  float max = audioZeit + 0.03f;
+  float tempo = filmTempo;
+  float t = audioZeit + (micros() - audioZeitUs) / 1e6f * tempo;
+  float max = audioZeit + 0.03f * tempo;
   if (t > max) t = max;
-  t -= LATENZ;
+  t -= LATENZ * tempo;
   return t < 0 ? 0 : t;
 }
 
@@ -370,6 +388,23 @@ static void linkeSeite(Gfx &g, int seite, float t) {
     }
     float w = 0.5f + 0.5f * sinf(t * 4);
     for (int i = 0; i <= grenze && i < 3; i++) g.bogen(64, 88, 10 + i * 8, -0.7f, 0.7f, 2, LEDER, (uint8_t)(120 + 135 * w));
+  } else if (seite == SEITE_LESEN) {
+    g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
+    g.kontur(1.4f, TINTE);
+    g.rundRechteck(36, 52, 70, 34, 9, WEISS);
+    g.konturAus();
+    float sp[] = {50, 85, 60, 85, 46, 96};
+    g.polygon(sp, 3, WEISS);
+    for (int i = 0; i < 2; i++) g.rundRechteck(44, 61 + i * 12, i ? 40 : 54, 4, 2, PAPIER_D);
+    // Schnecke: je langsamer das Lesen, desto gemuetlicher kriecht sie
+    float sx = 50 + fmodf(t * 10 * LESE_TEMPO[lesen], 56);
+    g.ellipse(sx, 124, 18, 4, FARBE(0x9AB86A));
+    g.kreis(sx + 16, 118, 4, FARBE(0x9AB86A));
+    g.linie(sx + 16, 115, sx + 19, 107, 1.2f, FARBE(0x6E8A4A));
+    g.kontur(1.2f, TINTE);
+    g.kreis(sx - 2, 113, 10, FARBE(0xC98A4A));
+    g.konturAus();
+    g.bogen(sx - 2, 113, 5, 0, 5, 1.6f, LEDER);
   } else if (seite == SEITE_DREHEN) {
     // kleiner Bildschirm, der sich dreht
     g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
@@ -500,20 +535,20 @@ static void buchBild(Gfx &g, float t) {
 static void einstellungenBild(Gfx &g, float t) {
   buchTisch(g, t);
   einband(g, 6, BY - 6, 272, BH + 12);
-  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_WLAN : auswahl, t);
+  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_LESEN : einstPos == 3 ? SEITE_WLAN : auswahl, t);
   seitenGrund(g, false);
   const float cx = MITTE + BW / 2;
   g.text(SCHRIFT_B, "Für Eltern", cx, 50, TINTE, 1);
   g.rechteck(cx - 36, 60, 72, 1.5f, GOLD_D);
-  const char *namen[4] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze], "WLAN einrichten",
-                          "Zurück zum Buch"};
-  for (int i = 0; i < 4; i++) {
-    float y = 68 + i * 32;
+  const char *namen[5] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze], LESE_TEXT[lesen],
+                          "WLAN einrichten", "Zurück zum Buch"};
+  for (int i = 0; i < 5; i++) {
+    float y = 66 + i * 27;
     bool an = i == einstPos;
     if (an) g.kontur(2, GOLD_D);
-    g.rundRechteck(MITTE + 5, y, BW - 10, 26, 9, an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
+    g.rundRechteck(MITTE + 5, y, BW - 10, 23, 8, an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
     g.konturAus();
-    g.text(SCHRIFT_K, namen[i], cx, y + 18, an ? TINTE : FARBE(0x9A7650), 1);
+    g.text(SCHRIFT_K, namen[i], cx, y + 17, an ? TINTE : FARBE(0x9A7650), 1);
   }
   g.text(SCHRIFT_K, "Start: auswählen", cx, 206, FARBE(0x9A7650), 1);
 }
@@ -592,6 +627,7 @@ static void neuesBild() {
   float t = zustand == SPIELT ? hoerZeit() : 0;
   float uhr = millis() / 1000.0f;
   uint32_t zu = 0, wu = 0;
+  blaseLesbar = 0;
   for (int s = 0; s < lcd::ANZAHL; s++) {
     uint32_t a = micros();
     uint16_t *p = lcd::puffer();
@@ -609,6 +645,7 @@ static void neuesBild() {
   }
   zeichenUs = zu;
   wartUs = wu;
+  blaseOffen = zustand == SPIELT && blaseLesbar;
 }
 
 // =====================================================================
@@ -946,7 +983,7 @@ static void ereignis(Ereignis e, int laut) {
     return;
   }
   if (zustand == EINSTELLUNGEN) {
-    if (laut) { einstPos = (einstPos - laut + 4) % 4; uiKlang = 1; }
+    if (laut) { einstPos = (einstPos - laut + 5) % 5; uiKlang = 1; }
     if (e == KURZ || e == DOPPEL) {
       if (einstPos == 0) { drehenUmschalten(); uiKlang = 3; }
       else if (einstPos == 1) {  // Hoechstlautstaerke weiterschalten
@@ -955,7 +992,12 @@ static void ereignis(Ereignis e, int laut) {
         setzeLautstaerke(false);
         uiKlang = 3;
       }
-      else if (einstPos == 2) einrichtungStarten();
+      else if (einstPos == 2) {  // Lesetempo der Sprechblasen weiterschalten
+        lesen = (lesen + 1) % LESEN_STUFEN;
+        prefs.begin("box", false); prefs.putInt("lesen", lesen); prefs.end();
+        uiKlang = 3;
+      }
+      else if (einstPos == 3) einrichtungStarten();
       else buchOeffnen();
     }
     if (e == LANG) buchOeffnen();
@@ -1013,6 +1055,7 @@ void setup() {
   prefs.begin("box", true);
   lautstaerke = prefs.getInt("laut", 7);
   grenze = constrain(prefs.getInt("grenze", 1), 0, GRENZEN - 1);
+  lesen = constrain(prefs.getInt("lesen", 1), 0, LESEN_STUFEN - 1);
   gedreht = prefs.getBool("gedreht", false);
   auswahl = constrain(prefs.getInt("auswahl", 0), 0, ANZAHL - 1);
   prefs.end();
