@@ -55,6 +55,8 @@ int auswahl = 0;            // aktuelles Maerchen
 constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3, SEITE_ZEIT = ANZAHL + 4, SEITE_HELL = ANZAHL + 5;
 constexpr int EINST_PUNKTE = 7;  // drehen, laut, hell, lesen, Nutzungszeit, WLAN, zurueck
 constexpr uint32_t KOMBI_MS = 3000;
+int einstZiel = 0;          // Drehrad: Ziel (ohne Kreis-Rest), einstPos = Rest
+float einstAnim = 0;        // Drehrad: aktuelle, weich nachlaufende Stellung
 int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 laut, 2 hell, 3 lesen, 4 Zeit, 5 WLAN, 6 zurueck
 // Hoechstlautstaerke (nur von den Eltern einstellbar): Stufe 0..3, ab Werk 1 = halb so laut wie voll
 // (etwa -10 dB, so viel wird als "halb so laut" empfunden). Die 10 Kinder-Stufen liegen darunter.
@@ -280,7 +282,11 @@ static void audioTask(void *) {
         uiKlang = 0;
         if (!uiAktiv) { synth.start(); digitalWrite(PIN_PA, HIGH); uiAktiv = true; }
         float t = synth.zeit() + 0.01f;
-        if (k == 1) {  // Seite raschelt
+        if (k == 5 || k == 6) {  // Tschuuu: Rauschen gleitet, ein leiser Ton schwingt mit
+          bool hoch = k == 5;
+          synth.rauschen(t, 0.3f, BANDPASS, hoch ? 2800 : 900, 0.09f, 1.3f, 0.07f, hoch ? 800 : 3000);
+          synth.ton(t + 0.02f, hoch ? 700 : 420, 0.022f, 0.03f, 0.22f, SINUS, MUSIK, hoch ? 420 : 700);
+        } else if (k == 1) {  // Seite raschelt
           synth.rauschen(t, 0.24f, BANDPASS, 1400, 0.10f, 0.9f, 0.05f, 3600);
           synth.note(t + 0.18f, 86, 0.3f);
         } else if (k == 4) {  // Gute Nacht: Wiegenlied-Anfang
@@ -898,17 +904,40 @@ static void einstellungenBild(Gfx &g, float t) {
   else snprintf(zeitZeile, sizeof zeitZeile, "Zeit: immer");
   const char *namen[EINST_PUNKTE] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze],
                                      HELL_TEXT[hell], LESE_TEXT[lesen], zeitZeile, "WLAN einrichten", "Zurück zum Buch"};
+  // Drehrad: die Punkte liegen auf einer Walze, die sich nach oben oder unten dreht (endlos im Kreis)
+  const float MY = 134, R = 66, SCHRITT = 0.42f;
+  int reihe[EINST_PUNKTE];
+  float dd[EINST_PUNKTE];
   for (int i = 0; i < EINST_PUNKTE; i++) {
-    float y = 57 + i * 20;
-    bool an = i == einstPos;
-    if (an) g.kontur(2, GOLD_D);
-    bool bearbeiten = an && i == 4 && zeitFeld >= 0;
-    if (bearbeiten) g.kontur(2.4f, LEDER);
-    g.rundRechteck(MITTE + 5, y, BW - 10, 18, 7, bearbeiten ? WEISS : an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
-    g.konturAus();
-    g.text(SCHRIFT_K, namen[i], cx, y + 14, an ? TINTE : FARBE(0x9A7650), 1);
+    float d = fmodf(i - einstAnim + EINST_PUNKTE * 100.0f + EINST_PUNKTE / 2.0f, (float)EINST_PUNKTE) - EINST_PUNKTE / 2.0f;
+    dd[i] = d;
+    reihe[i] = i;
   }
-  g.text(SCHRIFT_K, zeitFeld >= 0 ? "+/- und Start" : "Start: auswählen", cx, 211, FARBE(0x9A7650), 1);
+  for (int a = 0; a < EINST_PUNKTE; a++)  // hinten zuerst zeichnen
+    for (int b = a + 1; b < EINST_PUNKTE; b++)
+      if (fabsf(dd[reihe[b]]) > fabsf(dd[reihe[a]])) { int x = reihe[a]; reihe[a] = reihe[b]; reihe[b] = x; }
+  g.rundRechteck(MITTE + 3, MY - 15, BW - 6, 30, 9, FARBE(0xE9D6AE), 160);  // Mulde fuer den gewaehlten Punkt
+  for (int k = 0; k < EINST_PUNKTE; k++) {
+    int i = reihe[k];
+    float w = dd[i] * SCHRITT;
+    if (fabsf(w) > 1.45f) continue;
+    float c = cosf(w), y = MY + sinf(w) * R;
+    float hh = 22 * c, bw = (BW - 12) * (0.78f + 0.22f * c);
+    bool mitte = fabsf(dd[i]) < 0.5f;
+    bool bearbeiten = mitte && i == 4 && zeitFeld >= 0;
+    uint8_t a = (uint8_t)(255 * klemme(c * c * 1.1f));
+    if (mitte) g.kontur(bearbeiten ? 2.4f : 2, bearbeiten ? LEDER : GOLD_D);
+    g.rundRechteck(cx - bw / 2, y - hh / 2, bw, hh, 8 * c, bearbeiten ? WEISS : mitte ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2), a);
+    g.konturAus();
+    if (c > 0.62f)
+      g.text(SCHRIFT_K, namen[i], cx, y + 5.5f * c, mitte ? TINTE : FARBE(0x9A7650), 1, (uint8_t)(255 * klemme((c - 0.62f) * 3.5f)));
+  }
+  // kleine Pfeile: oben und unten geht es weiter
+  float ob[] = {cx - 6, 72, cx + 6, 72, cx, 66};
+  float un[] = {cx - 6, 196, cx + 6, 196, cx, 202};
+  g.polygon(ob, 3, GOLD_D, 170);
+  g.polygon(un, 3, GOLD_D, 170);
+  g.text(SCHRIFT_K, zeitFeld >= 0 ? "+/- und Start" : "Start: auswählen", cx, 215, FARBE(0x9A7650), 1);
 }
 
 // kleines Akkusymbol oben rechts; bei fast leer rot und "Bitte aufladen"
@@ -1458,6 +1487,8 @@ static void aufwachen() {
 static void einstellungenOeffnen() {
   if (zustand == SPIELT) anfStopp = true;
   einstPos = 0;
+  einstZiel = 0;
+  einstAnim = 0;
   wechsle(EINSTELLUNGEN);
   uiKlang = 2;
 }
@@ -1492,7 +1523,11 @@ static void ereignis(Ereignis e, int laut) {
     return;
   }
   if (zustand == EINSTELLUNGEN) {
-    if (laut) { einstPos = (einstPos - laut + EINST_PUNKTE) % EINST_PUNKTE; uiKlang = 1; }
+    if (laut) {
+      einstZiel -= laut;
+      einstPos = ((einstZiel % EINST_PUNKTE) + EINST_PUNKTE) % EINST_PUNKTE;
+      uiKlang = laut > 0 ? 5 : 6;  // Tschuuu nach oben / unten
+    }
     if (e == KURZ || e == DOPPEL) {
       if (einstPos == 0) { drehenUmschalten(); uiKlang = 3; }
       else if (einstPos == 1) {  // Hoechstlautstaerke weiterschalten
@@ -1661,6 +1696,13 @@ void loop() {
     lcd::licht(false);
     setCpuFrequencyMhz(80);  // sparsam warten, WLAN bleibt fuer Updates an
   }
+
+  // Drehrad laeuft weich hinterher
+  static uint32_t animSeit = millis();
+  float dtA = (millis() - animSeit) / 1000.0f;
+  animSeit = millis();
+  einstAnim += (einstZiel - einstAnim) * (dtA * 12 > 1 ? 1 : dtA * 12);
+  if (fabsf(einstZiel - einstAnim) < 0.002f) einstAnim = einstZiel;
 
   // Bild (hoechstens 30 je Sekunde)
   uint32_t jetzt = millis();
