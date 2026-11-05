@@ -158,12 +158,18 @@ Melodie des Märchens, so erkennen auch Kinder, die noch nicht lesen, ihr Märch
 **Einstellungen (für Eltern): Lauter und Leiser zusammen 3 Sekunden halten.** Dort: Höchste Lautstärke
 (30 / 50 / 70 / 100 %, ab Werk 50 % = halb so laut; die 10 Stufen der Kinder liegen darunter), Lesetempo
 (normal / langsam / sehr langsam, ab Werk langsam: solange eine Sprechblase zu lesen ist, laufen Bild und Musik
-in Zeitlupe, halb bzw. ein Drittel so schnell), Bild drehen
+in Zeitlupe, halb bzw. ein Drittel so schnell), Nutzungszeit (ab Werk 06:00–19:00: Start wählt
+an/aus → von → bis, Lauter/Leiser verstellen in 15-Minuten-Schritten), Bild drehen
 (180°, oben bleibt Lauter, wird gemerkt), WLAN einrichten, zurück zum Buch. Lauter/Leiser wählen,
 Start führt aus; nach einer Minute ohne Taste geht es von selbst zurück ins Buch.
 
 In den Einstellungen (Lauter + Leiser 3 s) „WLAN einrichten“ wählen (zurück: Start lang drücken), danach öffnet die Box das WLAN **„Märchenbox-Setup“**.
 Mit dem Handy verbinden, WLAN wählen, speichern.
+
+**Nutzungszeit:** Die Box holt die Uhrzeit über das WLAN (ohne WLAN gibt es keine Sperre). Außerhalb der
+Zeit darf ein laufendes Märchen zu Ende gehen, dann kommt „Gute Nacht!“ mit Wiegenlied, Bildschirm und Ton gehen
+aus. Wecken: Lauter + Leiser 3 Sekunden halten – dann bleibt sie eine Stunde wach. In der erlaubten Zeit weckt jede
+Taste. Das WLAN bleibt im Schlaf an, damit Updates gehen.
 
 ## Updates über WLAN
 

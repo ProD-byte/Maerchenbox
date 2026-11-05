@@ -23,6 +23,7 @@
 #include <ArduinoOTA.h>
 #include <Preferences.h>
 #include <driver/i2s.h>
+#include <time.h>
 #include "gfx.h"
 #include "lcd.h"
 #include "synth.h"
@@ -46,12 +47,13 @@ static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN, &ASCHENPUTTE
 constexpr int ANZAHL = sizeof(LISTE) / sizeof(LISTE[0]);
 
 // ---------- Zustand ----------
-enum Zustand { TITEL, SPIELT, MENUE, EINRICHTUNG, UPDATE, EINSTELLUNGEN };
+enum Zustand { TITEL, SPIELT, MENUE, EINRICHTUNG, UPDATE, EINSTELLUNGEN, SCHLAF };
 Zustand zustand = TITEL;
 int auswahl = 0;            // aktuelles Maerchen
 // Maerchenbuch: nur die Maerchen (Seite 0..ANZAHL-1). Die Einstellungen sind versteckt:
 // Lauter + Leiser 3 s gleichzeitig halten. SEITE_DREHEN / SEITE_WLAN sind nur Bilder dafuer.
-constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3;
+constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3, SEITE_ZEIT = ANZAHL + 4;
+constexpr int EINST_PUNKTE = 6;  // drehen, laut, lesen, Nutzungszeit, WLAN, zurueck
 constexpr uint32_t KOMBI_MS = 3000;
 int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 Hoechstlautstaerke, 2 Lesetempo, 3 WLAN, 4 zurueck
 // Hoechstlautstaerke (nur von den Eltern einstellbar): Stufe 0..3, ab Werk 1 = halb so laut wie voll
@@ -97,6 +99,29 @@ constexpr int LESEN_STUFEN = 3;
 static const float LESE_TEMPO[LESEN_STUFEN] = {1.0f, 0.5f, 0.33f};
 static const char *const LESE_TEXT[LESEN_STUFEN] = {"Lesen: normal", "Lesen: langsam", "Lesen: sehr langsam"};
 int lesen = 1;              // ab Werk: langsam
+// Nutzungszeit: ausserhalb von [von, bis) schlaeft die Box; wecken nur mit Lauter + Leiser 3 s
+bool zeitAn = true;
+int vonMin = 6 * 60, bisMin = 19 * 60;  // Minuten nach Mitternacht
+int zeitFeld = -1;                      // Bearbeiten: -1 nein, 0 an/aus, 1 von, 2 bis
+bool ueberbrueckt = false;              // Eltern haben ausserhalb der Zeit geweckt
+uint32_t wachSeit = 0;                  // ... und zwar dann
+constexpr uint32_t WACH_MS = 60UL * 60 * 1000;  // so lange bleibt sie dann wach
+
+// Minuten nach Mitternacht (Ortszeit) oder -1, solange die Uhrzeit noch nicht aus dem Netz kam
+static int uhrMinuten() {
+  time_t jetzt = time(nullptr);
+  if (jetzt < 1700000000) return -1;
+  struct tm lt;
+  localtime_r(&jetzt, &lt);
+  return lt.tm_hour * 60 + lt.tm_min;
+}
+static bool nutzungErlaubt() {
+  int m = uhrMinuten();
+  if (!zeitAn || m < 0) return true;  // ohne Uhrzeit keine Sperre
+  if (vonMin <= bisMin) return m >= vonMin && m < bisMin;
+  return m >= vonMin || m < bisMin;  // ueber Mitternacht
+}
+static void zeitText(char *b, int n, int m) { snprintf(b, n, "%02d:%02d", m / 60, m % 60); }
 volatile uint32_t audioZeitUs = 0;  // wann das war
 constexpr int BLOCK = 256;
 constexpr float LATENZ = 8 * 256 / (float)Synth::RATE;  // DMA-Puffer zwischen Erzeugen und Hoeren
@@ -209,13 +234,18 @@ static void audioTask(void *) {
         if (k == 1) {  // Seite raschelt
           synth.rauschen(t, 0.24f, BANDPASS, 1400, 0.10f, 0.9f, 0.05f, 3600);
           synth.note(t + 0.18f, 86, 0.3f);
+        } else if (k == 4) {  // Gute Nacht: Wiegenlied-Anfang
+          const int m[9] = {72, 69, 72, 74, 72, 69, 70, 67, 65};
+          const float d[9] = {0, 0.9f, 1.2f, 2.4f, 3.0f, 3.6f, 4.8f, 5.4f, 6.0f};
+          for (int i = 0; i < 9; i++) synth.note(t + d[i], m[i], 0.45f);
+          synth.glocke(t + 7.2f, 60, 0.3f);
         } else if (k == 2) {  // Buch klappt auf
           const int ak[5] = {0, 4, 7, 12, 16};
           for (int i = 0; i < 5; i++) synth.glocke(t + i * 0.16f, 72 + ak[i], 0.6f);
         } else {  // los geht's
           synth.note(t, 79, 0.7f); synth.note(t + 0.1f, 84, 0.7f); synth.note(t + 0.2f, 88, 0.7f);
         }
-        uiBis = synth.zeit() + 2.6f;
+        uiBis = synth.zeit() + (k == 4 ? 10.5f : 2.6f);
       }
       // leise Erkennungsmelodie der offenen Seite
       static int liedAktiv = -1;
@@ -388,6 +418,36 @@ static void linkeSeite(Gfx &g, int seite, float t) {
     }
     float w = 0.5f + 0.5f * sinf(t * 4);
     for (int i = 0; i <= grenze && i < 3; i++) g.bogen(64, 88, 10 + i * 8, -0.7f, 0.7f, 2, LEDER, (uint8_t)(120 + 135 * w));
+  } else if (seite == SEITE_ZEIT) {
+    g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
+    int m = uhrMinuten();
+    float mx = 78, my = 82, r = 26;
+    g.kontur(1.6f, TINTE);
+    g.kreis(mx, my, r, WEISS);
+    g.konturAus();
+    for (int i = 0; i < 12; i++) g.kreis(mx + sinf(i * 0.5236f) * (r - 5), my - cosf(i * 0.5236f) * (r - 5), 1.3f, TINTE);
+    // erlaubte Zeit als goldener Bogen am Rand (12-Stunden-Zifferblatt: nur grob)
+    if (zeitAn) {
+      float a0 = vonMin / 720.0f * 6.2832f - 1.5708f, a1 = bisMin / 720.0f * 6.2832f - 1.5708f;
+      if (a1 <= a0) a1 += 6.2832f;
+      if (bisMin - vonMin >= 720 || (bisMin < vonMin && bisMin + 1440 - vonMin >= 720)) { a0 = 0; a1 = 6.29f; }
+      g.bogen(mx, my, r + 4, a0, a1, 3, GOLD_D);
+    }
+    if (m >= 0) {
+      float ah = (m % 720) / 720.0f * 6.2832f, am = (m % 60) / 60.0f * 6.2832f;
+      g.linie(mx, my, mx + sinf(ah) * r * 0.5f, my - cosf(ah) * r * 0.5f, 2.6f, TINTE);
+      g.linie(mx, my, mx + sinf(am) * r * 0.78f, my - cosf(am) * r * 0.78f, 1.6f, TINTE);
+      char b[24], z[8];
+      zeitText(z, sizeof z, m);
+      snprintf(b, sizeof b, "jetzt %s", z);
+      g.text(SCHRIFT_K, b, mx, 128, TINTE, 1);
+    } else {
+      g.text(SCHRIFT_K, "Uhrzeit fehlt", mx, 128, LEDER, 1);
+    }
+    g.kreis(mx, my, 2.4f, LEDER);
+    // Mond oben rechts
+    g.kreis(116, 54, 7, FARBE(0xFFE9A0));
+    g.kreis(119, 52, 6, FARBE(0xFFF6E4));
   } else if (seite == SEITE_LESEN) {
     g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
     g.kontur(1.4f, TINTE);
@@ -535,22 +595,52 @@ static void buchBild(Gfx &g, float t) {
 static void einstellungenBild(Gfx &g, float t) {
   buchTisch(g, t);
   einband(g, 6, BY - 6, 272, BH + 12);
-  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_LESEN : einstPos == 3 ? SEITE_WLAN : auswahl, t);
+  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_LESEN : einstPos == 3 ? SEITE_ZEIT : einstPos == 4 ? SEITE_WLAN : auswahl, t);
   seitenGrund(g, false);
   const float cx = MITTE + BW / 2;
   g.text(SCHRIFT_B, "Für Eltern", cx, 50, TINTE, 1);
   g.rechteck(cx - 36, 60, 72, 1.5f, GOLD_D);
-  const char *namen[5] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze], LESE_TEXT[lesen],
-                          "WLAN einrichten", "Zurück zum Buch"};
-  for (int i = 0; i < 5; i++) {
-    float y = 66 + i * 27;
+  char zeitZeile[40], v[8], b[8];
+  zeitText(v, sizeof v, vonMin);
+  zeitText(b, sizeof b, bisMin);
+  if (zeitFeld == 0) snprintf(zeitZeile, sizeof zeitZeile, "Zeitgrenze: %s", zeitAn ? "an" : "aus");
+  else if (zeitFeld == 1) snprintf(zeitZeile, sizeof zeitZeile, "Von: %s", v);
+  else if (zeitFeld == 2) snprintf(zeitZeile, sizeof zeitZeile, "Bis: %s", b);
+  else if (zeitAn) snprintf(zeitZeile, sizeof zeitZeile, "Zeit: %s-%s", v, b);
+  else snprintf(zeitZeile, sizeof zeitZeile, "Zeit: immer");
+  const char *namen[EINST_PUNKTE] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze],
+                                     LESE_TEXT[lesen], zeitZeile, "WLAN einrichten", "Zurück zum Buch"};
+  for (int i = 0; i < EINST_PUNKTE; i++) {
+    float y = 61 + i * 22;
     bool an = i == einstPos;
     if (an) g.kontur(2, GOLD_D);
-    g.rundRechteck(MITTE + 5, y, BW - 10, 23, 8, an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
+    bool bearbeiten = an && i == 3 && zeitFeld >= 0;
+    if (bearbeiten) g.kontur(2.4f, LEDER);
+    g.rundRechteck(MITTE + 5, y, BW - 10, 19, 7, bearbeiten ? WEISS : an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
     g.konturAus();
-    g.text(SCHRIFT_K, namen[i], cx, y + 17, an ? TINTE : FARBE(0x9A7650), 1);
+    g.text(SCHRIFT_K, namen[i], cx, y + 14.5f, an ? TINTE : FARBE(0x9A7650), 1);
   }
-  g.text(SCHRIFT_K, "Start: auswählen", cx, 206, FARBE(0x9A7650), 1);
+  g.text(SCHRIFT_K, zeitFeld >= 0 ? "+/- und Start" : "Start: auswählen", cx, 211, FARBE(0x9A7650), 1);
+}
+
+// Gute Nacht: Mond, Sterne, das geschlossene Buch schlaeft
+uint32_t schlafSeit = 0;
+static void schlafBild(Gfx &g, float t) {
+  g.verlauf(0, 240, FARBE(0x1E1A4A), FARBE(0x0E0C24));
+  for (int i = 0; i < 24; i++) {
+    float fu = 0.5f + 0.5f * sinf(t * 1.6f + i * 1.9f);
+    g.stern(zufall(i + 11) * 284, zufall(i + 61) * 150, 1.5f + fu * 1.6f, 0.7f, 4, 0, GOLD, (uint8_t)(60 + fu * 150));
+  }
+  g.kreis(214, 58, 26, FARBE(0xFFF1B0));
+  g.kreis(226, 50, 23, FARBE(0x1E1A4A));
+  g.kreis(214, 58, 44, FARBE(0xFFF1B0), 25);
+  einband(g, 62, 150, 160, 62);
+  g.text(SCHRIFT_K, "Märchenbox", 142, 186, GOLD, 1);
+  for (int i = 0; i < 3; i++) {
+    float k = fmodf(t * 0.5f + i / 3.0f, 1);
+    g.text(SCHRIFT_M, "z", 228 + k * 24 + i * 3, 168 - k * 50, WEISS, 1, (uint8_t)(255 * sinf(k * 3.14159f)));
+  }
+  g.text(SCHRIFT_G, "Gute Nacht!", 142, 110, WEISS, 1);
 }
 
 // waehrend Lauter + Leiser gehalten werden: Kreis fuellt sich
@@ -613,13 +703,14 @@ static void zeichneInhalt(Gfx &g, float t, float uhr) {
     case EINRICHTUNG: einrichtungBild(g, uhr); break;
     case UPDATE: updateBild(g); break;
     case EINSTELLUNGEN: einstellungenBild(g, uhr); break;
+    case SCHLAF: schlafBild(g, uhr); break;
   }
   g.kameraAus();
   g.wackeln(0, 0);
   g.ausschnittAus();
   g.konturAus();
   if (zustand == SPIELT || zustand == TITEL) lautAnzeige(g);
-  if (zustand != EINSTELLUNGEN && zustand != EINRICHTUNG && zustand != UPDATE) kombiAnzeige(g);
+  if (zustand != EINSTELLUNGEN && zustand != EINRICHTUNG && zustand != UPDATE && zustand != SCHLAF) kombiAnzeige(g);
 }
 
 static void neuesBild() {
@@ -838,10 +929,12 @@ static void heimnetzServer() {
   server.on("/taste", tasteVonFern);
   server.on("/messtest", sendeMesstest);
   server.on("/status", []() {
-    char s[460];
-    snprintf(s, sizeof s, "{\"zustand\":%d,\"maerchen\":%d,\"t\":%.2f,\"fps\":%.1f,\"zeichnenMs\":%.1f,\"wartenMs\":%.1f,\"laut\":%d,\"heap\":%u,\"tasten\":\"%s\"}",
+    char s[520], uz[8] = "--:--";
+    int um = uhrMinuten();
+    if (um >= 0) zeitText(uz, sizeof uz, um);
+    snprintf(s, sizeof s, "{\"zustand\":%d,\"maerchen\":%d,\"t\":%.2f,\"fps\":%.1f,\"zeichnenMs\":%.1f,\"wartenMs\":%.1f,\"laut\":%d,\"heap\":%u,\"uhr\":\"%s\",\"erlaubt\":%d,\"tasten\":\"%s\"}",
              (int)zustand, auswahl, zustand == SPIELT ? hoerZeit() : 0.0f, fps, zeichenUs / 1000.0f, wartUs / 1000.0f,
-             lautstaerke, ESP.getFreeHeap(), protokoll.c_str());
+             lautstaerke, ESP.getFreeHeap(), uz, nutzungErlaubt() ? 1 : 0, protokoll.c_str());
     server.send(200, "application/json", s);
   });
   if (!serverLaeuft) { server.begin(); serverLaeuft = true; }
@@ -863,6 +956,7 @@ static void otaStarten() {
   ArduinoOTA.onError([](ota_error_t) { ESP.restart(); });
   ArduinoOTA.begin();
   otaGestartet = true;
+  configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org", "time.google.com", "ptbtime1.ptb.de");
   heimnetzServer();
   Serial.printf("WLAN: %s (" NAME_IM_NETZ ".local)\n", WiFi.localIP().toString().c_str());
 }
@@ -967,6 +1061,21 @@ static void blaettern(int d) {
   uiKlang = 1;
 }
 
+static void einschlafen() {
+  if (zustand == SPIELT) anfStopp = true;
+  zeitFeld = -1;
+  wechsle(SCHLAF);
+  schlafSeit = millis();
+  uiKlang = 4;
+  merke("Gute Nacht");
+}
+static void aufwachen() {
+  if (!nutzungErlaubt()) { ueberbrueckt = true; wachSeit = millis(); }
+  setCpuFrequencyMhz(240);
+  merke("aufgewacht");
+  buchOeffnen();
+}
+
 static void einstellungenOeffnen() {
   if (zustand == SPIELT) anfStopp = true;
   einstPos = 0;
@@ -978,12 +1087,32 @@ static void einstellungenOeffnen() {
 static void ereignis(Ereignis e, int laut) {
   letzteTaste = millis();
   if (!lcd::lichtAn() && zustand == TITEL) { lcd::licht(true); return; }  // erster Druck weckt nur
+  if (zustand == SCHLAF) { if (nutzungErlaubt()) aufwachen(); return; }
   if (zustand == EINRICHTUNG) {
     if (e == LANG) einrichtungAbbrechen();
     return;
   }
+  if (zustand == EINSTELLUNGEN && zeitFeld >= 0) {  // Nutzungszeit bearbeiten
+    if (laut) {
+      if (zeitFeld == 0) zeitAn = !zeitAn;
+      else if (zeitFeld == 1) vonMin = (vonMin + laut * 15 + 1440) % 1440;
+      else bisMin = (bisMin + laut * 15 + 1440) % 1440;
+      uiKlang = 1;
+    }
+    if (e == KURZ || e == DOPPEL || e == LANG) {
+      zeitFeld = (e == LANG || (zeitFeld == 0 && !zeitAn)) ? 3 : zeitFeld + 1;
+      if (zeitFeld > 2) {
+        zeitFeld = -1;
+        prefs.begin("box", false);
+        prefs.putBool("zeitAn", zeitAn); prefs.putInt("von", vonMin); prefs.putInt("bis", bisMin);
+        prefs.end();
+      }
+      uiKlang = 3;
+    }
+    return;
+  }
   if (zustand == EINSTELLUNGEN) {
-    if (laut) { einstPos = (einstPos - laut + 5) % 5; uiKlang = 1; }
+    if (laut) { einstPos = (einstPos - laut + EINST_PUNKTE) % EINST_PUNKTE; uiKlang = 1; }
     if (e == KURZ || e == DOPPEL) {
       if (einstPos == 0) { drehenUmschalten(); uiKlang = 3; }
       else if (einstPos == 1) {  // Hoechstlautstaerke weiterschalten
@@ -997,7 +1126,8 @@ static void ereignis(Ereignis e, int laut) {
         prefs.begin("box", false); prefs.putInt("lesen", lesen); prefs.end();
         uiKlang = 3;
       }
-      else if (einstPos == 3) einrichtungStarten();
+      else if (einstPos == 3) { zeitFeld = 0; uiKlang = 3; }
+      else if (einstPos == 4) einrichtungStarten();
       else buchOeffnen();
     }
     if (e == LANG) buchOeffnen();
@@ -1036,6 +1166,8 @@ static void tasteVonFern() {
   else if (k == "laut") ereignis(NICHTS, 1);
   else if (k == "leise") ereignis(NICHTS, -1);
   else if (k == "einstellungen") einstellungenOeffnen();
+  else if (k == "schlafen") einschlafen();
+  else if (k == "wecken") aufwachen();
   server.send(200, "text/plain", "ok");
 }
 
@@ -1056,6 +1188,9 @@ void setup() {
   lautstaerke = prefs.getInt("laut", 7);
   grenze = constrain(prefs.getInt("grenze", 1), 0, GRENZEN - 1);
   lesen = constrain(prefs.getInt("lesen", 1), 0, LESEN_STUFEN - 1);
+  zeitAn = prefs.getBool("zeitAn", true);
+  vonMin = constrain(prefs.getInt("von", 6 * 60), 0, 1439);
+  bisMin = constrain(prefs.getInt("bis", 19 * 60), 0, 1439);
   gedreht = prefs.getBool("gedreht", false);
   auswahl = constrain(prefs.getInt("auswahl", 0), 0, ANZAHL - 1);
   prefs.end();
@@ -1094,7 +1229,8 @@ void loop() {
       beideErledigt = true;
       kombiFortschritt = 0;
       if (lautstaerke != lautRuhe) { lautstaerke = lautRuhe; setzeLautstaerke(true); }  // erster Druck zaehlt nicht
-      if (zustand != EINRICHTUNG && zustand != UPDATE) { merke("Einstellungen"); einstellungenOeffnen(); }
+      if (zustand == SCHLAF) aufwachen();
+      else if (zustand != EINRICHTUNG && zustand != UPDATE) { merke("Einstellungen"); einstellungenOeffnen(); }
     }
   } else {
     beideSeit = 0;
@@ -1115,7 +1251,20 @@ void loop() {
   // Display aus, wenn lange nichts passiert
   if (zustand == TITEL && lcd::lichtAn() && millis() - zustandSeit > 90000 && millis() - letzteTaste > 90000) lcd::licht(false);
   if (zustand == MENUE && millis() - zustandSeit > 60000 && millis() - letzteTaste > 60000) wechsle(TITEL);
-  if (zustand == EINSTELLUNGEN && millis() - zustandSeit > 60000 && millis() - letzteTaste > 60000) buchOeffnen();
+  if (zustand == EINSTELLUNGEN && millis() - zustandSeit > 60000 && millis() - letzteTaste > 60000) { zeitFeld = -1; buchOeffnen(); }
+  // Nutzungszeit: ein laufendes Maerchen darf zu Ende gehen, dann Gute Nacht
+  static uint32_t zeitGeprueft = 0;
+  if (millis() - zeitGeprueft > 1000) {
+    zeitGeprueft = millis();
+    if (nutzungErlaubt()) ueberbrueckt = false;
+    else if (ueberbrueckt && millis() - wachSeit > WACH_MS) ueberbrueckt = false;
+    bool sperre = !nutzungErlaubt() && !ueberbrueckt;
+    if (sperre && (zustand == TITEL || zustand == MENUE)) einschlafen();
+  }
+  if (zustand == SCHLAF && lcd::lichtAn() && millis() - schlafSeit > 12000) {
+    lcd::licht(false);
+    setCpuFrequencyMhz(80);  // sparsam warten, WLAN bleibt fuer Updates an
+  }
 
   // Bild (hoechstens 30 je Sekunde)
   uint32_t jetzt = millis();
