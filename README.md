@@ -191,6 +191,21 @@ Nach dem Märchen der Brüder Grimm.
 | 2:54 | Die Faule: „Da hätt ich Lust, mich schmutzig zu machen!“ – sie schüttelt das Bett nicht |
 | 3:52 | Der Kessel voll Pech; „Kikeriki, unsere schmutzige Jungfrau ist wieder hie!“ |
 
+## Hänsel und Gretel (gut 4 Minuten)
+
+Nach dem Märchen der Brüder Grimm, der Ofen ist nur angedeutet.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die Eltern beraten in der Nacht; Hänsel sammelt Kieselsteine, die glänzen wie lauter Batzen |
+| 0:30 | Im Wald: die Kieselsteine weisen den Weg nach Hause |
+| 1:02 | Brotkrumen – die Vögel picken sie auf |
+| 1:26 | Das weiße Vöglein, das Häuschen aus Brot und Kuchen: „Knusper, knusper, Kneischen“ – „Der Wind, der Wind, das himmlische Kind!“ |
+| 2:02 | Die Hexe; Hänsel im Stall streckt ein Knöchlein heraus |
+| 2:32 | „Kriech hinein …“ – „Dumme Gans!“ – Gretel gibt ihr einen Stoß, die eiserne Tür fällt zu |
+| 3:10 | „Hänsel, wir sind erlöst!“ – Perlen und Edelsteine – „Entchen, Entchen …“ |
+| 3:46 | Heim zum Vater; „Mein Märchen ist aus, dort lauft eine Maus …“ |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -281,6 +296,7 @@ pio run -e ostb2st -t upload
 - `src/rotkaeppchen.cpp` – Rotkäppchen
 - `src/bremen.cpp` – Die Bremer Stadtmusikanten
 - `src/frauholle.cpp` – Frau Holle
+- `src/haensel.cpp` – Hänsel und Gretel
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 

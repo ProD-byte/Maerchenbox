@@ -35,3 +35,4 @@ extern const Maerchen MAXMORITZ;
 extern const Maerchen ROTKAEPPCHEN;
 extern const Maerchen BREMEN;
 extern const Maerchen FRAUHOLLE;
+extern const Maerchen HAENSEL_GRETEL;
