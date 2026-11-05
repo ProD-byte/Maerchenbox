@@ -89,6 +89,9 @@ uint32_t zeichenUs = 0, wartUs = 0;  // letzte Bildzeit: zeichnen / auf DMA wart
 Synth synth;
 volatile bool audioLaeuft = false;
 volatile bool anfStart = false, anfStopp = false;
+volatile bool pausiert = false;     // Film angehalten (Start druecken = weiter)
+float pauseZeit = 0;               // Filmzeit, bei der angehalten wurde
+uint32_t pauseSeit = 0;
 volatile bool maerchenEnde = false;
 volatile const Maerchen *audioMaerchen = nullptr;
 volatile float audioZeit = 0;       // Maerchenzeit am Ende des zuletzt erzeugten Blocks
@@ -239,13 +242,22 @@ static void audioTask(void *) {
   for (;;) {
     if (anfStopp) {
       anfStopp = false;
+      pausiert = false;
       audioLaeuft = false;
       synth.stille();
       i2s_zero_dma_buffer(I2S_NUM_0);
       digitalWrite(PIN_PA, LOW);
     }
+    static bool warPause = false;
+    if (audioLaeuft && pausiert) {
+      if (!warPause) { warPause = true; synth.stille(); i2s_zero_dma_buffer(I2S_NUM_0); digitalWrite(PIN_PA, LOW); }
+      vTaskDelay(pdMS_TO_TICKS(10));
+      continue;
+    }
+    if (warPause) { warPause = false; if (audioLaeuft) { digitalWrite(PIN_PA, HIGH); audioZeitUs = micros(); } }
     if (anfStart) {
       anfStart = false;
+      pausiert = false;
       synth.start();
       synth.abbildungAus();
       filmTempo = 1;
@@ -967,6 +979,33 @@ static void updateBild(Gfx &g) {
   if (updateProzent > 0) g.rundRechteck(42, 150, 2 * updateProzent, 18, 9, GOLD);
 }
 
+// Pause: Bild steht und wird dunkler, grosses Weiter-Zeichen, goldene Fortschrittsleiste
+static void pauseAnzeige(Gfx &g, float uhr) {
+  const Maerchen *m = LISTE[auswahl];
+  g.rechteck(0, 0, 284, 240, FARBE(0x0D0B26), 150);
+  float b = 1 + sinf(uhr * 3) * 0.05f;
+  g.kreis(142, 104, 46 * b, FARBE(0xFFE9A0), 40);
+  g.kontur(2, FARBE(0x7A5418));
+  g.kreis(142, 104, 34 * b, GOLD);
+  g.konturAus();
+  g.kreis(142, 104, 28 * b, FARBE(0xC0392B));
+  float tri[] = {132, 90, 132, 118, 157, 104};
+  g.polygon(tri, 3, FARBE(0xFFF3C0));
+  for (int i = 0; i < 6; i++) {
+    float an = uhr * 0.8f + i * 1.047f;
+    g.stern(142 + cosf(an) * 52, 104 + sinf(an) * 46, 3.5f, 1.4f, 4, an, GOLD, (uint8_t)(140 + 110 * sinf(uhr * 2 + i)));
+  }
+  // Tafel mit Fortschritt (verdeckt auch Erzaehltexte des Films)
+  float k = klemme(pauseZeit / m->dauer);
+  g.kontur(1.2f, GOLD_D);
+  g.rundRechteck(26, 170, 232, 62, 14, FARBE(0x10102A), 235);
+  g.konturAus();
+  g.rundRechteck(40, 184, 204, 10, 5, FARBE(0x2E2A55));
+  g.rundRechteck(41, 185, 202 * k < 8 ? 8 : 202 * k, 8, 4, GOLD);
+  g.stern(41 + 202 * k, 189, 7, 2.8f, 5, -1.5708f, FARBE(0xFFF3C0));
+  g.text(SCHRIFT_K, "Pause  -  Start drücken: weiter", 142, 220, FARBE(0xF2D98A), 1);
+}
+
 static void lautAnzeige(Gfx &g) {
   uint32_t seit = millis() - lautGezeigt;
   if (lautGezeigt == 0 || seit > 1500) return;
@@ -997,6 +1036,7 @@ static void zeichneInhalt(Gfx &g, float t, float uhr) {
   g.wackeln(0, 0);
   g.ausschnittAus();
   g.konturAus();
+  if (zustand == SPIELT && pausiert) pauseAnzeige(g, uhr);
   if (zustand == SPIELT || zustand == TITEL) lautAnzeige(g);
   if (zustand == MENUE || zustand == TITEL || zustand == EINSTELLUNGEN) akkuAnzeige(g, uhr, zustand == EINSTELLUNGEN);
   if (zustand != EINSTELLUNGEN && zustand != EINRICHTUNG && zustand != UPDATE && zustand != SCHLAF) kombiAnzeige(g);
@@ -1004,7 +1044,7 @@ static void zeichneInhalt(Gfx &g, float t, float uhr) {
 
 static void neuesBild() {
   bildMs = millis();
-  float t = zustand == SPIELT ? hoerZeit() : 0;
+  float t = zustand == SPIELT ? (pausiert ? pauseZeit : hoerZeit()) : 0;
   float uhr = millis() / 1000.0f;
   uint32_t zu = 0, wu = 0;
   blaseLesbar = 0;
@@ -1025,7 +1065,7 @@ static void neuesBild() {
   }
   zeichenUs = zu;
   wartUs = wu;
-  blaseOffen = zustand == SPIELT && blaseLesbar;
+  blaseOffen = zustand == SPIELT && !pausiert && blaseLesbar;
 }
 
 // =====================================================================
@@ -1044,6 +1084,20 @@ static void starte(int nr) {
   wechsle(SPIELT);
   Serial.printf("Start: %s\n", LISTE[auswahl]->titel);
 }
+static void merke(const char *was);
+static void pauseUmschalten() {
+  if (!pausiert) {
+    pauseZeit = hoerZeit();
+    pausiert = true;
+    pauseSeit = millis();
+    merke("Pause");
+  } else {
+    pausiert = false;
+    lcd::licht(true);
+    merke("weiter");
+  }
+}
+
 static void stoppe() {
   anfStopp = true;
   wechsle(TITEL);
@@ -1396,6 +1450,7 @@ static void einstellungenOeffnen() {
 static void ereignis(Ereignis e, int laut) {
   letzteTaste = millis();
   if (!lcd::lichtAn() && zustand == TITEL) { lcd::licht(true); return; }  // erster Druck weckt nur
+  if (!lcd::lichtAn() && zustand == SPIELT && pausiert) { lcd::licht(true); pauseSeit = millis(); return; }
   if (zustand == SCHLAF) { if (nutzungErlaubt()) aufwachen(); return; }
   if (zustand == EINRICHTUNG) {
     if (e == LANG) einrichtungAbbrechen();
@@ -1458,7 +1513,7 @@ static void ereignis(Ereignis e, int laut) {
     setzeLautstaerke(true);
     lautGezeigt = millis();
   }
-  if (e == KURZ) { if (zustand == SPIELT) stoppe(); else starte(auswahl); }
+  if (e == KURZ) { if (zustand == SPIELT) pauseUmschalten(); else starte(auswahl); }
   if (e == DOPPEL) starte(auswahl + 1);
   if (e == LANG) {
     if (zustand == SPIELT) anfStopp = true;
@@ -1476,6 +1531,7 @@ static void tasteVonFern() {
   else if (k == "leise") ereignis(NICHTS, -1);
   else if (k == "einstellungen") einstellungenOeffnen();
   else if (k == "schlafen") einschlafen();
+  else if (k == "pause" && zustand == SPIELT) pauseUmschalten();
   else if (k == "wecken") aufwachen();
   server.send(200, "text/plain", "ok");
 }
@@ -1573,8 +1629,10 @@ void loop() {
     if (nutzungErlaubt()) ueberbrueckt = false;
     else if (ueberbrueckt && millis() - wachSeit > WACH_MS) ueberbrueckt = false;
     bool sperre = !nutzungErlaubt() && !ueberbrueckt;
-    if (sperre && (zustand == TITEL || zustand == MENUE)) einschlafen();
+    if (sperre && (zustand == TITEL || zustand == MENUE || (zustand == SPIELT && pausiert))) einschlafen();
   }
+  if (zustand == SPIELT && pausiert && lcd::lichtAn() && millis() - pauseSeit > 10UL * 60 * 1000 &&
+      millis() - letzteTaste > 10UL * 60 * 1000) lcd::licht(false);
   if (zustand == SCHLAF && lcd::lichtAn() && millis() - schlafSeit > 12000) {
     lcd::licht(false);
     setCpuFrequencyMhz(80);  // sparsam warten, WLAN bleibt fuer Updates an

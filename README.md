@@ -134,7 +134,7 @@ Nach dem Märchen von Charles Perrault („Cendrillon“), mit Patin, Kürbis un
 
 | Knopf | im Film / Startbild | im Märchenbuch |
 |---|---|---|
-| Start 1× | Start / Stopp | Märchen starten bzw. Einstellung ausführen |
+| Start 1× | Start; im Film Pause / weiter (genau an derselben Stelle) | Märchen starten bzw. Einstellung ausführen |
 | Start 2× | nächstes Märchen | – |
 | Start lang | Märchenbuch | Buch schließen |
 | Laut / Leise | Lautstärke (wird gemerkt) | umblättern (im Kreis: nach dem letzten kommt wieder das erste) |
@@ -175,6 +175,10 @@ Taste. Das WLAN bleibt im Schlaf an, damit Updates gehen.
 goldener Blitz beim Laden), im Elternmenü mit Prozent und Volt. Gemessen an GPIO17 über Spannungsteiler 1:2,
 Ladepin GPIO47 ist beim Laden LOW. Die Prozente kommen grob aus der Spannung (3,4 V = leer, 4,15 V = voll); beim
 Laden liegt die Spannung etwas höher.
+
+**Pause:** Start im Film hält Bild und Musik an (Bild wird dunkler, goldene Fortschrittsleiste); Start noch einmal
+spielt an derselben Stelle weiter. Nach 10 Minuten Pause geht der Bildschirm aus, die Pause bleibt; ein Tastendruck
+zeigt sie wieder. Start lang führt ins Buch.
 
 ## Updates über WLAN
 
