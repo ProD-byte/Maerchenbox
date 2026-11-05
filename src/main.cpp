@@ -51,9 +51,15 @@ Zustand zustand = TITEL;
 int auswahl = 0;            // aktuelles Maerchen
 // Maerchenbuch: nur die Maerchen (Seite 0..ANZAHL-1). Die Einstellungen sind versteckt:
 // Lauter + Leiser 3 s gleichzeitig halten. SEITE_DREHEN / SEITE_WLAN sind nur Bilder dafuer.
-constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1;
+constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2;
 constexpr uint32_t KOMBI_MS = 3000;
-int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 WLAN, 2 zurueck
+int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 Hoechstlautstaerke, 2 WLAN, 3 zurueck
+// Hoechstlautstaerke (nur von den Eltern einstellbar): Stufe 0..3, ab Werk 1 = halb so laut wie voll
+// (etwa -10 dB, so viel wird als "halb so laut" empfunden). Die 10 Kinder-Stufen liegen darunter.
+constexpr int GRENZEN = 4;
+static const int GRENZE_DB[GRENZEN] = {-16, -10, -5, 0};
+static const char *const GRENZE_TEXT[GRENZEN] = {"Max. laut: 30 %", "Max. laut: 50 %", "Max. laut: 70 %", "Max. laut: 100 %"};
+int grenze = 1;
 float kombiFortschritt = 0; // 0..1 waehrend Lauter + Leiser gehalten werden
 bool gedreht = false;       // Bildschirm und Knoepfe um 180 Grad gedreht
 int buchSeite = 0;
@@ -131,7 +137,9 @@ static bool es8311Init() {
   return true;
 }
 static void setzeLautstaerke(bool merken) {
-  uint8_t reg = lautstaerke == 0 ? 0 : (uint8_t)(0xBF - (MAXLAUT - lautstaerke) * 8);
+  // 0xBF = 0 dB, je Registerschritt 0,5 dB; oberste Kinder-Stufe = Hoechstlautstaerke, je Stufe 4 dB leiser
+  int r = 0xBF + GRENZE_DB[grenze] * 2 - (MAXLAUT - lautstaerke) * 8;
+  uint8_t reg = lautstaerke == 0 ? 0 : (uint8_t)constrain(r, 1, 0xBF);
   esWrite(0x32, reg);
   if (merken) { prefs.begin("box", false); prefs.putInt("laut", lautstaerke); prefs.end(); }
 }
@@ -314,6 +322,16 @@ static void linkeSeite(Gfx &g, int seite, float t) {
     LISTE[seite]->vorschau(g, t);
     g.ausschnittAus();
     g.kameraAus();
+  } else if (seite == SEITE_LAUT) {
+    g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
+    float l[] = {40, 78, 50, 78, 64, 66, 64, 110, 50, 98, 40, 98};
+    g.polygon(l, 6, TINTE);
+    for (int i = 0; i < GRENZEN; i++) {
+      float h = 14 + i * 10;
+      g.rundRechteck(74 + i * 13, 110 - h, 9, h, 3, i <= grenze ? LEDER : PAPIER_D);
+    }
+    float w = 0.5f + 0.5f * sinf(t * 4);
+    for (int i = 0; i <= grenze && i < 3; i++) g.bogen(64, 88, 10 + i * 8, -0.7f, 0.7f, 2, LEDER, (uint8_t)(120 + 135 * w));
   } else if (seite == SEITE_DREHEN) {
     // kleiner Bildschirm, der sich dreht
     g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
@@ -444,19 +462,20 @@ static void buchBild(Gfx &g, float t) {
 static void einstellungenBild(Gfx &g, float t) {
   buchTisch(g, t);
   einband(g, 6, BY - 6, 272, BH + 12);
-  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_WLAN : auswahl, t);
+  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_WLAN : auswahl, t);
   seitenGrund(g, false);
   const float cx = MITTE + BW / 2;
   g.text(SCHRIFT_B, "Für Eltern", cx, 50, TINTE, 1);
   g.rechteck(cx - 36, 60, 72, 1.5f, GOLD_D);
-  const char *namen[3] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", "WLAN einrichten", "Zurück zum Buch"};
-  for (int i = 0; i < 3; i++) {
-    float y = 74 + i * 38;
+  const char *namen[4] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze], "WLAN einrichten",
+                          "Zurück zum Buch"};
+  for (int i = 0; i < 4; i++) {
+    float y = 68 + i * 32;
     bool an = i == einstPos;
     if (an) g.kontur(2, GOLD_D);
-    g.rundRechteck(MITTE + 5, y, BW - 10, 28, 9, an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
+    g.rundRechteck(MITTE + 5, y, BW - 10, 26, 9, an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
     g.konturAus();
-    g.text(SCHRIFT_K, namen[i], cx, y + 19, an ? TINTE : FARBE(0x9A7650), 1);
+    g.text(SCHRIFT_K, namen[i], cx, y + 18, an ? TINTE : FARBE(0x9A7650), 1);
   }
   g.text(SCHRIFT_K, "Start: auswählen", cx, 206, FARBE(0x9A7650), 1);
 }
@@ -889,10 +908,16 @@ static void ereignis(Ereignis e, int laut) {
     return;
   }
   if (zustand == EINSTELLUNGEN) {
-    if (laut) { einstPos = (einstPos - laut + 3) % 3; uiKlang = 1; }
+    if (laut) { einstPos = (einstPos - laut + 4) % 4; uiKlang = 1; }
     if (e == KURZ || e == DOPPEL) {
       if (einstPos == 0) { drehenUmschalten(); uiKlang = 3; }
-      else if (einstPos == 1) einrichtungStarten();
+      else if (einstPos == 1) {  // Hoechstlautstaerke weiterschalten
+        grenze = (grenze + 1) % GRENZEN;
+        prefs.begin("box", false); prefs.putInt("grenze", grenze); prefs.end();
+        setzeLautstaerke(false);
+        uiKlang = 3;
+      }
+      else if (einstPos == 2) einrichtungStarten();
       else buchOeffnen();
     }
     if (e == LANG) buchOeffnen();
@@ -949,6 +974,7 @@ void setup() {
   Serial.println(es8311Init() ? "ES8311 bereit" : "FEHLER: ES8311 antwortet nicht");
   prefs.begin("box", true);
   lautstaerke = prefs.getInt("laut", 7);
+  grenze = constrain(prefs.getInt("grenze", 1), 0, GRENZEN - 1);
   gedreht = prefs.getBool("gedreht", false);
   auswahl = constrain(prefs.getInt("auswahl", 0), 0, ANZAHL - 1);
   prefs.end();

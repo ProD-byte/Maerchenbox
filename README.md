@@ -109,7 +109,8 @@ auch wenn das Bild um 180° gedreht ist (dann tauschen die Knöpfe oben und unte
 Das Menü ist ein Märchenbuch: Beim Einschalten klappt es auf, jedes Märchen ist eine Doppelseite
 (links ein bewegtes Bild, rechts Titel und Startknopf), sonst nichts – Kinder können nichts verstellen.
 
-**Einstellungen (für Eltern): Lauter und Leiser zusammen 3 Sekunden halten.** Dort: Bild drehen
+**Einstellungen (für Eltern): Lauter und Leiser zusammen 3 Sekunden halten.** Dort: Höchste Lautstärke
+(30 / 50 / 70 / 100 %, ab Werk 50 % = halb so laut; die 10 Stufen der Kinder liegen darunter), Bild drehen
 (180°, oben bleibt Lauter, wird gemerkt), WLAN einrichten, zurück zum Buch. Lauter/Leiser wählen,
 Start führt aus; nach einer Minute ohne Taste geht es von selbst zurück ins Buch.
 
