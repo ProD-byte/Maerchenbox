@@ -20,6 +20,7 @@ struct Maerchen {
   const Ton3 *lied;                             // leise Erkennungsmelodie, solange die Seite offen ist
   int liedN;
   float liedSchlag;                             // Sekunden je Schlag
+  const char *autor;                            // fuer das Buchcover (nullptr = Brueder Grimm)
 };
 
 extern const Maerchen SCHNEIDERLEIN;

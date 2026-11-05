@@ -151,8 +151,8 @@ auch wenn das Bild um 180° gedreht ist (dann tauschen die Knöpfe oben und unte
 | 40 | unten | Leiser | Lauter |
 
 Das Menü ist ein Märchenbuch: Beim Einschalten klappt es auf, jedes Märchen ist eine Doppelseite
-(links ein bewegtes Bild und darunter ein großes Erkennungszeichen – Apfel, Glasschuh, Turm mit Zopf …, rechts Titel
-und Startknopf), sonst nichts – Kinder können nichts verstellen. Solange eine Seite offen ist, spielt leise die
+(links das Cover des Märchens – Leinen in seiner Farbe, Goldtitel, bewegtes Bild im Bogenfenster, „Brüder Grimm“ –,
+rechts „Es war einmal“, ein großes Erkennungszeichen – Apfel, Glasschuh, Turm mit Zopf … – und das goldene Siegel zum Starten), sonst nichts – Kinder können nichts verstellen. Solange eine Seite offen ist, spielt leise die
 Melodie des Märchens, so erkennen auch Kinder, die noch nicht lesen, ihr Märchen.
 
 **Einstellungen (für Eltern): Lauter und Leiser zusammen 3 Sekunden halten.** Dort: Höchste Lautstärke
@@ -189,7 +189,7 @@ pio run -e ostb2st -t upload
   im Buch mit `?blatt=0.5` mitten im Umblättern, `?auf=1200` beim Aufklappen (ms)
 - `http://maerchenbox.local/taste?k=kurz|doppel|lang|laut|leise|einstellungen` – Knopf drücken
 - `http://maerchenbox.local/status` – Zustand, Bilder/s, Zeichenzeit, letzte Tastendrücke
-- `http://maerchenbox.local/messtest` – was kostet welche Form beim Zeichnen
+- `http://maerchenbox.local/messtest` – was kostet welche Form beim Zeichnen (`?buch=1&m=5`: Teile des Märchenbuchs)
 
 ## Aufbau
 

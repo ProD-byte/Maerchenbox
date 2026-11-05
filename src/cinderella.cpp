@@ -778,4 +778,4 @@ static void symbol(Gfx &g, float x, float y, float t) {
   glitzern(g, x - 16, y - 20, 26, t, 5, 220);
 }
 
-const Maerchen CINDERELLA = {"Cinderella", PDAUER, FARBE(0xBFE6FF), bild, ton, titelbild, vorschau, symbol, LIED(MEL_WALZER, 0.3f)};
+const Maerchen CINDERELLA = {"Cinderella", PDAUER, FARBE(0xBFE6FF), bild, ton, titelbild, vorschau, symbol, LIED(MEL_WALZER, 0.3f), "Perrault"};

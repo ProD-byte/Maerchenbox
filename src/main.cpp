@@ -412,8 +412,8 @@ static void einband(Gfx &g, float x, float y, float w, float h) {
 static void rankenEcke(Gfx &g, float x, float y, float sx, float sy) {
   g.linie(x, y, x + sx * 26, y, 1.2f, GOLD_D);
   g.linie(x, y, x, y + sy * 26, 1.2f, GOLD_D);
-  g.bogen(x + sx * 29, y + sy * 2.5f, 2.6f, 0, 6.29f, 1.1f, GOLD_D);
-  g.bogen(x + sx * 2.5f, y + sy * 29, 2.6f, 0, 6.29f, 1.1f, GOLD_D);
+  g.kreis(x + sx * 29, y + sy * 2.5f, 2.2f, GOLD_D);
+  g.kreis(x + sx * 2.5f, y + sy * 29, 2.2f, GOLD_D);
   g.ellipse(x + sx * 13, y + sy * 3.5f, 4, 1.8f, BLATT, 255, sx * sy * 0.5f);
   g.ellipse(x + sx * 3.5f, y + sy * 13, 1.8f, 4, BLATT, 255, sx * sy * 0.5f);
   g.ellipse(x + sx * 20, y - sy * 2.5f, 3, 1.5f, BLATT, 255, -sx * sy * 0.5f);
@@ -425,7 +425,7 @@ static void seitenGrund(Gfx &g, bool links) {
   float x = links ? BX : MITTE;
   g.rechteck(x, BY, BW, BH, PAPIER);
   // altes Pergament: leichte Flecken, dunklere Raender
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 2; i++)
     g.ellipse(x + 14 + zufall(i + (links ? 400 : 420)) * (BW - 28), BY + 14 + zufall(i + 440) * (BH - 28),
               14 + zufall(i + 460) * 10, 10 + zufall(i + 480) * 8, PAPIER_D, 45);
   g.rechteck(x, BY, BW, 4, PAPIER_D, 110);
@@ -448,8 +448,8 @@ static void seitenGrund(Gfx &g, bool links) {
 static void schnoerkel(Gfx &g, float cx, float y, float b, Farbe c) {
   g.linie(cx - b, y, cx - 7, y, 1.2f, c);
   g.linie(cx + 7, y, cx + b, y, 1.2f, c);
-  g.bogen(cx - b - 3, y, 3, 0, 6.29f, 1.1f, c);
-  g.bogen(cx + b + 3, y, 3, 0, 6.29f, 1.1f, c);
+  g.kreis(cx - b - 2, y, 2.2f, c);
+  g.kreis(cx + b + 2, y, 2.2f, c);
   g.ellipse(cx - b * 0.55f, y - 3, 3.4f, 1.5f, BLATT, 255, 0.5f);
   g.ellipse(cx + b * 0.55f, y - 3, 3.4f, 1.5f, BLATT, 255, -0.5f);
   g.kreis(cx - 2, y - 1.5f, 2.6f, ROSE);
@@ -459,7 +459,9 @@ static void schnoerkel(Gfx &g, float cx, float y, float b, Farbe c) {
 }
 
 // Titel auf mehrere Zeilen verteilen (Woerter, max. Breite)
-static int zeilen(Gfx &g, const char *titel, char out[4][40], float maxB) {
+static int zeilen(Gfx &g, const char *titel, char out[4][40], float maxB, const Schrift &sch = SCHRIFT_B,
+                  bool *passt = nullptr) {
+  if (passt) *passt = true;
   int n = 0;
   out[0][0] = 0;
   const char *p = titel;
@@ -470,8 +472,9 @@ static int zeilen(Gfx &g, const char *titel, char out[4][40], float maxB) {
     snprintf(wort, sizeof wort, "%.*s", (int)(e - p), p);
     char probe[80];
     snprintf(probe, sizeof probe, "%s%s%s", out[n], out[n][0] ? " " : "", wort);
-    if (out[n][0] && g.textBreite(SCHRIFT_B, probe) > maxB) {
-      if (n == 3) break;
+    if (passt && g.textBreite(sch, wort) > maxB) *passt = false;
+    if (out[n][0] && g.textBreite(sch, probe) > maxB) {
+      if (n == 3) { if (passt) *passt = false; break; }
       n++;
       snprintf(out[n], 40, "%s", wort);
     } else {
@@ -501,7 +504,7 @@ static void startKnopf(Gfx &g, float x, float y, float t, float r = 15) {
 }
 
 // goldener Bogenrahmen um das Bild (oben rund wie ein Maerchenfenster); deckt die Ecken mit Pergament ab
-static void bogenFenster(Gfx &g, float x, float y, float w, float h, float t) {
+static void bogenFenster(Gfx &g, float x, float y, float w, float h, float t, Farbe grund = PAPIER) {
   const int N = 10;
   float cx = x + w / 2, rx = w / 2, ry = 26, by = y + ry;  // Bogen: Ellipse um (cx, by)
   float bx[N + 1], byy[N + 1];
@@ -517,16 +520,22 @@ static void bogenFenster(Gfx &g, float x, float y, float w, float h, float t) {
   for (int i = 0; i <= N / 2; i++) { l[nl++] = bx[i]; l[nl++] = byy[i] - 0.5f; }
   r[nr++] = x + w + 1; r[nr++] = y - 1;
   for (int i = N; i >= N / 2; i--) { r[nr++] = bx[i]; r[nr++] = byy[i] - 0.5f; }
-  g.polygon(l, nl / 2, PAPIER);
-  g.polygon(r, nr / 2, PAPIER);
-  // der Rahmen: dunkle Kante, Gold, helle Kante
-  for (int k = 0; k < 3; k++) {
-    Farbe c = k == 0 ? FARBE(0x7A5418) : k == 1 ? GOLD : FARBE(0xFFF0A8);
-    float d = k == 0 ? 5 : k == 1 ? 3.4f : 1;
-    for (int i = 0; i < N; i++) g.linie(bx[i], byy[i], bx[i + 1], byy[i + 1], d, c);
-    g.linie(x, by, x, y + h, d, c);
-    g.linie(x + w, by, x + w, y + h, d, c);
-    g.linie(x, y + h, x + w, y + h, d, c);
+  g.polygon(l, nl / 2, grund);
+  g.polygon(r, nr / 2, grund);
+  // der Rahmen: dunkle Kante und Gold, der Bogen jeweils als ein geschlossenes Band
+  for (int k = 0; k < 2; k++) {
+    Farbe c = k == 0 ? FARBE(0x7A5418) : GOLD;
+    float d = k == 0 ? 2.6f : 1.6f;  // halbe Breite
+    float band[4 * (N + 1)];
+    for (int i = 0; i <= N; i++) {
+      float a = 3.14159f + i * 3.14159f / N, ca = cosf(a), sa = sinf(a);
+      band[2 * i] = cx + ca * (rx + d); band[2 * i + 1] = by + sa * (ry + d);
+      band[4 * (N + 1) - 2 - 2 * i] = cx + ca * (rx - d); band[4 * (N + 1) - 1 - 2 * i] = by + sa * (ry - d);
+    }
+    g.polygon(band, 2 * (N + 1), c);
+    g.rechteck(x - d, by, 2 * d, y + h - by + d, c);
+    g.rechteck(x + w - d, by, 2 * d, y + h - by + d, c);
+    g.rechteck(x - d, y + h - d, w + 2 * d, 2 * d, c);
   }
   // Schlussstein mit Stern und funkelnde Ecken
   g.kontur(1, FARBE(0x7A5418));
@@ -538,22 +547,70 @@ static void bogenFenster(Gfx &g, float x, float y, float w, float h, float t) {
   g.stern(x + w - 3, y + h - 2, 6 - fu * 2, 1.3f, 4, 0, WEISS, (uint8_t)(250 - 100 * fu));
 }
 
+static void goldRahmen(Gfx &g, float x, float y, float w, float h, float d, Farbe c, uint8_t a = 255) {
+  g.rechteck(x, y, w, d, c, a);
+  g.rechteck(x, y + h - d, w, d, c, a);
+  g.rechteck(x, y, d, h, c, a);
+  g.rechteck(x + w - d, y, d, h, c, a);
+}
+
+// die linke Seite als Buchcover des Maerchens: Leinen in der Farbe des Maerchens, Goldtitel, Bild, Autor
+static void cover(Gfx &g, const Maerchen *m, float t) {
+  const float x = 16, y = 22, w = 124, h = 198;
+  Farbe stoff = mischeFarbe(m->farbe, FARBE(0x1A1430), 0.62f);
+  Farbe hell = mischeFarbe(stoff, WEISS, 0.14f), dunkel = mischeFarbe(stoff, FARBE(0x0A0610), 0.45f);
+  g.kontur(1.2f, FARBE(0x1A0E10));
+  g.rundRechteck(x, y, w, h, 4, stoff);
+  g.konturAus();
+  for (int i = 0; i < 7; i++) g.rechteck(x + 2, y + 9 + i * 28, w - 4, 0.8f, hell, 70);  // Leinen
+  g.rechteck(x + w - 10, y, 10, h, dunkel, 110);  // Falz zur Buchmitte
+  goldRahmen(g, x + 5, y + 5, w - 15, h - 10, 1.6f, GOLD_D);
+  goldRahmen(g, x + 8, y + 8, w - 21, h - 16, 0.8f, GOLD, 170);
+  for (int i = 0; i < 4; i++) {  // Eckornamente
+    float ex = i & 1 ? x + w - 13 : x + 8, ey = i & 2 ? y + h - 8 : y + 8;
+    g.stern(ex, ey, 5, 1.6f, 4, 0.785f, GOLD);
+    g.kreis(ex, ey, 1.6f, FARBE(0xC0392B));
+  }
+  // Titel in Goldschrift
+  float cx = x + (w - 5) / 2;
+  char z[4][40];
+  bool passt;
+  const Schrift *sch = &SCHRIFT_B;
+  float zh = 20;
+  int n = zeilen(g, m->titel, z, w - 26, SCHRIFT_B, &passt);
+  if (!passt || n > 3) { sch = &SCHRIFT_K; zh = 16; n = zeilen(g, m->titel, z, w - 26, SCHRIFT_K); }  // lange Titel kleiner
+  float ty = y + (zh > 16 ? 30 : 27);
+  for (int i = 0; i < n; i++) {
+    g.text(*sch, z[i], cx + 1, ty + i * zh + 1, dunkel, 1);
+    g.text(*sch, z[i], cx, ty + i * zh, GOLD, 1);
+  }
+  float ly = ty + (n - 1) * zh + 9;
+  float fu = 0.5f + 0.5f * sinf(t * 2.4f);
+  g.stern(cx, ly, 3.5f + fu, 1.4f, 4, 0, GOLD);
+  g.linie(cx - 30, ly, cx - 7, ly, 1, GOLD_D);
+  g.linie(cx + 7, ly, cx + 30, ly, 1, GOLD_D);
+  // Bild im Bogenfenster
+  float wx = x + 12, ww = w - 29, wy = ly + 9, wh = y + h - 30 - wy;
+  float zm = fmaxf(wh / 240.0f, ww / 284.0f);
+  float ox = wx + ww / 2 - 142 * zm, oy = wy + wh - 240 * zm;
+  g.ansicht(ox, oy, zm);
+  g.ausschnitt((wx - ox) / zm, (wy - oy) / zm, ww / zm, wh / zm);
+  m->vorschau(g, t);
+  g.ausschnittAus();
+  g.kameraAus();
+  bogenFenster(g, wx, wy, ww, wh, t, stoff);
+  // Autor
+  g.text(SCHRIFT_K, m->autor ? m->autor : "Brüder Grimm", cx, y + h - 13, FARBE(0xF2D98A), 1);
+}
+
 static void linkeSeite(Gfx &g, int seite, float t) {
-  seitenGrund(g, true);
   if (seite < ANZAHL) {
-    // grosses bewegtes Bild und darunter das Erkennungszeichen (fuer Kinder, die noch nicht lesen)
-    g.ansicht(20, 28, 116.0f / 284);
-    g.ausschnitt(0, 0, 284, 239);
-    LISTE[seite]->vorschau(g, t);
-    g.ausschnittAus();
-    g.kameraAus();
-    bogenFenster(g, 20, 28, 116, 98, t);
-    g.ausschnitt(BX, 132, BW - 4, 88);
-    if (LISTE[seite]->symbol) LISTE[seite]->symbol(g, 78, 212, t);
-    g.ausschnittAus();
-    g.kameraAus();
+    g.rechteck(BX, BY, BW, BH, PAPIER);  // das Cover liegt fast ueber der ganzen Seite
+    g.rechteck(BX + 2, BY + BH, BW - 4, 1.2f, FARBE(0xD9C49A));
+    cover(g, LISTE[seite], t);
     return;
   }
+  seitenGrund(g, true);
   // Rahmen fuer das Bild
   g.rundRechteck(23, 41, 110, 94, 6, GOLD_D);
   g.rundRechteck(25, 43, 106, 90, 5, GOLD);
@@ -659,31 +716,24 @@ static void rechteSeite(Gfx &g, int seite, float t) {
   const float cx = MITTE + BW / 2;
   if (seite < ANZAHL) {
     const Maerchen *m = LISTE[seite];
-    char z[4][40];
-    int n = zeilen(g, m->titel, z, BW - 22);
-    float y0 = 96 - (n - 1) * 11;
-    if (n <= 2) {
-      g.text(SCHRIFT_K, "Es war einmal", cx, 46, FARBE(0x9A7650), 1);
-      schnoerkel(g, cx, 56, 34, GOLD_D);
-    } else {
-      y0 = 50;
-    }
-    for (int i = 0; i < n; i++) {
-      g.text(SCHRIFT_B, z[i], cx + 0.8f, y0 + i * 22 + 0.8f, FARBE(0xE2C890), 1);  // weicher Schatten
-      g.text(SCHRIFT_B, z[i], cx, y0 + i * 22, i == 0 ? SAMT : TINTE, 1);
-    }
-    float yo = y0 + (n - 1) * 22 + 13;
-    schnoerkel(g, cx, yo, 30, GOLD_D);
+    g.text(SCHRIFT_K, "Es war einmal", cx, 44, FARBE(0x9A7650), 1);
+    schnoerkel(g, cx, 54, 34, GOLD_D);
+    // grosses Erkennungszeichen (fuer Kinder, die noch nicht lesen)
+    g.ausschnitt(MITTE + 6, 60, BW - 12, 98);
+    if (m->symbol) m->symbol(g, cx, 152, t);
+    g.ausschnittAus();
+    g.kameraAus();
+    schnoerkel(g, cx, 160, 30, GOLD_D);
     char d[24];
     snprintf(d, sizeof d, "%d Minuten", (int)(m->dauer / 60 + 0.5f));
-    g.text(SCHRIFT_K, d, cx, yo + 19, FARBE(0x9A7650), 1);
-    startKnopf(g, cx, 182, t, 14);
+    g.text(SCHRIFT_K, d, cx, 177, FARBE(0x9A7650), 1);
+    startKnopf(g, cx, 196, t, 11);
   }
   // Seitenpunkte
   for (int i = 0; i < SEITEN; i++) {
     float px = cx + (i - (SEITEN - 1) / 2.0f) * 10;
-    if (i == seite) g.stern(px, 212, 4.2f, 1.8f, 5, -1.5708f, GOLD_D);
-    else g.kreis(px, 212, 1.8f, PAPIER_D);
+    if (i == seite) g.stern(px, 215, 4.2f, 1.8f, 5, -1.5708f, GOLD_D);
+    else g.kreis(px, 215, 1.8f, PAPIER_D);
   }
 }
 
@@ -1074,6 +1124,24 @@ static void sendeMesstest() {
     }
     aus += String(name) + ": " + String((micros() - a) / 1000.0f, 2) + " ms\n";
   };
+  if (server.hasArg("buch")) {  // was kostet welcher Teil des Maerchenbuchs?
+    int mi = server.hasArg("m") ? constrain(server.arg("m").toInt(), 0, ANZAHL - 1) : 0;
+    const Maerchen *mm = LISTE[mi];
+    float tt = 3.3f;
+    miss("rahmen offen", [tt](Gfx &g) { buchRahmenOffen(g, tt); });
+    miss("seitengrund rechts", [](Gfx &g) { seitenGrund(g, false); });
+    miss("cover ganz", [mm, tt](Gfx &g) { cover(g, mm, tt); });
+    miss("vorschau gross", [mm, tt](Gfx &g) { g.ansicht(28, 90, 0.42f); g.ausschnitt(0, 0, 284, 240); mm->vorschau(g, tt); g.ausschnittAus(); g.kameraAus(); });
+    miss("bogenfenster", [tt](Gfx &g) { bogenFenster(g, 28, 90, 95, 100, tt); });
+    miss("rechte seite", [mi, tt](Gfx &g) { rechteSeite(g, mi, tt); });
+    miss("symbol", [mm, tt](Gfx &g) { mm->symbol(g, 206, 152, tt); g.kameraAus(); });
+    miss("zauberstaub", [tt](Gfx &g) { zauberstaub(g, tt); });
+    miss("startknopf", [tt](Gfx &g) { startKnopf(g, 206, 196, tt, 11); });
+    miss("schnoerkel x2", [](Gfx &g) { schnoerkel(g, 206, 54, 34, GOLD_D); schnoerkel(g, 206, 160, 30, GOLD_D); });
+    miss("buch ganz", [tt](Gfx &g) { buchBild(g, tt); });
+    server.send(200, "text/plain", aus);
+    return;
+  }
   aus += "CPU " + String(getCpuFrequencyMhz()) + " MHz, Flash " + String(ESP.getFlashChipSpeed() / 1000000) + " MHz\n";
   { uint32_t a = ESP.getCycleCount(); volatile int x = 0; for (int i = 0; i < 100000; i++) x += i; aus += "100k Additionen: " + String(ESP.getCycleCount() - a) + " Takte\n"; }
   miss("fuellen", [](Gfx &g) { g.fuellen(0x1234); });
