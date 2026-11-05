@@ -221,6 +221,54 @@ Nach dem Märchen der Brüder Grimm.
 | 3:10 | Die Hecke blüht und tut sich auf; der Kuss |
 | 3:54 | Alles erwacht – der Koch gibt die Ohrfeige; Hochzeit |
 
+## Der Froschkönig oder der eiserne Heinrich (knapp 4 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die goldene Kugel fällt in den Brunnen unter der Linde |
+| 0:26 | „Was gibst du mir?“ – Tischlein, Tellerlein, Becherlein, Bettlein – „Ach ja, ich verspreche dir alles!“ |
+| 1:10 | „Warte, warte, nimm mich mit!“ |
+| 1:30 | Plitsch platsch die Marmortreppe hinauf: „Königstochter, jüngste, mach mir auf!“ – „Was du versprochen hast …“ |
+| 2:18 | „Heb mich herauf, oder ich sag's deinem Vater!“ – an die Wand – ein Königssohn |
+| 2:52 | Der treue Heinrich: „Heinrich, der Wagen bricht!“ – drei Bänder springen vom Herzen |
+
+## Der Hase und der Igel (knapp 3 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Sonntagmorgen: der Igel singt vor seiner Tür |
+| 0:22 | Der Hase spottet über die krummen Beine; die Wette um einen goldenen Louisdor |
+| 1:02 | Frau Igel sieht genau so aus wie ihr Mann |
+| 1:22 | „Eins, zwei, drei!“ – „Ick bün all hier!“ – dreiundsiebzigmal, mit Rundenzähler |
+| 2:20 | Heim mit dem Goldstück; die Lehre |
+
+## Die Sterntaler (gut 2 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Das arme Mädchen mit dem Stückchen Brot |
+| 0:22 | Das Brot für den armen Mann: „Gott segne dir's!“ |
+| 0:42 | Das Mützchen, dann das Leibchen und das Röcklein |
+| 1:28 | Im dunklen Wald: das Hemdlein |
+| 1:52 | Die Sterne fallen und sind lauter blanke Taler; das neue Hemdlein aus feinstem Linnen |
+
+## Der süße Brei (gut 2 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die alte Frau im Wald schenkt das Töpfchen |
+| 0:28 | „Töpfchen, koche!“ – „Töpfchen, steh!“ |
+| 0:52 | Die Mutter vergisst das Wort: der Brei füllt Küche, Haus und Straße |
+| 1:40 | „Töpfchen, steh!“ – wer in die Stadt will, muss sich durchessen |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -313,6 +361,10 @@ pio run -e ostb2st -t upload
 - `src/frauholle.cpp` – Frau Holle
 - `src/haensel.cpp` – Hänsel und Gretel
 - `src/dornroeschen.cpp` – Dornröschen
+- `src/froschkoenig.cpp` – Der Froschkönig
+- `src/haseigel.cpp` – Der Hase und der Igel
+- `src/sterntaler.cpp` – Die Sterntaler
+- `src/suessebrei.cpp` – Der süße Brei
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 

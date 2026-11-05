@@ -37,3 +37,7 @@ extern const Maerchen BREMEN;
 extern const Maerchen FRAUHOLLE;
 extern const Maerchen HAENSEL_GRETEL;
 extern const Maerchen DORNROESCHEN;
+extern const Maerchen FROSCHKOENIG;
+extern const Maerchen HASE_IGEL;
+extern const Maerchen STERNTALER;
+extern const Maerchen SUESSERBREI;
