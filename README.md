@@ -176,6 +176,21 @@ Nach dem Märchen der Brüder Grimm.
 | 3:24 | In der Nacht: Katzenaugen wie glühende Kohlen – Kratz, Zwick, Rums, Kikeriki |
 | 4:08 | „Ach, in dem Haus sitzt eine gräuliche Hexe …“; die vier bleiben – „dem ist der Mund noch warm“ |
 
+## Frau Holle (gut 4 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die fleißige und die faule Tochter; die Spule fällt in den Brunnen: „… so hol sie auch wieder herauf!“ |
+| 0:32 | Durch den Brunnen auf die schöne Wiese |
+| 0:48 | „Ach, zieh mich raus, zieh mich raus, sonst verbrenn ich!“ |
+| 1:14 | „Ach, schüttel mich, schüttel mich, wir Äpfel sind alle miteinander reif!“ |
+| 1:36 | Frau Holle mit den großen Zähnen; das Bett schütteln – und in der Welt schneit es |
+| 2:20 | Der Goldregen unter dem Tor; „Kikeriki, unsere goldene Jungfrau ist wieder hie!“ |
+| 2:54 | Die Faule: „Da hätt ich Lust, mich schmutzig zu machen!“ – sie schüttelt das Bett nicht |
+| 3:52 | Der Kessel voll Pech; „Kikeriki, unsere schmutzige Jungfrau ist wieder hie!“ |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -265,6 +280,7 @@ pio run -e ostb2st -t upload
 - `src/maxmoritz.cpp` – Max und Moritz (nach Wilhelm Busch)
 - `src/rotkaeppchen.cpp` – Rotkäppchen
 - `src/bremen.cpp` – Die Bremer Stadtmusikanten
+- `src/frauholle.cpp` – Frau Holle
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
