@@ -43,7 +43,7 @@ constexpr int TASTE_A = 39, TASTE_B = 0, TASTE_C = 40;  // die drei Knoepfe (GPI
 constexpr uint8_t ES8311_ADDR = 0x18;
 
 // ---------- Maerchen ----------
-static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN, &ASCHENPUTTEL, &ROSENROT, &GEISSLEIN, &RAPUNZEL_M, &SCHNEEWITTCHEN, &CINDERELLA, &MAXMORITZ, &ROTKAEPPCHEN};
+static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN, &ASCHENPUTTEL, &ROSENROT, &GEISSLEIN, &RAPUNZEL_M, &SCHNEEWITTCHEN, &CINDERELLA, &MAXMORITZ, &ROTKAEPPCHEN, &BREMEN};
 constexpr int ANZAHL = sizeof(LISTE) / sizeof(LISTE[0]);
 
 // ---------- Zustand ----------

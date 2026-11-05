@@ -161,6 +161,21 @@ Nach dem Märchen der Brüder Grimm.
 | 3:16 | Der Jäger: „Finde ich dich hier, du alter Sünder!“ – „Wie war's so dunkel in dem Wolf seinem Leib!“ – Wackersteine |
 | 4:12 | Kuchen und Wein zu dritt: „Du willst dein Lebtag nicht wieder allein vom Wege ab …“ |
 
+## Die Bremer Stadtmusikanten (knapp 5 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der alte Esel: „Ich gehe nach Bremen und werde dort Stadtmusikant!“ |
+| 0:28 | Der Jagdhund: „Nun, was jappst du so, Packan?“ – „Ich spiele die Laute, und du schlägst die Pauken.“ |
+| 1:04 | Die Katze mit dem Gesicht wie drei Tage Regenwetter: „… du verstehst dich doch auf die Nachtmusik!“ |
+| 1:34 | Der Hahn auf dem Tor: „Etwas Besseres als den Tod findest du überall.“ |
+| 2:06 | Nacht im Wald, der Hahn sieht ein Licht |
+| 2:36 | Das Räuberhaus: die Pyramide, „Iah! Wau! Miau! Kikeriki!“, die Scheiben klirren, die Räuber fliehen |
+| 3:24 | In der Nacht: Katzenaugen wie glühende Kohlen – Kratz, Zwick, Rums, Kikeriki |
+| 4:08 | „Ach, in dem Haus sitzt eine gräuliche Hexe …“; die vier bleiben – „dem ist der Mund noch warm“ |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -249,6 +264,7 @@ pio run -e ostb2st -t upload
 - `src/cinderella.cpp` – Cinderella (nach Perrault)
 - `src/maxmoritz.cpp` – Max und Moritz (nach Wilhelm Busch)
 - `src/rotkaeppchen.cpp` – Rotkäppchen
+- `src/bremen.cpp` – Die Bremer Stadtmusikanten
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
