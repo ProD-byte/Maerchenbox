@@ -156,7 +156,7 @@ rechts „Es war einmal“, ein großes Erkennungszeichen – Apfel, Glasschuh, 
 Melodie des Märchens, so erkennen auch Kinder, die noch nicht lesen, ihr Märchen.
 
 **Einstellungen (für Eltern): Lauter und Leiser zusammen 3 Sekunden halten.** Dort: Höchste Lautstärke
-(30 / 50 / 70 / 100 %, ab Werk 50 % = halb so laut; die 10 Stufen der Kinder liegen darunter), Lesetempo
+(30 / 50 / 70 / 100 %, ab Werk 50 % = halb so laut; die 10 Stufen der Kinder liegen darunter), Helligkeit (25 / 50 / 75 / 100 %, ab Werk 50 %), Lesetempo
 (normal / langsam / sehr langsam, ab Werk langsam: solange eine Sprechblase zu lesen ist, laufen Bild und Musik
 in Zeitlupe, halb bzw. ein Drittel so schnell), Nutzungszeit (ab Werk 06:00–19:00: Start wählt
 an/aus → von → bis, Lauter/Leiser verstellen in 15-Minuten-Schritten), Bild drehen

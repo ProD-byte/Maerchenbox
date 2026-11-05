@@ -7,6 +7,7 @@
 namespace lcd {
 
 constexpr int PIN_SCLK = 9, PIN_MOSI = 10, PIN_CS = 14, PIN_DC = 8, PIN_RST = 18, PIN_LICHT = 13;
+constexpr int LICHT_KANAL = 7;  // LEDC-Kanal fuer die Hintergrundbeleuchtung
 constexpr int X_OFFSET = 36;      // wie in Xiaozhi (set_gap)
 constexpr uint8_t MADCTL = 0xA8;  // BGR | quer | gespiegelt Y - wie in Xiaozhi
 
@@ -43,8 +44,9 @@ static const Befehl INIT[] = {
 };
 
 void start() {
-  pinMode(PIN_LICHT, OUTPUT);
-  digitalWrite(PIN_LICHT, LOW);
+  ledcSetup(LICHT_KANAL, 5000, 10);
+  ledcAttachPin(PIN_LICHT, LICHT_KANAL);
+  ledcWrite(LICHT_KANAL, 0);
   pinMode(PIN_RST, OUTPUT);
   digitalWrite(PIN_RST, LOW); delay(50);    // laengerer Reset, das NV3023 braucht ihn
   digitalWrite(PIN_RST, HIGH); delay(150);
@@ -107,9 +109,14 @@ void warten() {
   xSemaphoreGive(frei);
 }
 
+static float hell = 0.5f;
 void licht(bool a) {
   an = a;
-  digitalWrite(PIN_LICHT, a ? HIGH : LOW);
+  ledcWrite(LICHT_KANAL, a ? (uint32_t)(hell * 1023) : 0);
+}
+void helligkeit(float h) {
+  hell = h < 0.03f ? 0.03f : h > 1 ? 1 : h;
+  if (an) ledcWrite(LICHT_KANAL, (uint32_t)(hell * 1023));
 }
 bool lichtAn() { return an; }
 

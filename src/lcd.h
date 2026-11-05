@@ -14,6 +14,7 @@ uint16_t *puffer();               // freien Streifenpuffer holen (wartet, bis DM
 void senden(uint16_t *p, int y);  // Streifen ab Zeile y abschicken (kehrt sofort zurueck)
 void warten();                    // bis alles beim Display angekommen ist
 void licht(bool an);
+void helligkeit(float h);  // 0..1, gilt ab sofort und fuer jedes licht(true)
 void drehen(bool gedreht);        // Bild um 180 Grad drehen
 bool lichtAn();
 }  // namespace lcd

@@ -52,10 +52,10 @@ Zustand zustand = TITEL;
 int auswahl = 0;            // aktuelles Maerchen
 // Maerchenbuch: nur die Maerchen (Seite 0..ANZAHL-1). Die Einstellungen sind versteckt:
 // Lauter + Leiser 3 s gleichzeitig halten. SEITE_DREHEN / SEITE_WLAN sind nur Bilder dafuer.
-constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3, SEITE_ZEIT = ANZAHL + 4;
-constexpr int EINST_PUNKTE = 6;  // drehen, laut, lesen, Nutzungszeit, WLAN, zurueck
+constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3, SEITE_ZEIT = ANZAHL + 4, SEITE_HELL = ANZAHL + 5;
+constexpr int EINST_PUNKTE = 7;  // drehen, laut, hell, lesen, Nutzungszeit, WLAN, zurueck
 constexpr uint32_t KOMBI_MS = 3000;
-int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 Hoechstlautstaerke, 2 Lesetempo, 3 WLAN, 4 zurueck
+int einstPos = 0;           // Auswahl in den Einstellungen: 0 drehen, 1 laut, 2 hell, 3 lesen, 4 Zeit, 5 WLAN, 6 zurueck
 // Hoechstlautstaerke (nur von den Eltern einstellbar): Stufe 0..3, ab Werk 1 = halb so laut wie voll
 // (etwa -10 dB, so viel wird als "halb so laut" empfunden). Die 10 Kinder-Stufen liegen darunter.
 constexpr int GRENZEN = 4;
@@ -102,6 +102,11 @@ constexpr int LESEN_STUFEN = 3;
 static const float LESE_TEMPO[LESEN_STUFEN] = {1.0f, 0.5f, 0.33f};
 static const char *const LESE_TEXT[LESEN_STUFEN] = {"Lesen: normal", "Lesen: langsam", "Lesen: sehr langsam"};
 int lesen = 1;              // ab Werk: langsam
+constexpr int HELL_STUFEN = 4;
+static const float HELL_PWM[HELL_STUFEN] = {0.10f, 0.28f, 0.58f, 1.0f};  // wirkt wie 25 / 50 / 75 / 100 %
+static const char *const HELL_TEXT[HELL_STUFEN] = {"Helligkeit: 25 %", "Helligkeit: 50 %", "Helligkeit: 75 %",
+                                                    "Helligkeit: 100 %"};
+int hell = 1;               // ab Werk 50 %
 // Nutzungszeit: ausserhalb von [von, bis) schlaeft die Box; wecken nur mit Lauter + Leiser 3 s
 bool zeitAn = true;
 int vonMin = 6 * 60, bisMin = 19 * 60;  // Minuten nach Mitternacht
@@ -674,6 +679,17 @@ static void linkeSeite(Gfx &g, int seite, float t) {
     }
     float w = 0.5f + 0.5f * sinf(t * 4);
     for (int i = 0; i <= grenze && i < 3; i++) g.bogen(64, 88, 10 + i * 8, -0.7f, 0.7f, 2, LEDER, (uint8_t)(120 + 135 * w));
+  } else if (seite == SEITE_HELL) {
+    g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
+    float k = (hell + 1) / (float)HELL_STUFEN;
+    for (int i = 0; i < 12; i++) {
+      float a = i * 0.5236f + t * 0.3f;
+      g.linie(78 + cosf(a) * 20, 86 + sinf(a) * 20, 78 + cosf(a) * (22 + 16 * k), 86 + sinf(a) * (22 + 16 * k), 3, GOLD_D);
+    }
+    g.kontur(1.4f, TINTE);
+    g.kreis(78, 86, 16, mischeFarbe(FARBE(0xB8A070), GOLD, k));
+    g.konturAus();
+    for (int i = 0; i < HELL_STUFEN; i++) g.rundRechteck(56 + i * 12, 122, 9, 5, 2, i <= hell ? LEDER : PAPIER_D);
   } else if (seite == SEITE_ZEIT) {
     g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
     int m = uhrMinuten();
@@ -867,7 +883,7 @@ static void buchBild(Gfx &g, float t) {
 // ---------- Einstellungen (fuer Eltern) ----------
 static void einstellungenBild(Gfx &g, float t) {
   buchRahmenOffen(g, t);
-  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_LESEN : einstPos == 3 ? SEITE_ZEIT : einstPos == 4 ? SEITE_WLAN : auswahl, t);
+  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_HELL : einstPos == 3 ? SEITE_LESEN : einstPos == 4 ? SEITE_ZEIT : einstPos == 5 ? SEITE_WLAN : auswahl, t);
   seitenGrund(g, false);
   const float cx = MITTE + BW / 2;
   g.text(SCHRIFT_B, "Für Eltern", cx, 50, TINTE, 1);
@@ -881,16 +897,16 @@ static void einstellungenBild(Gfx &g, float t) {
   else if (zeitAn) snprintf(zeitZeile, sizeof zeitZeile, "Zeit: %s-%s", v, b);
   else snprintf(zeitZeile, sizeof zeitZeile, "Zeit: immer");
   const char *namen[EINST_PUNKTE] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze],
-                                     LESE_TEXT[lesen], zeitZeile, "WLAN einrichten", "Zurück zum Buch"};
+                                     HELL_TEXT[hell], LESE_TEXT[lesen], zeitZeile, "WLAN einrichten", "Zurück zum Buch"};
   for (int i = 0; i < EINST_PUNKTE; i++) {
-    float y = 61 + i * 22;
+    float y = 57 + i * 20;
     bool an = i == einstPos;
     if (an) g.kontur(2, GOLD_D);
-    bool bearbeiten = an && i == 3 && zeitFeld >= 0;
+    bool bearbeiten = an && i == 4 && zeitFeld >= 0;
     if (bearbeiten) g.kontur(2.4f, LEDER);
-    g.rundRechteck(MITTE + 5, y, BW - 10, 19, 7, bearbeiten ? WEISS : an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
+    g.rundRechteck(MITTE + 5, y, BW - 10, 18, 7, bearbeiten ? WEISS : an ? FARBE(0xFFF7E6) : FARBE(0xF1E2C2));
     g.konturAus();
-    g.text(SCHRIFT_K, namen[i], cx, y + 14.5f, an ? TINTE : FARBE(0x9A7650), 1);
+    g.text(SCHRIFT_K, namen[i], cx, y + 14, an ? TINTE : FARBE(0x9A7650), 1);
   }
   g.text(SCHRIFT_K, zeitFeld >= 0 ? "+/- und Start" : "Start: auswählen", cx, 211, FARBE(0x9A7650), 1);
 }
@@ -1485,13 +1501,19 @@ static void ereignis(Ereignis e, int laut) {
         setzeLautstaerke(false);
         uiKlang = 3;
       }
-      else if (einstPos == 2) {  // Lesetempo der Sprechblasen weiterschalten
+      else if (einstPos == 2) {  // Helligkeit weiterschalten
+        hell = (hell + 1) % HELL_STUFEN;
+        lcd::helligkeit(HELL_PWM[hell]);
+        prefs.begin("box", false); prefs.putInt("hell", hell); prefs.end();
+        uiKlang = 3;
+      }
+      else if (einstPos == 3) {  // Lesetempo der Sprechblasen weiterschalten
         lesen = (lesen + 1) % LESEN_STUFEN;
         prefs.begin("box", false); prefs.putInt("lesen", lesen); prefs.end();
         uiKlang = 3;
       }
-      else if (einstPos == 3) { zeitFeld = 0; uiKlang = 3; }
-      else if (einstPos == 4) einrichtungStarten();
+      else if (einstPos == 4) { zeitFeld = 0; uiKlang = 3; }
+      else if (einstPos == 5) einrichtungStarten();
       else buchOeffnen();
     }
     if (e == LANG) buchOeffnen();
@@ -1553,6 +1575,7 @@ void setup() {
   lautstaerke = prefs.getInt("laut", 7);
   grenze = constrain(prefs.getInt("grenze", 1), 0, GRENZEN - 1);
   lesen = constrain(prefs.getInt("lesen", 1), 0, LESEN_STUFEN - 1);
+  hell = constrain(prefs.getInt("hell", 1), 0, HELL_STUFEN - 1);
   zeitAn = prefs.getBool("zeitAn", true);
   vonMin = constrain(prefs.getInt("von", 6 * 60), 0, 1439);
   bisMin = constrain(prefs.getInt("bis", 19 * 60), 0, 1439);
@@ -1561,6 +1584,7 @@ void setup() {
   prefs.end();
   setzeLautstaerke(false);
   lcd::drehen(gedreht);
+  lcd::helligkeit(HELL_PWM[hell]);
   tastenBelegen();
   pinMode(PIN_LADEN, INPUT_PULLUP);  // Ladeanzeige des Ladereglers ist open-drain: zieht nur beim Laden auf LOW
   analogSetPinAttenuation(PIN_AKKU, ADC_11db);
