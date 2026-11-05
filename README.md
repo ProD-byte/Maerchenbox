@@ -130,6 +130,23 @@ Nach dem Märchen von Charles Perrault („Cendrillon“), mit Patin, Kürbis un
 | 3:12 | Die Schuhprobe: zu klein für die Schwestern; „Hier ist das andere!“ |
 | 4:16 | Sie verzeiht den Schwestern; Hochzeit |
 
+## Max und Moritz (gut 6 Minuten)
+
+Nach Wilhelm Busch, als Bildergeschichte: oben stehen die Verse wie in einem Bilderbuch (meist im Original,
+ein paar Überleitungen frei im Busch-Ton), dazu Sprechblasen. Die harten Stellen sind nur angedeutet.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Vorwort: „Ach, was muss man oft von bösen Kindern hören oder lesen!“ |
+| 0:24 | 1. Streich: Witwe Boltes Hühner, Brot an Fäden, „Kikeriki!“, „Fließet aus dem Aug', ihr Tränen!“ |
+| 1:16 | 2. Streich: die Hühner durch den Schornstein geangelt, der Spitz bekommt die Schuld |
+| 2:02 | 3. Streich: Schneider Böck – „Meck, meck, meck!“, „Kracks! Die Brücke bricht in Stücke“, die Gänse, das Bügeleisen |
+| 2:52 | 4. Streich: Lehrer Lämpel und die Pfeife – „Rums!!“ |
+| 3:38 | 5. Streich: Onkel Fritz und die Maikäfer – „Guckste wohl, jetzt ist's vorbei mit der Käferkrabbelei!“ |
+| 4:22 | 6. Streich: beim Bäcker – Mehl, Teig, „Ruff!!“ ins Ofenloch, „Knusper, knasper!“ |
+| 5:12 | 7. Streich: Bauer Mecke, der Sack, „Rickeracke! Geht die Mühle mit Geknacke“, Meister Müllers Federvieh |
+| 6:02 | Schluss: „Gott sei Dank! Nun ist's vorbei mit der Übeltäterei!!“ |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -216,6 +233,7 @@ pio run -e ostb2st -t upload
 - `src/rapunzel.cpp` – Rapunzel
 - `src/schneewittchen.cpp` – Schneewittchen
 - `src/cinderella.cpp` – Cinderella (nach Perrault)
+- `src/maxmoritz.cpp` – Max und Moritz (nach Wilhelm Busch)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
 Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `figuren.h`), in `maerchen.h` bekannt machen und in `LISTE` in `src/main.cpp` eintragen.

@@ -31,3 +31,4 @@ extern const Maerchen GEISSLEIN;
 extern const Maerchen RAPUNZEL_M;
 extern const Maerchen SCHNEEWITTCHEN;
 extern const Maerchen CINDERELLA;
+extern const Maerchen MAXMORITZ;
