@@ -251,10 +251,17 @@ Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `fig
 | Ladestatus (LOW = lädt) | 47 |
 | Akkuspannung (ADC2 Kanal 6, Teiler 1:2) | 17 |
 
+## Speicher
+
+Zwei Programmplätze zu je 7,9 MB (`partitionen.csv`), damit Updates über WLAN gehen; die Märchen sind Programmcode
+und brauchen je etwa 30–50 KB, da passen weit über hundert. Die Einstellungen (`nvs`) liegen getrennt und bleiben bei
+jedem Update erhalten. Eine neue Speicheraufteilung geht nur per USB: `pio run -e ostb2st -t upload`.
+
 ## Ältere Version
 
 `aufnahme/`, `werkzeuge/mach_maerchen.py` und `werkzeuge/maerchen_hochladen.py` gehören zur
-früheren Version, die die aufgenommene Märchenbox abgespielt hat. Sie werden nicht mehr gebraucht.
+früheren Version, die die aufgenommene Märchenbox abgespielt hat. Sie werden nicht mehr gebraucht (der Bereich
+dafür ist seit 2026-11-05 aus der Speicheraufteilung entfernt).
 
 ## Zurück zu Xiaozhi
 
