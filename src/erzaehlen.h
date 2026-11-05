@@ -6,6 +6,7 @@
 #include "figuren.h"
 #include "melodien.h"
 #include <initializer_list>
+#include <stdio.h>
 
 // 0..1..0: geht bei a federnd auf, bei b wieder zu
 static inline float aufzu(float u, float a, float b) { return federnd(seg(u, a, a + 0.4f)) * (1 - seg(u, b - 0.3f, b)); }

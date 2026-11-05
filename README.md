@@ -206,6 +206,21 @@ Nach dem Märchen der Brüder Grimm, der Ofen ist nur angedeutet.
 | 3:10 | „Hänsel, wir sind erlöst!“ – Perlen und Edelsteine – „Entchen, Entchen …“ |
 | 3:46 | Heim zum Vater; „Mein Märchen ist aus, dort lauft eine Maus …“ |
 
+## Dornröschen (gut 4 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der Frosch im Bad: „Ehe ein Jahr vergeht, wirst du eine Tochter zur Welt bringen.“ |
+| 0:24 | Das Fest, die zwölf weisen Frauen mit ihren Gaben, der Fluch der dreizehnten, der hundertjährige Schlaf |
+| 1:06 | Alle Spindeln im Königreich werden verbrannt |
+| 1:20 | Der fünfzehnte Geburtstag: „Guten Tag, du altes Mütterchen“ – die Spindel |
+| 2:02 | Das ganze Schloss schläft: Koch und Küchenjunge, die Fliegen, Pferde und Tauben, der Wind |
+| 2:36 | Die Dornenhecke wächst, hundert Jahre; Königssöhne kommen nicht hindurch |
+| 3:10 | Die Hecke blüht und tut sich auf; der Kuss |
+| 3:54 | Alles erwacht – der Koch gibt die Ohrfeige; Hochzeit |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -297,6 +312,7 @@ pio run -e ostb2st -t upload
 - `src/bremen.cpp` – Die Bremer Stadtmusikanten
 - `src/frauholle.cpp` – Frau Holle
 - `src/haensel.cpp` – Hänsel und Gretel
+- `src/dornroeschen.cpp` – Dornröschen
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
