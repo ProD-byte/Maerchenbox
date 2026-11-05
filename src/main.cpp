@@ -1506,7 +1506,7 @@ void setup() {
   setzeLautstaerke(false);
   lcd::drehen(gedreht);
   tastenBelegen();
-  pinMode(PIN_LADEN, INPUT);
+  pinMode(PIN_LADEN, INPUT_PULLUP);  // Ladeanzeige des Ladereglers ist open-drain: zieht nur beim Laden auf LOW
   analogSetPinAttenuation(PIN_AKKU, ADC_11db);
   akkuMessen();
   synth.start();
