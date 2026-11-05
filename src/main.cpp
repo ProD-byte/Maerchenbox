@@ -887,7 +887,7 @@ static void einstellungenBild(Gfx &g, float t) {
 static void akkuAnzeige(Gfx &g, float t, bool mitText) {
   int p = akkuProzent();
   if (p < 0) return;
-  const float x = 250, y = 2.5f, w = 22, h = 10;
+  const float x = 236, y = 6.5f, w = 22, h = 10;  // etwas eingerueckt: das Display hat runde Ecken
   bool leer = p <= 10 && !akkuLaedt;
   Farbe c = leer ? FARBE(0xFF5A4A) : p <= 25 ? FARBE(0xFFC23D) : FARBE(0x7CDB6A);
   uint8_t a = leer ? (uint8_t)(150 + 105 * fabsf(sinf(t * 3))) : 255;
@@ -1131,6 +1131,7 @@ static void sendeBildschirmfoto() {
   int altAuswahl = auswahl;
   if (server.hasArg("m")) auswahl = constrain(server.arg("m").toInt(), 0, ANZAHL - 1);
   if (mitZeit) zustand = SPIELT;
+  if (server.hasArg("z")) zustand = (Zustand)constrain(server.arg("z").toInt(), 0, (int)SCHLAF);  // nur fuers Foto
   uint16_t *tmp = fotoPuffer;
   static uint8_t zeile[lcd::W * 3];
   const uint32_t groesse = 54 + lcd::W * 3 * lcd::H;
