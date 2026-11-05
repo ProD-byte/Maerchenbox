@@ -147,6 +147,20 @@ ein paar Überleitungen frei im Busch-Ton), dazu Sprechblasen. Die harten Stelle
 | 5:12 | 7. Streich: Bauer Mecke, der Sack, „Rickeracke! Geht die Mühle mit Geknacke“, Meister Müllers Federvieh |
 | 6:02 | Schluss: „Gott sei Dank! Nun ist's vorbei mit der Übeltäterei!!“ |
 
+## Rotkäppchen (knapp 5 Minuten)
+
+Nach dem Märchen der Brüder Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Das Käppchen von rotem Samt; Kuchen und Wein: „Lauf nicht vom Weg ab!“ |
+| 0:32 | Im Wald: „Guten Tag, Rotkäppchen.“ – „Unter den drei großen Eichbäumen …“ – „Sieh einmal die schönen Blumen!“ |
+| 1:20 | Rotkäppchen pflückt Blumen, der Wolf läuft zur Großmutter |
+| 1:44 | „Drück nur auf die Klinke“ – nur angedeutet |
+| 2:14 | „Ei, Großmutter, was hast du für große Ohren!“ … Augen, Hände, Maul – „Happ!“ |
+| 3:16 | Der Jäger: „Finde ich dich hier, du alter Sünder!“ – „Wie war's so dunkel in dem Wolf seinem Leib!“ – Wackersteine |
+| 4:12 | Kuchen und Wein zu dritt: „Du willst dein Lebtag nicht wieder allein vom Wege ab …“ |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -234,6 +248,8 @@ pio run -e ostb2st -t upload
 - `src/schneewittchen.cpp` – Schneewittchen
 - `src/cinderella.cpp` – Cinderella (nach Perrault)
 - `src/maxmoritz.cpp` – Max und Moritz (nach Wilhelm Busch)
+- `src/rotkaeppchen.cpp` – Rotkäppchen
+- `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
 Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `figuren.h`), in `maerchen.h` bekannt machen und in `LISTE` in `src/main.cpp` eintragen.

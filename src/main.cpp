@@ -43,7 +43,7 @@ constexpr int TASTE_A = 39, TASTE_B = 0, TASTE_C = 40;  // die drei Knoepfe (GPI
 constexpr uint8_t ES8311_ADDR = 0x18;
 
 // ---------- Maerchen ----------
-static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN, &ASCHENPUTTEL, &ROSENROT, &GEISSLEIN, &RAPUNZEL_M, &SCHNEEWITTCHEN, &CINDERELLA, &MAXMORITZ};
+static const Maerchen *const LISTE[] = {&SCHNEIDERLEIN, &FUERCHTEN, &ASCHENPUTTEL, &ROSENROT, &GEISSLEIN, &RAPUNZEL_M, &SCHNEEWITTCHEN, &CINDERELLA, &MAXMORITZ, &ROTKAEPPCHEN};
 constexpr int ANZAHL = sizeof(LISTE) / sizeof(LISTE[0]);
 
 // ---------- Zustand ----------
@@ -796,10 +796,18 @@ static void rechteSeite(Gfx &g, int seite, float t) {
     startKnopf(g, cx, 196, t, 11);
   }
   // Seitenpunkte
-  for (int i = 0; i < SEITEN; i++) {
-    float px = cx + (i - (SEITEN - 1) / 2.0f) * 10;
-    if (i == seite) g.stern(px, 215, 4.2f, 1.8f, 5, -1.5708f, GOLD_D);
-    else g.kreis(px, 215, 1.8f, PAPIER_D);
+  if (SEITEN <= 12) {
+    for (int i = 0; i < SEITEN; i++) {
+      float px = cx + (i - (SEITEN - 1) / 2.0f) * 10;
+      if (i == seite) g.stern(px, 215, 4.2f, 1.8f, 5, -1.5708f, GOLD_D);
+      else g.kreis(px, 215, 1.8f, PAPIER_D);
+    }
+  } else if (seite < ANZAHL) {  // viele Maerchen: "3 / 20" mit Sternchen
+    char b[12];
+    snprintf(b, sizeof b, "%d / %d", seite + 1, SEITEN);
+    g.text(SCHRIFT_K, b, cx, 219, FARBE(0xB8A078), 1);
+    g.stern(cx - 26, 214, 3, 1.2f, 5, -1.5708f, GOLD_D);
+    g.stern(cx + 26, 214, 3, 1.2f, 5, -1.5708f, GOLD_D);
   }
 }
 
