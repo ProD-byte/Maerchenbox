@@ -41,3 +41,5 @@ extern const Maerchen FROSCHKOENIG;
 extern const Maerchen HASE_IGEL;
 extern const Maerchen STERNTALER;
 extern const Maerchen SUESSERBREI;
+extern const Maerchen ENTLEIN;
+extern const Maerchen ERBSE;

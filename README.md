@@ -269,6 +269,31 @@ Nach dem Märchen der Brüder Grimm.
 | 0:52 | Die Mutter vergisst das Wort: der Brei füllt Küche, Haus und Straße |
 | 1:40 | „Töpfchen, steh!“ – wer in die Stadt will, muss sich durchessen |
 
+## Das hässliche Entlein (gut 3 Minuten)
+
+Nach dem Märchen von Hans Christian Andersen.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Pip, pip! – zuletzt platzt das große Ei: „Das ist ja ein entsetzlich großes Entlein!“ |
+| 0:34 | Auf dem Entenhof wird es von allen gepickt und ausgelacht |
+| 1:02 | Im Moor bei den wilden Enten: „… dass mich sogar der Hund nicht mag!“ |
+| 1:32 | Bei der alten Frau: „Kannst du Eier legen?“ – „Kannst du einen Buckel machen?“ |
+| 2:00 | Die Schwäne ziehen fort; der kalte Winter, das Eis |
+| 2:32 | Im Frühling: das Bild im Wasser – ein Schwan! „Der neue ist der schönste!“ |
+
+## Die Prinzessin auf der Erbse (gut 2 Minuten)
+
+Nach dem Märchen von Hans Christian Andersen.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der Prinz sucht in der ganzen Welt eine wirkliche Prinzessin |
+| 0:28 | Das Gewitter; die triefnasse Prinzessin am Stadttor |
+| 0:56 | Die Erbse, zwanzig Matratzen und zwanzig Eiderdaunenbetten |
+| 1:26 | Die ganze Nacht kein Auge zugetan |
+| 1:46 | „… dass ich ganz braun und blau bin!“ – Hochzeit; die Erbse in der Kunstkammer |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -365,6 +390,8 @@ pio run -e ostb2st -t upload
 - `src/haseigel.cpp` – Der Hase und der Igel
 - `src/sterntaler.cpp` – Die Sterntaler
 - `src/suessebrei.cpp` – Der süße Brei
+- `src/entlein.cpp` – Das hässliche Entlein (Andersen)
+- `src/erbse.cpp` – Die Prinzessin auf der Erbse (Andersen)
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
