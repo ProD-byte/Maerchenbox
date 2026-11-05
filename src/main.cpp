@@ -122,6 +122,38 @@ static bool nutzungErlaubt() {
   return m >= vonMin || m < bisMin;  // ueber Mitternacht
 }
 static void zeitText(char *b, int n, int m) { snprintf(b, n, "%02d:%02d", m / 60, m % 60); }
+
+// ---------- Akku ----------
+constexpr int PIN_AKKU = 17;   // Akkuspannung ueber Spannungsteiler 1:2 (ADC2 Kanal 6)
+constexpr int PIN_LADEN = 47;  // Ladestatus
+float akkuMv = 0;              // geglaettet, 0 = noch kein Messwert
+int akkuRohMv = 0, ladenRoh = -1;
+bool akkuLaedt = false;
+constexpr bool LADEN_BEI_LOW = true;  // Ladeanzeige-Pin des Laderegler-ICs ist meist "low = laedt"
+static void akkuMessen() {
+  int summe = 0, n = 0;
+  for (int i = 0; i < 8; i++) {
+    int mv = analogReadMilliVolts(PIN_AKKU);  // ADC2 kann waehrend WLAN-Betrieb ausfallen: 0 verwerfen
+    if (mv > 300) { summe += mv; n++; }
+  }
+  if (n) {
+    akkuRohMv = summe / n;
+    float v = akkuRohMv * 2.0f;
+    akkuMv = akkuMv <= 0 ? v : akkuMv * 0.85f + v * 0.15f;
+  }
+  ladenRoh = digitalRead(PIN_LADEN);
+  akkuLaedt = LADEN_BEI_LOW ? ladenRoh == LOW : ladenRoh == HIGH;
+}
+// Ladezustand in Prozent aus der Spannung (Li-Ion-Kurve, grob)
+static int akkuProzent() {
+  static const float V[] = {3400, 3500, 3650, 3750, 3850, 4000, 4150};
+  static const float P[] = {0, 5, 20, 40, 60, 80, 100};
+  if (akkuMv <= 0) return -1;
+  if (akkuMv <= V[0]) return 0;
+  for (int i = 1; i < 7; i++)
+    if (akkuMv < V[i]) return (int)(P[i - 1] + (P[i] - P[i - 1]) * (akkuMv - V[i - 1]) / (V[i] - V[i - 1]));
+  return 100;
+}
 volatile uint32_t audioZeitUs = 0;  // wann das war
 constexpr int BLOCK = 256;
 constexpr float LATENZ = 8 * 256 / (float)Synth::RATE;  // DMA-Puffer zwischen Erzeugen und Hoeren
@@ -851,6 +883,34 @@ static void einstellungenBild(Gfx &g, float t) {
   g.text(SCHRIFT_K, zeitFeld >= 0 ? "+/- und Start" : "Start: auswählen", cx, 211, FARBE(0x9A7650), 1);
 }
 
+// kleines Akkusymbol oben rechts; bei fast leer rot und "Bitte aufladen"
+static void akkuAnzeige(Gfx &g, float t, bool mitText) {
+  int p = akkuProzent();
+  if (p < 0) return;
+  const float x = 250, y = 2.5f, w = 22, h = 10;
+  bool leer = p <= 10 && !akkuLaedt;
+  Farbe c = leer ? FARBE(0xFF5A4A) : p <= 25 ? FARBE(0xFFC23D) : FARBE(0x7CDB6A);
+  uint8_t a = leer ? (uint8_t)(150 + 105 * fabsf(sinf(t * 3))) : 255;
+  g.rundRechteck(x - 1, y - 1, w + 2, h + 2, 3, FARBE(0x10102A), 170);
+  g.kontur(1.2f, WEISS);
+  g.rundRechteck(x, y, w, h, 2.5f, FARBE(0x10102A));
+  g.konturAus();
+  g.rechteck(x + w + 0.5f, y + 3, 2, 4, WEISS);
+  float f = (w - 4) * (p < 6 ? 0.06f : p / 100.0f);
+  g.rundRechteck(x + 2, y + 2, f, h - 4, 1.5f, c, a);
+  if (akkuLaedt) {  // Blitz
+    float b[] = {x + 12, y + 0.5f, x + 7.5f, y + 5.8f, x + 10.5f, y + 5.8f, x + 9.5f, y + 9.5f, x + 14.5f, y + 4.2f, x + 11.5f, y + 4.2f};
+    g.polygon(b, 6, GOLD);
+  }
+  if (mitText) {
+    char s[32];
+    snprintf(s, sizeof s, "%d %%  %.2f V", p, akkuMv / 1000.0f);
+    g.text(SCHRIFT_K, s, x - 4, y + 10, WEISS, 2);
+  } else if (leer) {
+    g.text(SCHRIFT_K, "Bitte aufladen", x - 4, y + 10, FARBE(0xFFB0A0), 2, a);
+  }
+}
+
 // Gute Nacht: Mond, Sterne, das geschlossene Buch schlaeft
 uint32_t schlafSeit = 0;
 static void schlafBild(Gfx &g, float t) {
@@ -938,6 +998,7 @@ static void zeichneInhalt(Gfx &g, float t, float uhr) {
   g.ausschnittAus();
   g.konturAus();
   if (zustand == SPIELT || zustand == TITEL) lautAnzeige(g);
+  if (zustand == MENUE || zustand == TITEL || zustand == EINSTELLUNGEN) akkuAnzeige(g, uhr, zustand == EINSTELLUNGEN);
   if (zustand != EINSTELLUNGEN && zustand != EINRICHTUNG && zustand != UPDATE && zustand != SCHLAF) kombiAnzeige(g);
 }
 
@@ -1178,9 +1239,10 @@ static void heimnetzServer() {
     char s[520], uz[8] = "--:--";
     int um = uhrMinuten();
     if (um >= 0) zeitText(uz, sizeof uz, um);
-    snprintf(s, sizeof s, "{\"zustand\":%d,\"maerchen\":%d,\"t\":%.2f,\"fps\":%.1f,\"zeichnenMs\":%.1f,\"wartenMs\":%.1f,\"laut\":%d,\"heap\":%u,\"uhr\":\"%s\",\"erlaubt\":%d,\"tasten\":\"%s\"}",
+    snprintf(s, sizeof s, "{\"zustand\":%d,\"maerchen\":%d,\"t\":%.2f,\"fps\":%.1f,\"zeichnenMs\":%.1f,\"wartenMs\":%.1f,\"laut\":%d,\"heap\":%u,\"uhr\":\"%s\",\"erlaubt\":%d,\"akkuMv\":%.0f,\"akkuRohMv\":%d,\"akkuProzent\":%d,\"ladePin\":%d,\"tasten\":\"%s\"}",
              (int)zustand, auswahl, zustand == SPIELT ? hoerZeit() : 0.0f, fps, zeichenUs / 1000.0f, wartUs / 1000.0f,
-             lautstaerke, ESP.getFreeHeap(), uz, nutzungErlaubt() ? 1 : 0, protokoll.c_str());
+             lautstaerke, ESP.getFreeHeap(), uz, nutzungErlaubt() ? 1 : 0, akkuMv, akkuRohMv, akkuProzent(), ladenRoh,
+             protokoll.c_str());
     server.send(200, "application/json", s);
   });
   if (!serverLaeuft) { server.begin(); serverLaeuft = true; }
@@ -1443,6 +1505,9 @@ void setup() {
   setzeLautstaerke(false);
   lcd::drehen(gedreht);
   tastenBelegen();
+  pinMode(PIN_LADEN, INPUT);
+  analogSetPinAttenuation(PIN_AKKU, ADC_11db);
+  akkuMessen();
   synth.start();
   xTaskCreatePinnedToCore(audioTask, "audio", 6144, nullptr, 5, nullptr, 0);
 
@@ -1499,6 +1564,8 @@ void loop() {
   if (zustand == MENUE && millis() - zustandSeit > 60000 && millis() - letzteTaste > 60000) wechsle(TITEL);
   if (zustand == EINSTELLUNGEN && millis() - zustandSeit > 60000 && millis() - letzteTaste > 60000) { zeitFeld = -1; buchOeffnen(); }
   // Nutzungszeit: ein laufendes Maerchen darf zu Ende gehen, dann Gute Nacht
+  static uint32_t akkuGemessen = 0;
+  if (millis() - akkuGemessen > 2000) { akkuGemessen = millis(); akkuMessen(); }
   static uint32_t zeitGeprueft = 0;
   if (millis() - zeitGeprueft > 1000) {
     zeitGeprueft = millis();

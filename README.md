@@ -171,6 +171,11 @@ Zeit darf ein laufendes Märchen zu Ende gehen, dann kommt „Gute Nacht!“ mit
 aus. Wecken: Lauter + Leiser 3 Sekunden halten – dann bleibt sie eine Stunde wach. In der erlaubten Zeit weckt jede
 Taste. Das WLAN bleibt im Schlaf an, damit Updates gehen.
 
+**Akku:** oben rechts im Buch und auf dem Startbild (grün, ab 25 % gelb, ab 10 % rot mit „Bitte aufladen“,
+goldener Blitz beim Laden), im Elternmenü mit Prozent und Volt. Gemessen an GPIO17 über Spannungsteiler 1:2,
+Ladepin GPIO47 ist beim Laden LOW. Die Prozente kommen grob aus der Spannung (3,4 V = leer, 4,15 V = voll); beim
+Laden liegt die Spannung etwas höher.
+
 ## Updates über WLAN
 
 ```bash
@@ -221,8 +226,8 @@ Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `fig
 | Display NV3023 (284 × 240, x-Versatz 36): SCLK / MOSI / CS / DC / Reset | 9 / 10 / 14 / 8 / 18 |
 | Hintergrundbeleuchtung | 13 |
 | Knöpfe (siehe Belegung oben) | 39 / 0 / 40 |
-| Ladestatus | 47 |
-| Akkuspannung (ADC2 Kanal 6) | 17 |
+| Ladestatus (LOW = lädt) | 47 |
+| Akkuspannung (ADC2 Kanal 6, Teiler 1:2) | 17 |
 
 ## Ältere Version
 
