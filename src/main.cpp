@@ -78,6 +78,11 @@ volatile uint8_t uiKlang = 0;  // 1 = umblaettern, 2 = aufklappen, 3 = los
 int lautstaerke = 7;        // 0..10
 constexpr int MAXLAUT = 10;
 uint32_t lautGezeigt = 0;   // wann die Lautstaerke zuletzt geaendert wurde (Anzeige)
+uint32_t flugIns = 0;       // Start des Flugs vom Cover in den Film (0 = keiner)
+uint32_t flugZurueck = 0;   // Start des Flugs vom Film zurueck ins Cover
+constexpr uint32_t FLUG_MS = 750;
+float coverWX = 28, coverWY = 90, coverWW = 95, coverWH = 100;  // Bildfenster des Covers (zuletzt gezeichnet)
+uint32_t tasteOben = 0, tasteMitte = 0, tasteUnten = 0;          // wann zuletzt gedrueckt (Leuchten am Rand)
 uint32_t letzteTaste = 0;
 uint32_t zustandSeit = 0;
 int updateProzent = -1;
@@ -646,6 +651,7 @@ static void cover(Gfx &g, const Maerchen *m, float t) {
   g.linie(cx + 7, ly, cx + 30, ly, 1, GOLD_D);
   // Bild im Bogenfenster
   float wx = x + 12, ww = w - 29, wy = ly + 9, wh = y + h - 30 - wy;
+  coverWX = wx; coverWY = wy; coverWW = ww; coverWH = wh;
   float zm = fmaxf(wh / 240.0f, ww / 284.0f);
   float ox = wx + ww / 2 - 142 * zm, oy = wy + wh - 240 * zm;
   g.ansicht(ox, oy, zm);
@@ -976,6 +982,71 @@ static void akkuAnzeige(Gfx &g, float t, bool mitText) {
   }
 }
 
+// leuchtende Zeichen neben den drei echten Knoepfen (oben Lauter, Mitte Start, unten Leiser)
+static void tastenHinweise(Gfx &g, float t) {
+  if (zustand != MENUE && zustand != TITEL) return;
+  if (zustand == MENUE && (buchAuf || blattSeit)) return;
+  float x = gedreht ? 9 : 275;  // bei gedrehtem Bild sitzen die Knoepfe links
+  const float ys[3] = {52, 120, 188};
+  uint32_t jetzt = millis(), zeiten[3] = {tasteOben, tasteMitte, tasteUnten};
+  for (int i = 0; i < 3; i++) {
+    float leucht = zeiten[i] ? 1 - klemme((jetzt - zeiten[i]) / 450.0f) : 0;
+    float y = ys[i];
+    float r = 9 + leucht * 3;
+    g.kreis(x, y, r + 5, GOLD, (uint8_t)(40 + 120 * leucht));
+    g.kontur(1, FARBE(0xB8862B));
+    g.kreis(x, y, r, FARBE(0x1E1A3A), 210);
+    g.konturAus();
+    Farbe c = mischeFarbe(FARBE(0xF2D98A), WEISS, leucht);
+    if (i == 1) {  // Start: Stern im Buch, Dreieck auf dem Startbild
+      if (zustand == MENUE) g.stern(x, y, 6, 2.6f, 5, -1.5708f + sinf(t * 2) * 0.1f, c);
+      else { float tri[] = {x - 3, y - 5, x - 3, y + 5, x + 5, y}; g.polygon(tri, 3, c); }
+    } else if (zustand == MENUE) {  // umblaettern
+      float s = i == 0 ? -1 : 1;
+      float tri[] = {x - 5, y - 2.5f * s, x + 5, y - 2.5f * s, x, y + 4 * s};
+      g.polygon(tri, 3, c);
+    } else {  // lauter / leiser
+      g.rechteck(x - 4.5f, y - 1, 9, 2, c);
+      if (i == 0) g.rechteck(x - 1, y - 4.5f, 2, 9, c);
+    }
+  }
+}
+
+// Flug zwischen Cover und ganzem Bild: k = 0 im Cover, 1 bildschirmfuellend
+static void flugBild(Gfx &g, float uhr, float k) {
+  const Maerchen *m = LISTE[auswahl];
+  float rx = lerp(coverWX, 0, k), ry = lerp(coverWY, 0, k), rw = lerp(coverWW, 284, k), rh = lerp(coverWH, 240, k);
+  float zm = fmaxf(rh / 240.0f, rw / 284.0f);
+  float ox = rx + rw / 2 - 142 * zm, oy = ry + rh - 240 * zm;
+  g.rundRechteck(rx - 3, ry - 3, rw + 6, rh + 6, 8 * (1 - k) + 1, GOLD, (uint8_t)(255 * (1 - k * 0.8f)));
+  g.ansicht(ox, oy, zm);
+  g.ausschnitt((rx - ox) / zm, (ry - oy) / zm, rw / zm, rh / zm);
+  m->vorschau(g, uhr);
+  g.ausschnittAus();
+  g.kameraAus();
+  for (int i = 0; i < 8; i++) {  // Zauberstaub fliegt mit
+    float a = i * 0.785f + uhr * 2;
+    float px = rx + rw / 2 + cosf(a) * (rw / 2 + 6), py = ry + rh / 2 + sinf(a) * (rh / 2 + 6);
+    g.stern(px, py, 4, 1.6f, 4, a, i & 1 ? GOLD : WEISS, (uint8_t)(220 * huepf(k)));
+  }
+}
+
+// Startbild fuer alle Maerchen: helle Bildunterschrift mit Titel und goldenem Siegel
+static void startBild(Gfx &g, float uhr) {
+  const Maerchen *m = LISTE[auswahl];
+  m->vorschau(g, uhr);
+  g.kameraAus();
+  const Schrift *sch = &SCHRIFT_B;
+  if (g.textBreite(SCHRIFT_B, m->titel) > 196) sch = &SCHRIFT_K;
+  float y = 190, h = 40;
+  g.rundRechteck(10, y + 2, 264, h, 14, FARBE(0x000000), 60);
+  g.kontur(1.2f, FARBE(0xB8862B));
+  g.rundRechteck(10, y, 264, h, 14, PAPIER, 235);
+  g.konturAus();
+  startKnopf(g, 34, y + h / 2, uhr, 12);
+  g.text(*sch, m->titel, 160, y + h / 2 + (sch == &SCHRIFT_B ? 6 : 5), TINTE, 1);
+}
+
 // Gute Nacht: Mond, Sterne, das geschlossene Buch schlaeft
 uint32_t schlafSeit = 0;
 static void schlafBild(Gfx &g, float t) {
@@ -1061,15 +1132,31 @@ static void pauseAnzeige(Gfx &g, float uhr) {
 
 static void lautAnzeige(Gfx &g) {
   uint32_t seit = millis() - lautGezeigt;
-  if (lautGezeigt == 0 || seit > 1500) return;
-  uint8_t a = seit > 1200 ? (uint8_t)(255 * (1500 - seit) / 300) : 255;
-  g.rundRechteck(52, 196, 180, 30, 15, DUNKEL, (uint8_t)(a * 0.85f));
-  // Lautsprecher
-  float l[] = {66, 206, 72, 206, 80, 200, 80, 222, 72, 216, 66, 216};
+  if (lautGezeigt == 0 || seit > 1700) return;
+  // gleitet von unten herein und wieder hinaus
+  float rein = sanft(seg(seit, 0, 220)), raus = sanft(seg(seit, 1400, 1700));
+  float dy = (1 - rein) * 50 + raus * 50;
+  uint8_t a = (uint8_t)(255 * (1 - raus));
+  float x = 46, y = 188 + dy, w = 192, h = 38;
+  g.rundRechteck(x, y + 2, w, h, 19, FARBE(0x000000), (uint8_t)(a * 0.25f));  // weicher Schatten
+  g.kontur(1.2f, FARBE(0x6E5A8E));
+  g.rundRechteck(x, y, w, h, 19, FARBE(0x1E1A3A), (uint8_t)(a * 0.92f));
+  g.konturAus();
+  // Lautsprecher mit Schallwellen, so viele wie laut
+  float lx = x + 22, ly = y + h / 2;
+  float l[] = {lx - 8, ly - 5, lx - 3, ly - 5, lx + 4, ly - 11, lx + 4, ly + 11, lx - 3, ly + 5, lx - 8, ly + 5};
   g.polygon(l, 6, WEISS, a);
+  int wellen = lautstaerke == 0 ? 0 : lautstaerke < 4 ? 1 : lautstaerke < 8 ? 2 : 3;
+  float puls = 0.5f + 0.5f * sinf(millis() / 120.0f);
+  for (int i = 0; i < wellen; i++)
+    g.bogen(lx + 4, ly, 6 + i * 5, -0.8f, 0.8f, 1.8f, GOLD, (uint8_t)(a * (0.6f + 0.4f * puls)));
+  if (lautstaerke == 0) { g.linie(lx + 8, ly - 6, lx + 16, ly + 6, 2, FARBE(0xFF8A7A), a); g.linie(lx + 16, ly - 6, lx + 8, ly + 6, 2, FARBE(0xFF8A7A), a); }
+  // Stufen als runde Perlen, die aktuelle groesser
   for (int i = 0; i < MAXLAUT; i++) {
-    float h = 6 + i * 1.4f;
-    g.rundRechteck(92 + i * 13, 219 - h, 9, h, 3, i < lautstaerke ? GOLD : FARBE(0x6B5A50), a);
+    float px = x + 60 + i * 13, py = ly;
+    bool an = i < lautstaerke;
+    float r = an ? (i == lautstaerke - 1 ? 5.2f : 4) : 2.6f;
+    g.kreis(px, py, r, an ? mischeFarbe(FARBE(0xFFE070), FARBE(0xFF9A3A), i / 9.0f) : FARBE(0x4A4466), a);
   }
 }
 
@@ -1077,9 +1164,15 @@ static void lautAnzeige(Gfx &g) {
 static void zeichneInhalt(Gfx &g, float t, float uhr) {
   const Maerchen *m = LISTE[auswahl];
   switch (zustand) {
-    case SPIELT: m->bild(g, t); break;
-    case TITEL: m->titelbild(g, uhr); break;
-    case MENUE: buchBild(g, uhr); break;
+    case SPIELT:
+      if (flugIns && bildMs - flugIns < FLUG_MS) { buchBild(g, uhr); flugBild(g, uhr, sanft((bildMs - flugIns) / (float)FLUG_MS)); }
+      else m->bild(g, t);
+      break;
+    case TITEL: startBild(g, uhr); break;
+    case MENUE:
+      buchBild(g, uhr);
+      if (flugZurueck && bildMs - flugZurueck < FLUG_MS) flugBild(g, uhr, 1 - sanft((bildMs - flugZurueck) / (float)FLUG_MS));
+      break;
     case EINRICHTUNG: einrichtungBild(g, uhr); break;
     case UPDATE: updateBild(g); break;
     case EINSTELLUNGEN: einstellungenBild(g, uhr); break;
@@ -1092,6 +1185,7 @@ static void zeichneInhalt(Gfx &g, float t, float uhr) {
   if (zustand == SPIELT && pausiert) pauseAnzeige(g, uhr);
   if (zustand == SPIELT || zustand == TITEL) lautAnzeige(g);
   if (zustand == MENUE || zustand == TITEL || zustand == EINSTELLUNGEN) akkuAnzeige(g, uhr, zustand == EINSTELLUNGEN);
+  tastenHinweise(g, uhr);
   if (zustand != EINSTELLUNGEN && zustand != EINRICHTUNG && zustand != UPDATE && zustand != SCHLAF) kombiAnzeige(g);
 }
 
@@ -1130,6 +1224,8 @@ static void wechsle(Zustand z) {
   lcd::licht(true);
 }
 static void starte(int nr) {
+  flugIns = zustand == MENUE ? millis() : 0;
+  if (flugIns) { buchSeite = (nr + ANZAHL) % ANZAHL; blattSeit = 0; buchAuf = 0; }
   auswahl = (nr + ANZAHL) % ANZAHL;
   prefs.begin("box", false); prefs.putInt("auswahl", auswahl); prefs.end();
   audioMaerchen = LISTE[auswahl];
@@ -1259,6 +1355,12 @@ static void sendeBildschirmfoto() {
     blattSeit = bildMs - (uint32_t)(server.arg("blatt").toFloat() * BLATT_MS);
   }
   if (server.hasArg("auf")) buchAuf = bildMs - server.arg("auf").toInt();
+  uint32_t altIns = flugIns, altZur = flugZurueck;
+  uint32_t altLaut = lautGezeigt;
+  if (server.hasArg("flug")) { zustand = SPIELT; buchSeite = auswahl; flugIns = bildMs - server.arg("flug").toInt(); }  // nur fuers Foto
+  if (server.hasArg("zurueck")) { zustand = MENUE; buchSeite = auswahl; flugZurueck = bildMs - server.arg("zurueck").toInt(); }
+  if (server.hasArg("laut")) lautGezeigt = millis() - server.arg("laut").toInt();
+  if (server.hasArg("taste")) tasteMitte = millis() - 100;
   for (int s = 0; s < lcd::ANZAHL; s++) {
     g.streifen(tmp, s * lcd::STREIFEN, (s + 1) * lcd::STREIFEN);
     g.kameraAus(); g.wackeln(0, 0); g.ausschnittAus(); g.konturAus();
@@ -1277,6 +1379,7 @@ static void sendeBildschirmfoto() {
   zustand = alt;
   auswahl = altAuswahl;
   blattSeit = altBlatt; buchAuf = altAuf; blattNach = altNach;
+  flugIns = altIns; flugZurueck = altZur; lautGezeigt = altLaut;
 }
 static void tasteVonFern();
 
@@ -1673,12 +1776,20 @@ void loop() {
     kombiFortschritt = 0;
     if (!obenUnten && !untenUnten) lautRuhe = lautstaerke;
   }
+  if (l > 0) tasteOben = millis();
+  if (l < 0) tasteUnten = millis();
+  if (e != NICHTS) tasteMitte = millis();
   if (e != NICHTS || l) {
     merke(e == KURZ ? "Knopf kurz" : e == DOPPEL ? "Knopf doppel" : e == LANG ? "Knopf lang" : l > 0 ? "Knopf laut" : "Knopf leise");
     ereignis(e, l);
   }
 
-  if (maerchenEnde) { maerchenEnde = false; wechsle(TITEL); }
+  if (maerchenEnde) {
+    maerchenEnde = false;
+    buchSeite = auswahl; blattSeit = 0; buchAuf = 0;
+    wechsle(MENUE);
+    flugZurueck = millis();
+  }
   // Buch: Umblaettern / Aufklappen fertig?
   if (blattSeit && millis() - blattSeit >= BLATT_MS) { buchSeite = blattNach; blattSeit = 0; }
   if (buchAuf && millis() - buchAuf >= AUF_MS) buchAuf = 0;

@@ -393,6 +393,11 @@ goldener Blitz beim Laden), im Elternmenü mit Prozent und Volt. Gemessen an GPI
 Ladepin GPIO47 ist beim Laden LOW. Die Prozente kommen grob aus der Spannung (3,4 V = leer, 4,15 V = voll); beim
 Laden liegt die Spannung etwas höher.
 
+**Bedienhilfen:** Neben den drei echten Knöpfen zeigen leuchtende Zeichen, was sie gerade tun (im Buch ▲ ★ ▼, auf dem
+Startbild + ▶ −); beim Drücken leuchtet das Zeichen auf. Beim Start fliegt das Bild aus dem Cover auf den ganzen
+Bildschirm, am Ende des Films zurück ins Cover – das Buch liegt dann auf der Seite des Märchens. Die Lautstärke erscheint
+als Leiste mit Lautsprecher, Schallwellen und Perlen. Fürs Foto: `bild.bmp?flug=300&m=5`, `?zurueck=300`, `?laut=600`.
+
 **Pause:** Start im Film hält Bild und Musik an (Bild wird dunkler, goldene Fortschrittsleiste); Start noch einmal
 spielt an derselben Stelle weiter. Nach 10 Minuten Pause geht der Bildschirm aus, die Pause bleibt; ein Tastendruck
 zeigt sie wieder. Start lang führt ins Buch.
