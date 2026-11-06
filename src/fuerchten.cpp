@@ -304,6 +304,7 @@ static void blase(Gfx &g, float x, float y, const char *txt, float k, float sx, 
   if (k <= 0.05f) return;
   int w = g.textBreite(SCHRIFT_K, txt) + 18;
   float bw = w * k, bh = 26 * k;
+  inKreis(x, y, bw, bh);  // rundes Board: ganz in den sichtbaren Kreis
   float sp[] = {x - 6, y + bh / 2 - 2, x + 6, y + bh / 2 - 2, sx, sy};
   g.kontur(1.4f, OUT);
   g.rundRechteck(x - bw / 2, y - bh / 2, bw, bh, 10 * k, f);

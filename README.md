@@ -561,9 +561,17 @@ Bauen mit `pio run -e rund -t upload` (USB, COM10), danach über WLAN mit `-e ru
 an `maerchenbox-rund.local`. Die Board-Teile stehen unter `#ifdef BOARD_RUND`, der Display-Treiber in
 `src/lcd_rund.cpp`.
 
-- **Bild:** Das Märchenbild wird etwa 1,25-fach vergrößert (356 × 300) und sitzt in einem festen Rahmen aus
-  Nachthimmel, Sternen und Goldring. Das Panel nimmt nur Fenster mit gerader Startspalte/-zeile und gerader
-  Breite/Höhe an, deshalb geht das Bild in Teilen zu 20 Zeilen hinaus.
+- **Bild rund:** Die Bildbreite (284) füllt den Kreisdurchmesser (464 × 464, etwa 1,63-fach). Oben und unten
+  fehlen dem Bild je 22 Zeilen; dort wird die oberste bzw. unterste Bildzeile fortgesetzt (Himmel, Boden).
+  Sichtbar ist so der Kreis um (142, 120) mit Radius 142 in Bildkoordinaten. Das Panel nimmt nur Fenster mit
+  gerader Startspalte/-zeile und gerader Breite/Höhe an, deshalb geht das Bild in Teilen zu 16 Zeilen hinaus.
+- **Texte rund:** `Gfx::text` rückt auf dem runden Board jeden sichtbaren Text in den Kreis (und ins echte
+  Bild 2…237); müsste er dafür weit wandern, wird er am Leerzeichen in zwei Zeilen geteilt. Sprechblasen und
+  Verse schiebt `inKreis()` (gfx.h) in den Kreis, Verse sind nur so breit wie ihr Text. Startbild, Pause,
+  Lautstärke, Akku und die Touch-Zeichen haben eigene runde Maße (`#ifdef BOARD_RUND` in main.cpp).
+- **Prüfen über USB (nur rundes Board):** `P` senden spielt alle Märchen im Schnelldurchlauf (alle 0,2 s), dazu
+  Buch, Startbilder und Einstellungen, und meldet jeden Text, der über den Kreis ragt (`RAND|Märchen|Zeit|…`).
+  `F <märchen> <zustand> <zeit> <buchseite> <einstellung>` schickt ein Bildschirmfoto (284 × 240, RGB565).
 - **Bedienung per Touch:** oberes Drittel = Lauter / zurückblättern, Mitte = Start (doppelt tippen, lang halten
   wie beim Knopf), unteres Drittel = Leiser / weiterblättern. Die Zeichen ▲ ★ ▼ am rechten Bildrand zeigen es.
 - **Eltern:** die BOOT-Taste 3 s halten öffnet die Einstellungen und weckt die Box (statt Lauter + Leiser).

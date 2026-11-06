@@ -376,8 +376,59 @@ int Gfx::textBreite(const Schrift &f, const char *s) {
   return w;
 }
 
+void (*Gfx::textPruefer)(const char *, float, float, float, float, uint8_t) = nullptr;
+
+#ifdef BOARD_RUND
+static bool rechteckImKreis(float x, float y, float w, float h) {
+  const float r = RUND_R - 2;
+  float dx = fmaxf(fabsf(x - RUND_CX), fabsf(x + w - RUND_CX)), dy = fmaxf(fabsf(y - RUND_CY), fabsf(y + h - RUND_CY));
+  return dx * dx + dy * dy <= r * r;
+}
+#endif
+
 void Gfx::text(const Schrift &f, const char *s, float x, float y, Farbe c, int ausr, uint8_t a) {
-  if (ausr) x -= textBreite(f, s) * (ausr == 1 ? 0.5f : 1.0f);
+  int tw = textBreite(f, s);
+  if (ausr) x -= tw * (ausr == 1 ? 0.5f : 1.0f);
+#ifdef BOARD_RUND
+  // Rund: ragt ein (sichtbarer) Text ueber den Kreisrand, rueckt er nach innen; muesste er dafuer weit
+  // wandern, wird er am Leerzeichen nahe der Mitte in zwei Zeilen geteilt und bleibt etwa an seinem Platz.
+  float hb = f.asc + f.desc, bx0 = x + wx, by0 = y + wy - f.asc;
+  bool sichtbar = bx0 + tw > 0 && bx0 < W && by0 + hb > 0 && by0 < H;
+  if (sichtbar && !rechteckImKreis(bx0, by0, tw, hb)) {
+    float cx = bx0 + tw / 2, cy = by0 + hb / 2, nx = cx, ny = cy;
+    inKreis(nx, ny, tw, hb, 3);
+    if (fabsf(ny - cy) > 24 && strlen(s) < 120) {
+      // beste Trennstelle: die beiden Zeilen moeglichst gleich breit
+      char z1[120], z2[120];
+      int best = -1, bestW = 1 << 30;
+      for (int i = 1; s[i]; i++) {
+        if (s[i] != ' ') continue;
+        memcpy(z1, s, i); z1[i] = 0;
+        int w1 = textBreite(f, z1), w2 = textBreite(f, s + i + 1), m = w1 > w2 ? w1 : w2;
+        if (m < bestW) { bestW = m; best = i; }
+      }
+      if (best > 0) {
+        memcpy(z1, s, best); z1[best] = 0;
+        strcpy(z2, s + best + 1);
+        int w1 = textBreite(f, z1), w2 = textBreite(f, z2);
+        float lh = hb + 2, hh = lh + hb;
+        float mx = cx, my = cy;
+        inKreis(mx, my, (float)bestW, hh, 3);
+        float top = my - hh / 2;
+        textRoh(f, z1, mx - w1 / 2.0f - wx, top + f.asc - wy, c, a, w1);
+        textRoh(f, z2, mx - w2 / 2.0f - wx, top + lh + f.asc - wy, c, a, w2);
+        return;
+      }
+    }
+    x = nx - tw / 2.0f - wx;
+    y = ny - hb / 2 + f.asc - wy;
+  }
+#endif
+  textRoh(f, s, x, y, c, a, tw);
+}
+
+void Gfx::textRoh(const Schrift &f, const char *s, float x, float y, Farbe c, uint8_t a, int tw) {
+  if (textPruefer) textPruefer(s, x + wx, y + wy - f.asc, x + wx + tw, y + wy + f.desc, a);
   int bx = (int)roundf(x + wx), by = (int)roundf(y + wy);
   if (by + f.desc + 2 < y0 || by - f.asc - 4 > y1) return;
   while (*s) {

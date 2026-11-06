@@ -53,7 +53,7 @@ constexpr int TASTE_A = -1, TASTE_B = -2, TASTE_C = -3;  // Touch-Bereiche: Mitt
 constexpr int TASTE_BOOT = 0;
 constexpr int PIN_TOUCH_RST = 2, PIN_TOUCH_INT = 11;
 constexpr uint8_t TOUCH_ADDR = 0x5A, PMU_ADDR = 0x34;
-constexpr int BILD_X = 54, BILD_Y = 82;   // Lage des 1,25-fach vergroesserten Maerchenbilds auf dem 466er-Display
+constexpr int BILD_X = 2, BILD_Y = 2;     // Lage des Bildfensters (464 x 464) auf dem 466er-Display
 #else
 constexpr int PIN_I2C_SDA = 12, PIN_I2C_SCL = 11;
 constexpr int PIN_MCLK = 5, PIN_BCLK = 15, PIN_WS = 16, PIN_DOUT = 6;
@@ -1018,7 +1018,12 @@ static void einstellungenBild(Gfx &g, float t) {
 static void akkuAnzeige(Gfx &g, float t, bool mitText) {
   int p = akkuProzent();
   if (p < 0) return;
+#ifdef BOARD_RUND
+  // rund: oben in der Mitte; mit Text steht der Text links daneben (Akku etwas nach rechts)
+  const float x = mitText ? 168 : 131, y = mitText ? 15 : 8, w = 22, h = 10;
+#else
   const float x = 236, y = 6.5f, w = 22, h = 10;  // etwas eingerueckt: das Display hat runde Ecken
+#endif
   bool leer = p <= 10 && !akkuLaedt;
   Farbe c = leer ? FARBE(0xFF5A4A) : p <= 25 ? FARBE(0xFFC23D) : FARBE(0x7CDB6A);
   uint8_t a = leer ? (uint8_t)(150 + 105 * fabsf(sinf(t * 3))) : 255;
@@ -1036,7 +1041,11 @@ static void akkuAnzeige(Gfx &g, float t, bool mitText) {
   if (mitText) {
     char s[32];
     snprintf(s, sizeof s, "%d %%  %.2f V", p, akkuMv / 1000.0f);
+#ifdef BOARD_RUND
+    g.text(SCHRIFT_K, s, x - 6, y + 10, WEISS, 2);
+#else
     g.text(SCHRIFT_K, s, x - 4, y + 10, WEISS, 2);
+#endif
   } else if (leer) {
     g.text(SCHRIFT_K, "Bitte aufladen", x - 4, y + 10, FARBE(0xFFB0A0), 2, a);
   }
@@ -1047,31 +1056,44 @@ static void tastenHinweise(Gfx &g, float t) {
   if (zustand != MENUE && zustand != TITEL) return;
   if (zustand == MENUE && (buchAuf || blattSeit)) return;
 #ifdef BOARD_RUND
-  float x = 275;  // Touch: die Bereiche drehen mit dem Bild
+  float x = 0;  // rund: am rechten Kreisbogen (Touch: die Bereiche drehen mit dem Bild)
 #else
   float x = gedreht ? 9 : 275;  // bei gedrehtem Bild sitzen die Knoepfe links
 #endif
   const float ys[3] = {52, 120, 188};
   uint32_t jetzt = millis(), zeiten[3] = {tasteOben, tasteMitte, tasteUnten};
+  float sicht = 1;  // Deckkraft der Zeichen
+#ifdef BOARD_RUND
+  // rund: im Buch liegen die Zeichen auf der rechten Seite ueber dem Text; nach 3 s ohne Beruehrung blenden sie aus
+  if (zustand == MENUE) {
+    uint32_t ruhe = jetzt - (letzteTaste > zustandSeit ? letzteTaste : zustandSeit);
+    sicht = 1 - klemme((ruhe - 3000.0f) / 600.0f);
+    if (sicht <= 0.01f) return;
+  }
+#endif
   for (int i = 0; i < 3; i++) {
     float leucht = zeiten[i] ? 1 - klemme((jetzt - zeiten[i]) / 450.0f) : 0;
     float y = ys[i];
+#ifdef BOARD_RUND
+    x = RUND_CX + sqrtf(126.0f * 126 - (y - RUND_CY) * (y - RUND_CY));
+#endif
     float r = 9 + leucht * 3;
-    g.kreis(x, y, r + 5, GOLD, (uint8_t)(40 + 120 * leucht));
+    g.kreis(x, y, r + 5, GOLD, (uint8_t)((40 + 120 * leucht) * sicht));
     g.kontur(1, FARBE(0xB8862B));
-    g.kreis(x, y, r, FARBE(0x1E1A3A), 210);
+    g.kreis(x, y, r, FARBE(0x1E1A3A), (uint8_t)(210 * sicht));
     g.konturAus();
     Farbe c = mischeFarbe(FARBE(0xF2D98A), WEISS, leucht);
+    uint8_t ca = (uint8_t)(255 * sicht);
     if (i == 1) {  // Start: Stern im Buch, Dreieck auf dem Startbild
-      if (zustand == MENUE) g.stern(x, y, 6, 2.6f, 5, -1.5708f + sinf(t * 2) * 0.1f, c);
-      else { float tri[] = {x - 3, y - 5, x - 3, y + 5, x + 5, y}; g.polygon(tri, 3, c); }
+      if (zustand == MENUE) g.stern(x, y, 6, 2.6f, 5, -1.5708f + sinf(t * 2) * 0.1f, c, ca);
+      else { float tri[] = {x - 3, y - 5, x - 3, y + 5, x + 5, y}; g.polygon(tri, 3, c, ca); }
     } else if (zustand == MENUE) {  // umblaettern
       float s = i == 0 ? -1 : 1;
       float tri[] = {x - 5, y - 2.5f * s, x + 5, y - 2.5f * s, x, y + 4 * s};
-      g.polygon(tri, 3, c);
+      g.polygon(tri, 3, c, ca);
     } else {  // lauter / leiser
-      g.rechteck(x - 4.5f, y - 1, 9, 2, c);
-      if (i == 0) g.rechteck(x - 1, y - 4.5f, 2, 9, c);
+      g.rechteck(x - 4.5f, y - 1, 9, 2, c, ca);
+      if (i == 0) g.rechteck(x - 1, y - 4.5f, 2, 9, c, ca);
     }
   }
 }
@@ -1101,14 +1123,39 @@ static void startBild(Gfx &g, float uhr) {
   m->vorschau(g, uhr);
   g.kameraAus();
   const Schrift *sch = &SCHRIFT_B;
-  if (g.textBreite(SCHRIFT_B, m->titel) > 196) sch = &SCHRIFT_K;
-  float y = 190, h = 40;
-  g.rundRechteck(10, y + 2, 264, h, 14, FARBE(0x000000), 60);
+#ifdef BOARD_RUND
+  // rund: hoeher und schmaler (rechts sitzt das Leiser-Zeichen); lange Titel in zwei Zeilen, die Tafel waechst mit
+  const float bx = 38, bb = 186, knopfX = 60, titelX = 145, platz = 140;
+  float y = 172, h = 40;
+  char z1[80] = "", z2[80] = "";
+  if (g.textBreite(SCHRIFT_B, m->titel) > platz) sch = &SCHRIFT_K;
+  if (sch == &SCHRIFT_K && g.textBreite(SCHRIFT_K, m->titel) > platz && strlen(m->titel) < sizeof z1) {
+    int best = -1, bestW = 1 << 30;
+    for (int i = 1; m->titel[i]; i++) {
+      if (m->titel[i] != ' ') continue;
+      memcpy(z1, m->titel, i); z1[i] = 0;
+      int a = g.textBreite(SCHRIFT_K, z1), b = g.textBreite(SCHRIFT_K, m->titel + i + 1), mx = a > b ? a : b;
+      if (mx < bestW) { bestW = mx; best = i; }
+    }
+    if (best > 0) { memcpy(z1, m->titel, best); z1[best] = 0; strcpy(z2, m->titel + best + 1); y = 160; h = 54; }
+  }
+#else
+  const float bx = 10, bb = 264, y = 190, h = 40, knopfX = 34, titelX = 160, platz = 196;
+  if (g.textBreite(SCHRIFT_B, m->titel) > platz) sch = &SCHRIFT_K;
+#endif
+  g.rundRechteck(bx, y + 2, bb, h, 14, FARBE(0x000000), 60);
   g.kontur(1.2f, FARBE(0xB8862B));
-  g.rundRechteck(10, y, 264, h, 14, PAPIER, 235);
+  g.rundRechteck(bx, y, bb, h, 14, PAPIER, 235);
   g.konturAus();
-  startKnopf(g, 34, y + h / 2, uhr, 12);
-  g.text(*sch, m->titel, 160, y + h / 2 + (sch == &SCHRIFT_B ? 6 : 5), TINTE, 1);
+  startKnopf(g, knopfX, y + h / 2, uhr, 12);
+#ifdef BOARD_RUND
+  if (z2[0]) {
+    g.text(SCHRIFT_K, z1, titelX, y + h / 2 - 3, TINTE, 1);
+    g.text(SCHRIFT_K, z2, titelX, y + h / 2 + 14, TINTE, 1);
+    return;
+  }
+#endif
+  g.text(*sch, m->titel, titelX, y + h / 2 + (sch == &SCHRIFT_B ? 6 : 5), TINTE, 1);
 }
 
 // Gute Nacht: Mond, Sterne, das geschlossene Buch schlaeft
@@ -1143,9 +1190,14 @@ static void kombiAnzeige(Gfx &g) {
 
 static void einrichtungBild(Gfx &g, float t) {
   g.verlauf(0, 240, FARBE(0x2B2A6B), FARBE(0x5B3D8F));
-  g.text(SCHRIFT_G, "WLAN einrichten", 142, 48, GOLD, 1);
-  g.text(SCHRIFT_K, "Mit dem Handy verbinden:", 142, 86, WEISS, 1);
-  g.text(SCHRIFT_M, SETUP_WLAN, 142, 114, WEISS, 1);
+#ifdef BOARD_RUND
+  const float dy = 16;  // rund: die Ueberschrift braucht oben mehr Platz
+#else
+  const float dy = 0;
+#endif
+  g.text(SCHRIFT_G, "WLAN einrichten", 142, 48 + dy, GOLD, 1);
+  g.text(SCHRIFT_K, "Mit dem Handy verbinden:", 142, 86 + dy * 0.6f, WEISS, 1);
+  g.text(SCHRIFT_M, SETUP_WLAN, 142, 114 + dy * 0.4f, WEISS, 1);
   g.text(SCHRIFT_K, "Die Seite öffnet sich von selbst.", 142, 146, FARBE(0xCFC8F5), 1);
   g.text(SCHRIFT_K, "Dort WLAN wählen und speichern.", 142, 166, FARBE(0xCFC8F5), 1);
   g.rechteck(62, 184, 160, 1.5f, FARBE(0x8F82C8));
@@ -1185,13 +1237,21 @@ static void pauseAnzeige(Gfx &g, float uhr) {
   }
   // Tafel mit Fortschritt (verdeckt auch Erzaehltexte des Films)
   float k = klemme(pauseZeit / m->dauer);
+#ifdef BOARD_RUND
+  const float tx = 46, tw = 192, ty = 154, th = 58, bl = 168;  // rund: hoeher und schmaler, damit es im Kreis liegt
+  const char *hinweis = "Pause - Start: weiter";
+#else
+  const float tx = 26, tw = 232, ty = 170, th = 62, bl = 202;
+  const char *hinweis = "Pause  -  Start drücken: weiter";
+#endif
+  const float lx = 142 - bl / 2;
   g.kontur(1.2f, GOLD_D);
-  g.rundRechteck(26, 170, 232, 62, 14, FARBE(0x10102A), 235);
+  g.rundRechteck(tx, ty, tw, th, 14, FARBE(0x10102A), 235);
   g.konturAus();
-  g.rundRechteck(40, 184, 204, 10, 5, FARBE(0x2E2A55));
-  g.rundRechteck(41, 185, 202 * k < 8 ? 8 : 202 * k, 8, 4, GOLD);
-  g.stern(41 + 202 * k, 189, 7, 2.8f, 5, -1.5708f, FARBE(0xFFF3C0));
-  g.text(SCHRIFT_K, "Pause  -  Start drücken: weiter", 142, 220, FARBE(0xF2D98A), 1);
+  g.rundRechteck(lx - 1, ty + 14, bl + 2, 10, 5, FARBE(0x2E2A55));
+  g.rundRechteck(lx, ty + 15, bl * k < 8 ? 8 : bl * k, 8, 4, GOLD);
+  g.stern(lx + bl * k, ty + 19, 7, 2.8f, 5, -1.5708f, FARBE(0xFFF3C0));
+  g.text(SCHRIFT_K, hinweis, 142, ty + th - 12, FARBE(0xF2D98A), 1);
 }
 
 static void lautAnzeige(Gfx &g) {
@@ -1201,7 +1261,11 @@ static void lautAnzeige(Gfx &g) {
   float rein = sanft(seg(seit, 0, 220)), raus = sanft(seg(seit, 1400, 1700));
   float dy = (1 - rein) * 50 + raus * 50;
   uint8_t a = (uint8_t)(255 * (1 - raus));
+#ifdef BOARD_RUND
+  float x = 46, y = 164 + dy, w = 192, h = 38;  // rund: etwas hoeher
+#else
   float x = 46, y = 188 + dy, w = 192, h = 38;
+#endif
   g.rundRechteck(x, y + 2, w, h, 19, FARBE(0x000000), (uint8_t)(a * 0.25f));  // weicher Schatten
   g.kontur(1.2f, FARBE(0x6E5A8E));
   g.rundRechteck(x, y, w, h, 19, FARBE(0x1E1A3A), (uint8_t)(a * 0.92f));
@@ -1252,6 +1316,79 @@ static void zeichneInhalt(Gfx &g, float t, float uhr) {
   tastenHinweise(g, uhr);
   if (zustand != EINSTELLUNGEN && zustand != EINRICHTUNG && zustand != UPDATE && zustand != SCHLAF) kombiAnzeige(g);
 }
+
+#ifdef BOARD_RUND
+// ---------- Pruefung fuer das runde Display ----------
+// Ueber USB "P" senden: alle Maerchen im Schnelldurchlauf (alle 0,2 s), dazu Buch, Startbilder, Einstellungen.
+// Gemeldet wird jeder Text, der ueber den sichtbaren Kreis hinausragt (einmal je Text und Teil).
+static const char *pruefTeil = "";
+static float pruefT = 0;
+static const char *gemeldet[96];
+static int nGemeldet = 0, nRand = 0;
+static void pruefeText(const char *s, float x0, float y0, float x1, float y1, uint8_t a) {
+  if (a < 60) return;  // fast unsichtbar (blendet ein / aus)
+  if (x1 <= 0 || x0 >= Gfx::W || y1 <= 0 || y0 >= Gfx::H) return;  // ganz ausserhalb des Bildes (auch frueher unsichtbar)
+  float ueber = 0;
+  const float xs[2] = {x0, x1}, ys[2] = {y0, y1};
+  for (float px : xs)
+    for (float py : ys) {
+      float d = sqrtf((px - RUND_CX) * (px - RUND_CX) + (py - RUND_CY) * (py - RUND_CY)) - (RUND_R - 2);
+      if (d > ueber) ueber = d;
+    }
+  if (ueber < 1.5f) return;
+  for (int i = 0; i < nGemeldet; i++) if (gemeldet[i] == s) return;
+  if (nGemeldet < 96) gemeldet[nGemeldet++] = s;
+  nRand++;
+  Serial.printf("RAND|%s|%.1f|%d|%d|%d|%d|%.0f|%s\n", pruefTeil, pruefT, (int)x0, (int)y0, (int)x1, (int)y1, ueber, s);
+}
+static void pruefen() {
+  static uint16_t pbuf[Gfx::W * 2];
+  Gfx p;
+  auto teil = [](const char *name) { pruefTeil = name; nGemeldet = 0; };
+  Gfx::textPruefer = pruefeText;
+  nRand = 0;
+  uint32_t schritte = 0;
+  // nur eine Zeile zeichnen: die Texte melden sich trotzdem alle, das geht schnell
+  auto zeichne = [&](std::function<void(Gfx &)> f) {
+    p.streifen(pbuf, 0, 1);
+    f(p);
+    if (++schritte % 40 == 0) delay(1);
+  };
+  Zustand alt = zustand;
+  int altA = auswahl;
+  for (int i = 0; i < ANZAHL; i++) {
+    const Maerchen *m = LISTE[i];
+    teil(m->titel);
+    for (float t = 0; t < m->dauer + 3; t += 0.2f) { pruefT = t; zeichne([m, t](Gfx &g) { m->bild(g, t); g.kameraAus(); }); }
+    pruefT = -1;  // -1 = Startbild
+    auswahl = i; zustand = TITEL;
+    for (float u = 0; u < 3; u += 0.5f) zeichne([u](Gfx &g) { startBild(g, u); });
+  }
+  auswahl = altA;
+  teil("Buch");
+  zustand = MENUE;
+  int altSeite = buchSeite;
+  for (int s = 0; s < ANZAHL; s++) { buchSeite = s; pruefT = s; zeichne([](Gfx &g) { buchBild(g, 1); }); }
+  buchSeite = altSeite;
+  teil("Einstellungen");
+  zustand = EINSTELLUNGEN;
+  int altPos = einstPos, altZiel = einstZiel; float altAnim = einstAnim;
+  for (int e = 0; e < EINST_PUNKTE; e++) {
+    einstPos = e; einstZiel = e; einstAnim = e; pruefT = e;
+    zeichne([](Gfx &g) { einstellungenBild(g, 1); akkuAnzeige(g, 1, true); });
+  }
+  einstPos = altPos; einstAnim = altAnim; einstZiel = altZiel;
+  teil("Sonstiges");
+  pruefT = 0;
+  zeichne([](Gfx &g) { schlafBild(g, 1); });
+  zeichne([](Gfx &g) { einrichtungBild(g, 1); });
+  zeichne([](Gfx &g) { updateBild(g); });
+  zeichne([](Gfx &g) { pauseAnzeige(g, 1); });
+  zustand = alt;
+  Gfx::textPruefer = nullptr;
+  Serial.printf("PRUEFUNG FERTIG: %d Texte ragen ueber den Rand\n", nRand);
+}
+#endif
 
 static void neuesBild() {
   bildMs = millis();
@@ -1447,6 +1584,38 @@ static void sendeBildschirmfoto() {
 }
 static void tasteVonFern();
 
+#ifdef BOARD_RUND
+// Bildschirmfoto ueber USB: "F <maerchen> <zustand> <zeit> <buchseite> <einstPos>" -> "FOTO\n" + 284x240 RGB565 (wie zum Display)
+static void fotoUeberUsb() {
+  int m = Serial.parseInt(), z = Serial.parseInt();
+  float t = Serial.parseFloat();
+  int seite = Serial.parseInt(), ep = Serial.parseInt();
+  Zustand alt = zustand;
+  int altA = auswahl, altS = buchSeite, altP = einstPos, altZ = einstZiel;
+  float altAn = einstAnim;
+  bool altPaus = pausiert;
+  float altPz = pauseZeit;
+  uint32_t altBlatt = blattSeit, altAuf = buchAuf;
+  auswahl = constrain(m, 0, ANZAHL - 1);
+  zustand = (Zustand)constrain(z, 0, (int)SCHLAF);
+  buchSeite = constrain(seite, 0, ANZAHL - 1);
+  einstPos = einstZiel = constrain(ep, 0, EINST_PUNKTE - 1); einstAnim = einstPos;
+  blattSeit = 0; buchAuf = 0;
+  if (zustand == SPIELT && t < 0) { pausiert = true; pauseZeit = -t; t = -t; }
+  bildMs = millis();
+  Serial.print("FOTO\n");
+  for (int s = 0; s < lcd::ANZAHL; s++) {
+    g.streifen(fotoPuffer, s * lcd::STREIFEN, (s + 1) * lcd::STREIFEN);
+    g.kameraAus(); g.wackeln(0, 0); g.ausschnittAus(); g.konturAus();
+    zeichneInhalt(g, t, 2.0f);
+    Serial.write((const uint8_t *)fotoPuffer, sizeof fotoPuffer);
+  }
+  Serial.flush();
+  zustand = alt; auswahl = altA; buchSeite = altS; einstPos = altP; einstZiel = altZ; einstAnim = altAn;
+  pausiert = altPaus; pauseZeit = altPz; blattSeit = altBlatt; buchAuf = altAuf;
+}
+#endif
+
 // Messtest: was kostet welche Form? (ein ganzes Bild in 4 Streifen)
 static void sendeMesstest() {
   uint16_t *tmp = fotoPuffer;
@@ -1604,9 +1773,11 @@ static void touchLesen() {
   x = 465 - x; y = 465 - y;  // Panel gespiegelt (wie in der Xiaozhi-Firmware)
   if (gedreht) { x = 465 - x; y = 465 - y; }
   touchX = x; touchY = y;
+  // in Bildkoordinaten umrechnen (Bildfenster ab Zeile 2, Breite 284 -> 464, 22 Zeilen Himmel darueber)
+  int wy = (y - BILD_Y) * 284 / 464 - 22;
   // Drittel des Maerchenbilds: wie die Zeichen am Rand bei 52 / 120 / 188
   int vorher = touchBereich;
-  touchBereich = y < BILD_Y + 86 * 5 / 4 ? TASTE_B : y < BILD_Y + 154 * 5 / 4 ? TASTE_A : TASTE_C;
+  touchBereich = wy < 86 ? TASTE_B : wy < 154 ? TASTE_A : TASTE_C;
   if (!vorher) Serial.printf("Touch x=%d y=%d\n", x, y);
 }
 static bool knopf(int pin) {
@@ -1895,6 +2066,11 @@ void loop() {
 
 #ifdef BOARD_RUND
   touchLesen();
+  if (Serial.available()) {
+    int c = Serial.read();
+    if (c == 'P') pruefen();
+    else if (c == 'F') fotoUeberUsb();
+  }
 #endif
   Ereignis e = mitte.lies();
   int l = (lauter.lies() ? 1 : 0) - (leiser.lies() ? 1 : 0);

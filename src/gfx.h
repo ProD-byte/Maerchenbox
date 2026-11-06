@@ -11,6 +11,29 @@
 #include <stdint.h>
 #include <math.h>
 
+// Rundes Board: sichtbar ist nur der Kreis um (142, 120) mit Radius 142 (in Weltkoordinaten).
+// inKreis() schiebt einen Kasten (Mitte x, y; Groesse w x h) so weit zur Mitte, dass er ganz im Kreis liegt.
+#ifdef BOARD_RUND
+constexpr float RUND_CX = 142, RUND_CY = 120, RUND_R = 142;
+static inline void inKreis(float &x, float &y, float w, float h, float rand = 4) {
+  float r = RUND_R - rand, halb = w / 2 < r - 1 ? w / 2 : r - 1;
+  float maxDy = sqrtf(r * r - halb * halb) - h / 2;  // so weit darf die Kastenmitte senkrecht von der Kreismitte weg
+  if (maxDy < 0) maxDy = 0;
+  if (y < RUND_CY - maxDy) y = RUND_CY - maxDy;
+  if (y > RUND_CY + maxDy) y = RUND_CY + maxDy;
+  // ausserdem im gezeichneten Bild bleiben (0..240): die Zeilen darueber/darunter setzen nur die Randzeile fort
+  if (y - h / 2 < 2) y = 2 + h / 2;
+  if (y + h / 2 > 237) y = 237 - h / 2;
+  float dy = fabsf(y - RUND_CY) + h / 2;            // fernste Kante
+  float erl = sqrtf(r * r - dy * dy > 0 ? r * r - dy * dy : 0) - w / 2;
+  if (erl < 0) erl = 0;
+  if (x < RUND_CX - erl) x = RUND_CX - erl;
+  if (x > RUND_CX + erl) x = RUND_CX + erl;
+}
+#else
+static inline void inKreis(float &, float &, float, float, float = 4) {}
+#endif
+
 typedef uint16_t Farbe;  // RGB565
 constexpr Farbe RGB(uint8_t r, uint8_t g, uint8_t b) {
   return (Farbe)(((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3));
@@ -55,6 +78,8 @@ class Gfx {
   // ausrichtung: 0 links, 1 Mitte, 2 rechts; y = Grundlinie
   void text(const Schrift &s, const char *utf8, float x, float y, Farbe c, int ausrichtung = 0, uint8_t a = 255);
   int textBreite(const Schrift &s, const char *utf8);
+  // Pruefhilfe: wird (wenn gesetzt) bei jedem Text mit seinem Rechteck aufgerufen (Bildschirmkoordinaten)
+  static void (*textPruefer)(const char *utf8, float x0, float y0, float x1, float y1, uint8_t a);
 
   // Kontur-Hilfe: Ist sie aktiv, zeichnen kreis/ellipse/... zuerst eine etwas groessere dunkle Flaeche.
   void kontur(float dicke, Farbe c) { kDicke = dicke; kFarbe = c; }
@@ -85,6 +110,7 @@ class Gfx {
   void fuellePoly(const float *xy, int n, Farbe c, uint8_t a);  // Bildschirmkoordinaten
   int ellipsePunkte(float cx, float cy, float rx, float ry, float winkel, float *out);
   void zeile(int y, int xa, int xb, Farbe c, uint8_t a);
+  void textRoh(const Schrift &s, const char *utf8, float x, float y, Farbe c, uint8_t a, int breite);  // x = linker Rand
   bool draussen(float ymin, float ymax) const;  // liegt der y-Bereich ganz ausserhalb?
 };
 

@@ -255,7 +255,12 @@ static void szeneFestzug(Gfx &g, float u) {
     kh.lauf = fmodf(u * 1.2f + i * 0.5f, 1);
     schneiderlein(g, 110 + i * 26, 222, 0.75f, 1, kh);
   }
+#ifdef BOARD_RUND
+  // rund: enger zusammen und in zwei Reihen, damit alle Rufe im Kreis liegen und sich nicht ueberdecken
+  if (u > 34) for (int i = 0; i < 6; i++) g.text(SCHRIFT_K, i & 1 ? "hihi" : "nichts an!", 50 + i * 37, 152 - (i & 1) * 22, OUT, 1, (uint8_t)(255 * aufzu(u, 34, 46)));
+#else
   if (u > 34) for (int i = 0; i < 6; i++) g.text(SCHRIFT_K, i & 1 ? "hihi" : "nichts an!", 30 + i * 44, 150 - (i & 1) * 12, OUT, 1, (uint8_t)(255 * aufzu(u, 34, 46)));
+#endif
   g.kameraAus();
   vers(g, {"Der Kaiser ging in der Prozession,", "und alle Leute riefen:"}, aufzu(u, 0.4f, 5));
   blase(g, 150, 46, {"Wie prächtig sind des Kaisers", "neue Kleider!"}, aufzu(u, 5.2f, 12), 120, 160);

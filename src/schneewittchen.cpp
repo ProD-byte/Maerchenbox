@@ -90,6 +90,7 @@ static void blase(Gfx &g, float x, float y, std::initializer_list<const char *> 
   if (x - bw / 2 < 3) x = 3 + bw / 2;
   if (x + bw / 2 > 281) x = 281 - bw / 2;
   if (y - bh / 2 < 3) y = 3 + bh / 2;
+  inKreis(x, y, bw, bh);  // rundes Board: ganz in den sichtbaren Kreis
   float sp[] = {x - 6, y + bh / 2 - 2, x + 6, y + bh / 2 - 2, sx, sy};
   g.kontur(1.4f, OUT);
   g.rundRechteck(x - bw / 2, y - bh / 2, bw, bh, 9 * k, f);

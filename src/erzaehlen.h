@@ -21,6 +21,7 @@ static inline void blase(Gfx &g, float x, float y, std::initializer_list<const c
   if (x - bw / 2 < 3) x = 3 + bw / 2;
   if (x + bw / 2 > 281) x = 281 - bw / 2;
   if (y - bh / 2 < 3) y = 3 + bh / 2;
+  inKreis(x, y, bw, bh);  // rundes Board: ganz in den sichtbaren Kreis
   float sp[] = {x - 6, y + bh / 2 - 2, x + 6, y + bh / 2 - 2, sx, sy};
   g.kontur(1.4f, OUT);
   g.rundRechteck(x - bw / 2, y - bh / 2, bw, bh, 9 * k, f);
@@ -40,15 +41,25 @@ static inline void vers(Gfx &g, std::initializer_list<const char *> zeilen, floa
   float h = 9 + n * 17;
   uint8_t a = (uint8_t)(255 * klemme(k));
   g.kameraAus();
+#ifdef BOARD_RUND
+  // rund: Streifen nur so breit wie der Text, so weit unten, dass er ganz im Kreis liegt
+  int tw = 0;
+  for (const char *z : zeilen) { int b = g.textBreite(SCHRIFT_K, z); if (b > tw) tw = b; }
+  float bw = tw + 30, vx = 142, vy = 4 + h / 2;
+  inKreis(vx, vy, bw, h);
+  float x0 = vx - bw / 2, y0 = vy - h / 2;
+#else
+  float bw = 272, x0 = 6, y0 = 4;
+#endif
   g.kontur(1.2f, FARBE(0xB8862B));
-  g.rundRechteck(6, 4, 272, h, 7, FARBE(0xFBF1DC), a);
+  g.rundRechteck(x0, y0, bw, h, 7, FARBE(0xFBF1DC), a);
   g.konturAus();
-  g.kreis(13, 4 + h / 2, 2.2f, FARBE(0xC8485E), a);
-  g.kreis(271, 4 + h / 2, 2.2f, FARBE(0xC8485E), a);
+  g.kreis(x0 + 7, y0 + h / 2, 2.2f, FARBE(0xC8485E), a);
+  g.kreis(x0 + bw - 7, y0 + h / 2, 2.2f, FARBE(0xC8485E), a);
   if (k > 0.8f) {
     blaseLesbar = 1;
     int i = 0;
-    for (const char *z : zeilen) g.text(SCHRIFT_K, z, 142, 18 + i++ * 17, FARBE(0x5A3418), 1);
+    for (const char *z : zeilen) g.text(SCHRIFT_K, z, x0 + bw / 2, y0 + 14 + i++ * 17, FARBE(0x5A3418), 1);
   }
 }
 
