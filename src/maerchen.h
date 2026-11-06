@@ -44,3 +44,4 @@ extern const Maerchen SUESSERBREI;
 extern const Maerchen ENTLEIN;
 extern const Maerchen ERBSE;
 extern const Maerchen RUMPELSTILZCHEN;
+extern const Maerchen KAISER_KLEIDER;

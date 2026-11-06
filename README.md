@@ -308,6 +308,18 @@ Nach dem Märchen der Brüder Grimm.
 | 2:44 | Das Feuer im Wald: „Ach, wie gut, dass niemand weiß, dass ich Rumpelstilzchen heiß!“ |
 | 3:14 | Kunz? Heinz? „Heißt du etwa Rumpelstilzchen?“ – „Das hat dir der Teufel gesagt!“ |
 
+## Des Kaisers neue Kleider (gut 3 Minuten)
+
+Nach dem Märchen von Hans Christian Andersen.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der Kaiser hat für jede Stunde einen anderen Rock |
+| 0:26 | Zwei Betrüger: Stoff, den nicht sehen kann, wer dumm ist oder für sein Amt nicht taugt |
+| 0:58 | Der alte Minister: „Ich sehe ja nichts!“ – „Oh, es ist ganz allerliebst!“ |
+| 1:28 | Der Kaiser sieht auch nichts – „Oh, es ist sehr hübsch!“ – die Anprobe vor dem Spiegel |
+| 2:02 | Der Festzug: „Aber er hat ja gar nichts an!“ – und die Kammerherren tragen die Schleppe, die gar nicht da ist |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -407,6 +419,7 @@ pio run -e ostb2st -t upload
 - `src/entlein.cpp` – Das hässliche Entlein (Andersen)
 - `src/erbse.cpp` – Die Prinzessin auf der Erbse (Andersen)
 - `src/rumpelstilzchen.cpp` – Rumpelstilzchen
+- `src/kaiser.cpp` – Des Kaisers neue Kleider (Andersen)
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
