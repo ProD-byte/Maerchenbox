@@ -21,6 +21,10 @@
   .bilder img{width:100%;height:auto;display:block;filter:drop-shadow(0 8px 18px #0008)}
   .geraete{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:620px){.geraete{grid-template-columns:1fr}}
+  .geraetfoto{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center}
+  .geraetfoto img{width:100%;height:auto;display:block;filter:drop-shadow(0 14px 28px #000a)}
+  .geraetfoto p{margin:0}
+  @media(max-width:560px){.geraetfoto{grid-template-columns:1fr;text-align:center}.geraetfoto img{max-width:240px;margin:0 auto}}
   .geraet{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:16px;background:#130f30;border:1px solid var(--rand2)}
   .geraet .titel{font-weight:700;font-size:18px}
   .geraet small{color:var(--leise)}
@@ -40,7 +44,15 @@
 <div class="rahmen">
   <div class="kopf">
     <div class="logo">&#128214;</div>
-    <div><h1 data-en="Fairy Tale Box">M&auml;rchenbox</h1><p data-en="Online flasher &middot; 30 music-box films that the box draws and sets to music live">Online-Flasher &middot; 30 Spieluhr-Filme, die die Box live zeichnet und vertont</p></div>
+    <div><h1 data-en="Fairy Tale Box">M&auml;rchenbox</h1><p data-en="Online flasher &middot; 30 music-box films on a round display, drawn and set to music live">Online-Flasher &middot; 30 Spieluhr-Filme auf einem runden Display, live gezeichnet und vertont</p></div>
+  </div>
+
+  <div class="karte geraetfoto">
+    <img src="bilder/geraet.png" alt="Runde Märchenbox mit aufgeschlagenem Märchenbuch" width="500" height="500">
+    <div>
+      <h2 data-en="The round fairy tale box">Die runde M&auml;rchenbox</h2>
+      <p class="leise" data-en="Waveshare ESP32-S3-Touch-AMOLED-1.75C: round 1.75&Prime; AMOLED (466&times;466) with touch, speaker, battery. The fairy tales fill the whole circle; you tap the top, middle or bottom of the screen.">Waveshare ESP32-S3-Touch-AMOLED-1.75C: rundes 1,75&Prime;-AMOLED (466&times;466) mit Touch, Lautsprecher und Akku. Die M&auml;rchen f&uuml;llen den ganzen Kreis; bedient wird durch Tippen oben, in der Mitte oder unten.</p>
+    </div>
   </div>
 
   <div class="karte">
@@ -56,45 +68,23 @@
   <div class="karte">
     <h2 data-en="Install">Aufspielen</h2>
     <div class="geraete">
-      <div class="geraet">
-        <div class="titel" data-en="&#9711; Round box">&#9711; Runde M&auml;rchenbox</div>
-        <small>Waveshare ESP32-S3-Touch-AMOLED-1.75C &middot; 466&times;466, Touch</small>
-        <div class="option">
-          <p data-en="New firmware &ndash; <b>Wi-Fi and settings are kept.</b> Do <b>not</b> tick &bdquo;Erase device?&ldquo;.">Neue Firmware &ndash; <b>WLAN und Einstellungen bleiben.</b> Bei &bdquo;Erase device?&ldquo; den Haken <b>nicht</b> setzen.</p>
-          <esp-web-install-button manifest="rund/manifest-update.json">
-            <button slot="activate" data-en="&#9889; Install update">&#9889; Update installieren</button>
-            <span slot="unsupported" data-en="<b>This browser can&rsquo;t do that.</b> Please use Chrome or Edge on a computer."><b>Dieser Browser kann das leider nicht.</b> Bitte Chrome oder Edge am Computer.</span>
-            <span slot="not-allowed"><b>https!</b></span>
-          </esp-web-install-button>
-        </div>
-        <div class="option loeschen">
-          <p data-en="Erase and install fresh &ndash; for <b>new boards</b>. <b>Wi-Fi and settings will be gone.</b>">L&ouml;schen und neu aufspielen &ndash; f&uuml;r <b>neue Boards</b>. <b>WLAN und Einstellungen sind danach weg.</b></p>
-          <esp-web-install-button manifest="rund/manifest-neu.json">
-            <button slot="activate" data-en="&#128465;&#65039; Erase &amp; install">&#128465;&#65039; L&ouml;schen &amp; neu installieren</button>
-            <span slot="unsupported"><b>Chrome / Edge</b></span>
-            <span slot="not-allowed"><b>https!</b></span>
-          </esp-web-install-button>
-        </div>
+      <div class="option">
+        <div class="titel" data-en="&#128260; Update">&#128260; Update</div>
+        <p data-en="New firmware &ndash; <b>Wi-Fi and settings are kept.</b> When asked &bdquo;Erase device?&ldquo;, do <b>not</b> tick the box.">Neue Firmware &ndash; <b>WLAN und Einstellungen bleiben.</b> Bei &bdquo;Erase device?&ldquo; den Haken <b>nicht</b> setzen.</p>
+        <esp-web-install-button manifest="rund/manifest-update.json">
+          <button slot="activate" data-en="&#9889; Install update">&#9889; Update installieren</button>
+          <span slot="unsupported" data-en="<b>This browser can&rsquo;t do that.</b> Please use Chrome or Edge on a computer."><b>Dieser Browser kann das leider nicht.</b> Bitte Chrome oder Edge am Computer.</span>
+          <span slot="not-allowed" data-en="<b>Only works over https.</b>"><b>Nur &uuml;ber https m&ouml;glich.</b></span>
+        </esp-web-install-button>
       </div>
-      <div class="geraet">
-        <div class="titel" data-en="&#9634; Square box">&#9634; Eckige M&auml;rchenbox</div>
-        <small data-en="Xiaozhi board &bdquo;ostb-2st&ldquo; &middot; 284&times;240, three buttons">Xiaozhi-Board &bdquo;ostb-2st&ldquo; &middot; 284&times;240, drei Kn&ouml;pfe</small>
-        <div class="option">
-          <p data-en="New firmware &ndash; <b>Wi-Fi and settings are kept.</b> Do <b>not</b> tick &bdquo;Erase device?&ldquo;.">Neue Firmware &ndash; <b>WLAN und Einstellungen bleiben.</b> Bei &bdquo;Erase device?&ldquo; den Haken <b>nicht</b> setzen.</p>
-          <esp-web-install-button manifest="eckig/manifest-update.json">
-            <button slot="activate" data-en="&#9889; Install update">&#9889; Update installieren</button>
-            <span slot="unsupported"><b>Chrome / Edge</b></span>
-            <span slot="not-allowed"><b>https!</b></span>
-          </esp-web-install-button>
-        </div>
-        <div class="option loeschen">
-          <p data-en="Erase and install fresh &ndash; for <b>new boards</b>. <b>Wi-Fi and settings will be gone.</b>">L&ouml;schen und neu aufspielen &ndash; f&uuml;r <b>neue Boards</b>. <b>WLAN und Einstellungen sind danach weg.</b></p>
-          <esp-web-install-button manifest="eckig/manifest-neu.json">
-            <button slot="activate" data-en="&#128465;&#65039; Erase &amp; install">&#128465;&#65039; L&ouml;schen &amp; neu installieren</button>
-            <span slot="unsupported"><b>Chrome / Edge</b></span>
-            <span slot="not-allowed"><b>https!</b></span>
-          </esp-web-install-button>
-        </div>
+      <div class="option loeschen">
+        <div class="titel" data-en="&#129529; Fresh install">&#129529; Neuinstallation</div>
+        <p data-en="Erase everything and install fresh &ndash; for <b>new boards</b> or when nothing works anymore. <b>Wi-Fi and settings will be gone.</b>">Speicher komplett l&ouml;schen und neu aufspielen &ndash; f&uuml;r <b>neue Boards</b> oder wenn gar nichts mehr geht. <b>WLAN und Einstellungen sind danach weg.</b></p>
+        <esp-web-install-button manifest="rund/manifest-neu.json">
+          <button slot="activate" data-en="&#128465;&#65039; Erase &amp; install">&#128465;&#65039; L&ouml;schen &amp; neu installieren</button>
+          <span slot="unsupported" data-en="<b>This browser can&rsquo;t do that.</b> Please use Chrome or Edge on a computer."><b>Dieser Browser kann das leider nicht.</b> Bitte Chrome oder Edge am Computer.</span>
+          <span slot="not-allowed" data-en="<b>Only works over https.</b>"><b>Nur &uuml;ber https m&ouml;glich.</b></span>
+        </esp-web-install-button>
       </div>
     </div>
     <p class="leise" style="text-align:center;margin:14px 0 0"><span class="chip">Version __VERSION__</span></p>
@@ -104,7 +94,7 @@
     <h2 data-en="How it works">So geht&rsquo;s</h2>
     <ol>
       <li data-en="Connect the box to the computer via <b>USB-C</b> (a cable with data lines) and open <b>Chrome</b> or <b>Edge</b>.">Box per <b>USB-C</b> mit dem Computer verbinden (Kabel mit Datenleitungen) und <b>Chrome</b> oder <b>Edge</b> &ouml;ffnen.</li>
-      <li data-en="Click the button for <b>your</b> box and pick the port (usually &bdquo;USB JTAG/serial debug unit&ldquo;) &ndash; no driver needed.">Den Knopf f&uuml;r <b>deine</b> Box klicken und den Anschluss w&auml;hlen (meist &bdquo;USB JTAG/serial debug unit&ldquo;) &ndash; ein Treiber ist nicht n&ouml;tig.</li>
+      <li data-en="Click <b>&bdquo;Install update&ldquo;</b> or <b>&bdquo;Erase &amp; install&ldquo;</b> and pick the port (usually &bdquo;USB JTAG/serial debug unit&ldquo;) &ndash; no driver needed."><b>&bdquo;Update installieren&ldquo;</b> oder <b>&bdquo;L&ouml;schen &amp; neu installieren&ldquo;</b> klicken und den Anschluss w&auml;hlen (meist &bdquo;USB JTAG/serial debug unit&ldquo;) &ndash; ein Treiber ist nicht n&ouml;tig.</li>
       <li data-en="No connection? Hold <b>BOOT</b>, briefly press <b>RESET</b>, release BOOT &ndash; try again.">Keine Verbindung? <b>BOOT</b> gedr&uuml;ckt halten, kurz <b>RESET</b> dr&uuml;cken, BOOT loslassen &ndash; nochmal versuchen.</li>
       <li data-en="After flashing, the fairy tale book opens. <b>Wi-Fi</b> (for the clock and updates) is set up by the parents: open the settings, choose &bdquo;WLAN einrichten&ldquo; and connect your phone to <b>&bdquo;M&auml;rchenbox-Setup&ldquo;</b>.">Nach dem Aufspielen klappt das M&auml;rchenbuch auf. Das <b>WLAN</b> (f&uuml;r Uhrzeit und Updates) richten die Eltern ein: Einstellungen &ouml;ffnen, &bdquo;WLAN einrichten&ldquo; w&auml;hlen und mit dem Handy ins WLAN <b>&bdquo;M&auml;rchenbox-Setup&ldquo;</b> gehen.</li>
     </ol>
@@ -112,10 +102,12 @@
 
   <div class="karte">
     <h2 data-en="Controls">Bedienung</h2>
-    <div class="merkmale" data-en="<span><b>Round box (touch):</b> top third = louder / page back, middle = start (double tap = next tale, hold = book), bottom third = quieter / page on. Hold <b>BOOT</b> 3&nbsp;s = settings for parents.</span><span><b>Square box (buttons):</b> top = louder, middle = start (twice = next tale, hold = book), bottom = quieter. Hold <b>louder + quieter</b> 3&nbsp;s = settings for parents.</span>">
-      <span><b>Runde Box (Touch):</b> oberes Drittel = lauter / zur&uuml;ckbl&auml;ttern, Mitte = Start (doppelt tippen = n&auml;chstes M&auml;rchen, halten = Buch), unteres Drittel = leiser / weiterbl&auml;ttern. <b>BOOT</b> 3&nbsp;s halten = Einstellungen f&uuml;r Eltern.</span>
-      <span><b>Eckige Box (Kn&ouml;pfe):</b> oben = lauter, Mitte = Start (2&times; = n&auml;chstes M&auml;rchen, halten = Buch), unten = leiser. <b>Lauter + Leiser</b> 3&nbsp;s halten = Einstellungen f&uuml;r Eltern.</span>
-    </div>
+    <ol data-en="<li>Tap the <b>top third</b>: louder &ndash; in the book: page back.</li><li>Tap the <b>middle</b>: start or pause &ndash; tap twice: next tale, hold: back to the book.</li><li>Tap the <b>bottom third</b>: quieter &ndash; in the book: page on.</li><li>Hold <b>BOOT</b> for 3&nbsp;s: settings for parents (maximum volume, brightness, reading speed, usage times, Wi-Fi) &ndash; also wakes the box at night.</li>">
+      <li><b>Oberes Drittel</b> tippen: lauter &ndash; im Buch zur&uuml;ckbl&auml;ttern.</li>
+      <li><b>Mitte</b> tippen: Start oder Pause &ndash; doppelt tippen: n&auml;chstes M&auml;rchen, halten: zur&uuml;ck ins Buch.</li>
+      <li><b>Unteres Drittel</b> tippen: leiser &ndash; im Buch weiterbl&auml;ttern.</li>
+      <li><b>BOOT</b> 3&nbsp;s halten: Einstellungen f&uuml;r Eltern (H&ouml;chstlautst&auml;rke, Helligkeit, Lesetempo, Nutzungszeiten, WLAN) &ndash; weckt die Box auch nachts.</li>
+    </ol>
   </div>
 
   <div class="karte">

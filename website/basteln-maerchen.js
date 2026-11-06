@@ -50,9 +50,9 @@ function maerchenEinbauen(raw) {
 var MAERCHEN_SEITE = 'https://prod-byte.github.io/Maerchenbox';
 var MAERCHEN_GH = '<a href="https://github.com/ProD-byte/Maerchenbox" target="_blank" rel="noopener">GitHub</a>';
 
-var MAERCHEN_KARTE = `<a class="dl-karte" href="#maerchen" data-p="maerchen" aria-expanded="false"><span class="ic">📖</span><h3>Märchenbox</h3><p data-t="k_maerchen">30 Märchen als Spieluhr-Filme – live gezeichnet und vertont.</p><small>ESP32-S3 · rund oder eckig</small><span class="auf-zu" data-t="k_auf">Öffnen</span></a>`;
+var MAERCHEN_KARTE = `<a class="dl-karte" href="#maerchen" data-p="maerchen" aria-expanded="false"><span class="ic">📖</span><h3>Märchenbox</h3><p data-t="k_maerchen">30 Märchen als Spieluhr-Filme – live gezeichnet und vertont.</p><small>Waveshare AMOLED 1.75C · rund</small><span class="auf-zu" data-t="k_auf">Öffnen</span></a>`;
 
-// zwei Flasher-Paare (rund / eckig) im Stil der anderen Projekte
+// Flasher-Paar (Update / Neuinstallation) im Stil der anderen Projekte
 function maerchenFlasher(ordner, titelKey, titel, boardKey, board) {
   return `      <h3 class="rv" style="margin:26px 0 4px" data-t="${titelKey}">${titel}</h3>
       <p class="dl-sub rv" style="margin:0 0 12px" data-t="${boardKey}">${board}</p>
@@ -84,16 +84,16 @@ var MAERCHEN_BILDER = ['buch', 'schneiderlein', 'rotkaeppchen', 'bremen', 'rapun
 var MAERCHEN_ABSCHNITT = `  <section class="dl-sec" id="maerchen">
     <div class="dl-wrap">
       <h2 class="dl-h2 rv" data-t="mae_h2">Märchenbox <span class="dl-grad">installieren</span></h2>
-      <p class="dl-sub rv"><span data-t="mae_sub">30 Märchen als Spieluhr-Filme, die die Box live zeichnet und vertont – mit Märchenbuch, Sprechblasen zum Mitlesen und Einstellungen für Eltern. Läuft auf dem <b>runden Waveshare-AMOLED</b> (Touch) und auf dem <b>eckigen Xiaozhi-Board</b> (drei Knöpfe).</span> <span id="dl-ver-maerchen"></span></p>
+      <p class="dl-sub rv"><span data-t="mae_sub">30 Märchen als Spieluhr-Filme, die die Box live zeichnet und vertont – mit Märchenbuch, Sprechblasen zum Mitlesen und Einstellungen für Eltern. Für das runde <b>Waveshare ESP32-S3-Touch-AMOLED-1.75C</b> – die Märchen füllen den ganzen Kreis, bedient wird per Touch.</span> <span id="dl-ver-maerchen"></span></p>
+      <div class="rv" style="display:flex;justify-content:center;margin:4px 0 18px"><img src="${MAERCHEN_SEITE}/bilder/geraet.png" alt="Runde Märchenbox" loading="lazy" style="width:min(300px,80%);height:auto;filter:drop-shadow(0 18px 34px rgba(0,0,0,.6))"></div>
       <div class="rv" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin:6px 0 10px">${MAERCHEN_BILDER}</div>
 ${maerchenFlasher('rund', 'mae_rund_h', '◯ Runde Märchenbox', 'mae_rund_b', 'Waveshare ESP32-S3-Touch-AMOLED-1.75C · 466 × 466, Touch')}
-${maerchenFlasher('eckig', 'mae_eckig_h', '▢ Eckige Märchenbox', 'mae_eckig_b', 'Xiaozhi-Board „ostb-2st“ · 284 × 240, drei Knöpfe')}
       <ol class="dl-schritte" style="margin-top:28px">
         <li class="rv" data-t="mae_s1"><b>Box anschließen.</b> Per <b>USB-C</b> mit dem Computer verbinden (Kabel mit Datenleitungen) und <b>Chrome</b> oder <b>Edge</b> öffnen.</li>
-        <li class="rv" data-t="mae_s2"><b>Richtigen Knopf wählen.</b> Den Knopf für <b>deine</b> Box klicken und den Anschluss wählen – meist „USB JTAG/serial debug unit“, ein Treiber ist nicht nötig.</li>
+        <li class="rv" data-t="mae_s2"><b>Aufspielen.</b> „Update installieren“ oder „Löschen &amp; neu installieren“ klicken und den Anschluss wählen – meist „USB JTAG/serial debug unit“, ein Treiber ist nicht nötig.</li>
         <li class="rv" data-t="mae_s3"><b>Keine Verbindung?</b> <b>BOOT</b> gedrückt halten, kurz <b>RESET</b> drücken, BOOT loslassen – nochmal versuchen.</li>
-        <li class="rv" data-t="mae_s4"><b>Bedienen.</b> Rund: oben tippen = lauter / zurückblättern, Mitte = Start (doppelt = nächstes Märchen, halten = Buch), unten = leiser / weiterblättern. Eckig: dieselben drei Knöpfe von oben nach unten.</li>
-        <li class="rv" data-t="mae_s5"><b>Für Eltern.</b> Rund: <b>BOOT</b> 3 Sekunden halten, eckig: <b>Lauter + Leiser</b> 3 Sekunden halten – dort Höchstlautstärke, Helligkeit, Nutzungszeiten und das <b>WLAN</b> (Handy ins WLAN „Märchenbox-Setup“).</li>
+        <li class="rv" data-t="mae_s4"><b>Bedienen.</b> Oben tippen = lauter / zurückblättern, Mitte = Start (doppelt = nächstes Märchen, halten = Buch), unten = leiser / weiterblättern.</li>
+        <li class="rv" data-t="mae_s5"><b>Für Eltern.</b> <b>BOOT</b> 3 Sekunden halten – dort Höchstlautstärke, Helligkeit, Nutzungszeiten und das <b>WLAN</b> (Handy ins WLAN „Märchenbox-Setup“).</li>
       </ol>
       <div class="dl-auto rv">
         <div>
@@ -110,18 +110,16 @@ var MAERCHEN_SKRIPT = `fetch('${MAERCHEN_SEITE}/version.json',{cache:'no-store'}
 var MAERCHEN_EN = [
   `k_maerchen:'30 fairy tales as music-box films – drawn and set to music live.'`,
   `mae_h2:'Install the <span class="dl-grad">fairy tale box</span>'`,
-  `mae_sub:'30 fairy tales as music-box films that the box draws and sets to music live – with a fairy tale book, speech bubbles to read along and settings for parents. Runs on the <b>round Waveshare AMOLED</b> (touch) and on the <b>square Xiaozhi board</b> (three buttons).'`,
+  `mae_sub:'30 fairy tales as music-box films that the box draws and sets to music live – with a fairy tale book, speech bubbles to read along and settings for parents. For the round <b>Waveshare ESP32-S3-Touch-AMOLED-1.75C</b> – the fairy tales fill the whole circle, controlled by touch.'`,
   `mae_rund_h:'◯ Round fairy tale box'`,
   `mae_rund_b:'Waveshare ESP32-S3-Touch-AMOLED-1.75C · 466 × 466, touch'`,
-  `mae_eckig_h:'▢ Square fairy tale box'`,
-  `mae_eckig_b:'Xiaozhi board “ostb-2st” · 284 × 240, three buttons'`,
   `mae_upd_p:'Install new firmware – <b>Wi-Fi and settings are kept.</b> When asked “Erase device?”, do <b>not</b> tick the box.'`,
   `mae_neu_p:'Erase everything and install from scratch – for <b>new boards</b> or when nothing works anymore. <b>Wi-Fi and settings will be gone.</b>'`,
   `mae_s1:'<b>Connect the box.</b> Plug it into the computer via <b>USB-C</b> (a cable with data lines) and open <b>Chrome</b> or <b>Edge</b>.'`,
-  `mae_s2:'<b>Pick the right button.</b> Click the button for <b>your</b> box and select the port – usually “USB JTAG/serial debug unit”, no driver needed.'`,
+  `mae_s2:'<b>Flash it.</b> Click “Install update” or “Erase &amp; install” and select the port – usually “USB JTAG/serial debug unit”, no driver needed.'`,
   `mae_s3:'<b>No connection?</b> Hold <b>BOOT</b>, briefly press <b>RESET</b>, release BOOT – try again.'`,
-  `mae_s4:'<b>Controls.</b> Round: tap top = louder / page back, middle = start (double = next tale, hold = book), bottom = quieter / page on. Square: the same three buttons from top to bottom.'`,
-  `mae_s5:'<b>For parents.</b> Round: hold <b>BOOT</b> for 3 seconds, square: hold <b>louder + quieter</b> for 3 seconds – there you set maximum volume, brightness, usage times and <b>Wi-Fi</b> (phone to the Wi-Fi “Märchenbox-Setup”).'`,
+  `mae_s4:'<b>Controls.</b> Tap top = louder / page back, middle = start (double = next tale, hold = book), bottom = quieter / page on.'`,
+  `mae_s5:'<b>For parents.</b> Hold <b>BOOT</b> for 3 seconds – there you set maximum volume, brightness, usage times and <b>Wi-Fi</b> (phone to the Wi-Fi “Märchenbox-Setup”).'`,
   `mae_auto_h:'📖 Everything on one page'`,
   `mae_auto_p:'Flasher, pictures and controls of the fairy tale box on a page of its own. Source code and guide: ${MAERCHEN_GH}.'`,
   `mae_auto_btn:'Open page →'`,

@@ -1,7 +1,6 @@
 # ============================================================
-#  Baut die Firmware fuer beide Maerchenboxen bei jedem Hochladen (Push):
-#    eckig = Xiaozhi-Board "ostb-2st" (16 MB)   -> pio-Umgebung ostb2st
-#    rund  = Waveshare ESP32-S3-Touch-AMOLED-1.75C (32 MB) -> pio-Umgebung rund
+#  Baut die Firmware der runden Maerchenbox bei jedem Hochladen (Push):
+#    Waveshare ESP32-S3-Touch-AMOLED-1.75C (32 MB) -> pio-Umgebung rund
 #  - Ergebnis zum Herunterladen unter "Actions" -> Lauf anklicken -> Artifacts
 #  - Der Online-Flasher (GitHub Pages) wird mit der neuesten Firmware aktualisiert;
 #    daveslab.de/basteln holt sich dort Flasher-Dateien, Bilder und Build-Nummer.
@@ -46,15 +45,15 @@ jobs:
           mkdir -p ../Himmelsstation
           printf '[geheim]\nota_passwort =\n' > ../Himmelsstation/geheim.ini
 
-      - name: Firmware bauen (beide Boxen)
-        run: pio run -e ostb2st -e rund
+      - name: Firmware bauen (runde Box)
+        run: pio run -e rund
 
       - name: Flasher-Dateien zusammenstellen
         run: |
           BOOT_APP0=$(find ~/.platformio/packages/framework-arduinoespressif32 -name boot_app0.bin | head -n 1)
           mkdir -p seite
           cp -r docs/* seite/
-          for paar in "ostb2st:eckig:16MB" "rund:rund:32MB"; do
+          for paar in "rund:rund:32MB"; do
             IFS=: read ENV ZIEL GROESSE <<< "$paar"
             B=.pio/build/$ENV
             mkdir -p seite/$ZIEL

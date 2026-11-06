@@ -591,11 +591,12 @@ die Chips) und die Board-Dateien der Xiaozhi-Firmware (`main/boards/waveshare/es
 
 ## Online-Flasher und daveslab.de/basteln
 
-Bei jedem Hochladen nach `master` baut GitHub Actions (`.github/workflows/build.yml`) beide Boxen und stellt den
+Bei jedem Hochladen nach `master` baut GitHub Actions (`.github/workflows/build.yml`) die **runde** Box und stellt den
 Online-Flasher auf GitHub Pages bereit: **https://prod-byte.github.io/Maerchenbox/** (Seite aus `docs/`, Firmware in
-`rund/` und `eckig/`, je „Update“ = Einzelteile, WLAN und Einstellungen bleiben, und „Neuinstallation“ = alles in
-einer Datei ab 0x0). `version.json` trägt die Build-Nummer. Die Bilder in `docs/bilder/` sind Bildschirmfotos des
-runden Boards (USB-Befehl `F`).
+`rund/`: „Update“ = Einzelteile, WLAN und Einstellungen bleiben; „Neuinstallation“ = alles in einer Datei ab 0x0).
+Die eckige Box gibt es dort bewusst nicht. `version.json` trägt die Build-Nummer. Die Bilder in `docs/bilder/` sind
+Bildschirmfotos des runden Boards (USB-Befehl `F`); `geraet.png` ist das Waveshare-Produktfoto mit eingesetztem
+Märchenbuch und durchsichtigem Hintergrund.
 Einmalig nötig: im Repo **Settings → Pages → Source: GitHub Actions**. Boxen aus dem Online-Flasher nehmen
 Updates über WLAN ohne Passwort an (in GitHub gibt es die `geheim.ini` nicht).
 
