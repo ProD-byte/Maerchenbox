@@ -1653,6 +1653,55 @@ static void fotoUeberUsb() {
   zustand = alt; auswahl = altA; buchSeite = altS; einstPos = altP; einstZiel = altZ; einstAnim = altAn;
   pausiert = altPaus; pauseZeit = altPz; blattSeit = altBlatt; buchAuf = altAuf;
 }
+
+// Videobild ueber USB (fuer Trailer): "V <m> <zustand> <zeit> <seite> <uhr> <auf> <blatt> <anim> <flug> <ruhe> <leucht>"
+//   auf   = ms seit dem Aufklappen des Buchs (-1 = offen)      blatt = Umblaettern 0..1 (negativ = zurueck, 0 = nicht)
+//   anim  = Stellung des Drehrads in den Einstellungen          flug  = ms seit dem Flug vom Cover ins Maerchen (-1 = keiner)
+//   ruhe  = ms seit der letzten Beruehrung (Touch-Zeichen)      leucht = 1 oben, 2 Mitte, 3 unten leuchtet gerade auf
+static void videoBildUeberUsb() {
+  int m = Serial.parseInt(), z = Serial.parseInt();
+  float t = Serial.parseFloat();
+  int seite = Serial.parseInt();
+  float uhr = Serial.parseFloat();
+  int auf = Serial.parseInt();
+  float blatt = Serial.parseFloat(), anim = Serial.parseFloat();
+  int flug = Serial.parseInt(), ruhe = Serial.parseInt(), leucht = Serial.parseInt();
+  Zustand alt = zustand;
+  int altA = auswahl, altS = buchSeite, altP = einstPos, altZ = einstZiel, altN = blattNach;
+  float altAn = einstAnim, altPz = pauseZeit;
+  bool altPaus = pausiert, altVor = blattVor;
+  uint32_t altBlatt = blattSeit, altAuf = buchAuf, altFlug = flugIns, altZur = flugZurueck, altT = letzteTaste,
+           altZs = zustandSeit, a1 = tasteOben, a2 = tasteMitte, a3 = tasteUnten;
+  bildMs = millis();
+  auswahl = constrain(m, 0, ANZAHL - 1);
+  zustand = (Zustand)constrain(z, 0, (int)SCHLAF);
+  buchSeite = constrain(seite, 0, ANZAHL - 1);
+  einstAnim = anim;
+  einstPos = einstZiel = (((int)lroundf(anim)) % EINST_PUNKTE + EINST_PUNKTE) % EINST_PUNKTE;
+  buchAuf = auf >= 0 ? bildMs - (uint32_t)auf : 0;
+  if (blatt != 0) {
+    blattVor = blatt > 0;
+    blattNach = (buchSeite + (blattVor ? 1 : -1) + SEITEN) % SEITEN;
+    blattSeit = bildMs - (uint32_t)(fabsf(blatt) * BLATT_MS);
+  } else blattSeit = 0;
+  flugIns = flug >= 0 ? bildMs - (uint32_t)flug : 0;
+  flugZurueck = 0;
+  letzteTaste = zustandSeit = millis() - (uint32_t)(ruhe < 0 ? 0 : ruhe);
+  tasteOben = leucht == 1 ? millis() : 0; tasteMitte = leucht == 2 ? millis() : 0; tasteUnten = leucht == 3 ? millis() : 0;
+  pausiert = false;
+  if (zustand == SPIELT && t < 0) { pausiert = true; pauseZeit = -t; t = -t; }
+  Serial.print("FOTO\n");
+  for (int s = 0; s < lcd::ANZAHL; s++) {
+    g.streifen(fotoPuffer, s * lcd::STREIFEN, (s + 1) * lcd::STREIFEN);
+    g.kameraAus(); g.wackeln(0, 0); g.ausschnittAus(); g.konturAus();
+    zeichneInhalt(g, t, uhr);
+    Serial.write((const uint8_t *)fotoPuffer, sizeof fotoPuffer);
+  }
+  Serial.flush();
+  zustand = alt; auswahl = altA; buchSeite = altS; einstPos = altP; einstZiel = altZ; einstAnim = altAn; blattNach = altN;
+  pausiert = altPaus; pauseZeit = altPz; blattSeit = altBlatt; buchAuf = altAuf; blattVor = altVor;
+  flugIns = altFlug; flugZurueck = altZur; letzteTaste = altT; zustandSeit = altZs; tasteOben = a1; tasteMitte = a2; tasteUnten = a3;
+}
 #endif
 
 // Messtest: was kostet welche Form? (ein ganzes Bild in 4 Streifen)
@@ -2115,6 +2164,8 @@ void loop() {
     int c = Serial.read();
     if (c == 'P') pruefen();
     else if (c == 'F') fotoUeberUsb();
+    else if (c == 'V') videoBildUeberUsb();
+    else if (c == 'E') { spracheSetzen(true); Serial.println("Sprache: Englisch"); }  // fest Englisch (fuer Videos)
     else if (c == 'S') { spracheSetzen(!englisch); Serial.println(englisch ? "Sprache: Englisch" : "Sprache: Deutsch"); }  // nur zum Pruefen, wird nicht gespeichert
   }
 #endif

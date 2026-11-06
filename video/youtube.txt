@@ -1,0 +1,36 @@
+TITLE
+Fairy Tale Box - 30 animated fairy tales on a round ESP32 display (DIY, no coding)
+
+DESCRIPTION
+30 classic fairy tales as little music-box films - drawn live and set to music by a tiny ESP32-S3 with a round 1.75" AMOLED touch display. Red Riding Hood, the Brave Little Tailor, the Town Musicians of Bremen, Rapunzel, Cinderella and many more, with speech bubbles to read along, a fairy tale book to browse and settings for parents. In English or German.
+
+Build your own in about 5 minutes - no coding, no software to install: flash it straight from your browser.
+
+What you need:
+- Waveshare ESP32-S3-Touch-AMOLED-1.75C
+- a USB-C cable with data lines
+- a computer with Chrome or Edge
+
+Flash it here: https://daveslab.de/basteln/
+Online flasher: https://prod-byte.github.io/Maerchenbox/
+Source code (free & open source): https://github.com/ProD-byte/Maerchenbox
+
+Chapters
+0:00 Intro
+0:10 30 fairy tales
+0:30 What it can do
+0:37 Step 1 - What you need
+0:47 Step 2 - Flash it from your browser
+1:02 Step 3 - First start
+1:15 Step 4 - Controls
+1:32 Step 5 - For parents
+1:47 Step 6 - Wi-Fi (optional)
+1:57 Bedtime built in
+2:05 Fairy Tale Box
+
+All pictures in this video come from the real device. Music: original, generated for this video.
+
+#ESP32 #FairyTales #DIY #Maker #AMOLED #Waveshare #KidsProject #OpenSource
+
+TAGS
+ESP32, ESP32-S3, Waveshare, AMOLED, round display, fairy tales, fairy tale box, music box, DIY, maker, kids, bedtime, open source, web flasher, no coding, Grimm, Andersen

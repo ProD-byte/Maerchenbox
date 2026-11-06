@@ -1,0 +1,20 @@
+[
+{"name": "buch_auf", "bilder": 60, "fps": 15, "z": 2, "seite": 0, "auf0": 0, "uhr0": 1, "ruhe": 99999},
+{"name": "t_schneider", "bilder": 40, "fps": 15, "m": 0, "z": 1, "t0": 105.0},
+{"name": "t_rotkaeppchen", "bilder": 40, "fps": 15, "m": 9, "z": 1, "t0": 39.0},
+{"name": "t_bremen", "bilder": 40, "fps": 15, "m": 10, "z": 1, "t0": 175.4},
+{"name": "t_rapunzel", "bilder": 40, "fps": 15, "m": 5, "z": 1, "t0": 73.0},
+{"name": "t_sterntaler", "bilder": 40, "fps": 15, "m": 16, "z": 1, "t0": 19.0},
+{"name": "t_maxmoritz", "bilder": 40, "fps": 15, "m": 8, "z": 1, "t0": 29.0},
+{"name": "t_schweinchen", "bilder": 40, "fps": 15, "m": 22, "z": 1, "t0": 29.0},
+{"name": "t_cinderella", "bilder": 40, "fps": 15, "m": 7, "z": 1, "t0": 52.0},
+{"name": "blatt", "bilder": 9, "fps": 15, "z": 2, "seite": 0, "blatt0": 0.02, "blatt1": 0.98, "uhr0": 3, "ruhe": 0, "leucht": 3},
+{"name": "seite2", "bilder": 15, "fps": 15, "z": 2, "seite": 1, "uhr0": 4, "ruhe": 200, "ruhe_laeuft": true},
+{"name": "flug", "bilder": 12, "fps": 15, "m": 1, "z": 1, "seite": 1, "t0": 0, "flug0": 0, "uhr0": 5},
+{"name": "film_start", "bilder": 60, "fps": 15, "m": 1, "z": 1, "t0": 0.8, "uhr0": 6},
+{"name": "buch_hinweise", "bilder": 30, "fps": 15, "z": 2, "seite": 0, "uhr0": 2, "ruhe": 0, "ruhe_laeuft": true},
+{"name": "einstellungen", "bilder": 120, "fps": 15, "z": 5, "anim0": 0, "anim1": 7, "uhr0": 1},
+{"name": "wlan", "bilder": 30, "fps": 15, "z": 3, "uhr0": 1},
+{"name": "gutenacht", "bilder": 60, "fps": 15, "z": 6, "uhr0": 1},
+{"name": "schluss", "bilder": 75, "fps": 15, "m": 6, "z": 1, "t0": 263.0}
+]
