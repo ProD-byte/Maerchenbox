@@ -45,6 +45,7 @@ for c in clips:
         blatt = c.get('blatt0', 0) + (c.get('blatt1', c.get('blatt0', 0)) - c.get('blatt0', 0)) * u
         anim = c.get('anim0', 0) + (c.get('anim1', c.get('anim0', 0)) - c.get('anim0', 0)) * u
         ruhe = c.get('ruhe', 99999); ruhe = int(ruhe + sek * 1000) if c.get('ruhe_laeuft') else ruhe
-        cmd = f"V {c.get('m',0)} {c.get('z',1)} {t:.4f} {c.get('seite',0)} {uhr:.4f} {auf} {blatt:.4f} {anim:.4f} {flug} {ruhe} {c.get('leucht',0)}\n"
+        prozent = int(c.get('p0', 0) + (c.get('p1', c.get('p0', 0)) - c.get('p0', 0)) * u)
+        cmd = f"V {c.get('m',0)} {c.get('z',1)} {t:.4f} {c.get('seite',0)} {uhr:.4f} {auf} {blatt:.4f} {anim:.4f} {flug} {ruhe} {c.get('leucht',0)} {prozent}\n"
         open(datei, 'wb').write(bild(cmd))
     print(c['name'], n, 'Bilder', round(time.time() - start, 1), 's', flush=True)

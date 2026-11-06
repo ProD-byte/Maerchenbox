@@ -1,8 +1,8 @@
-"""Musik fuer den Maerchenbox-Trailer: warmes Spieluhr-Stueck in G-Dur, 96 BPM (Takt = 2,5 s), 54 Takte + Ausklang.
+"""Musik fuer den Maerchenbox-Trailer: warmes Spieluhr-Stueck in G-Dur, 96 BPM (Takt = 2,5 s), 58 Takte + Ausklang.
 
 Komplett synthetisch (keine Samples) - frei im Video verwendbar.
 Takte: 0-1 Intro (Spieluhr allein) | 2-3 Titel | 4-11 Teaser (voll, sanfter Rhythmus) | 12-13 Merkmale |
-14 Uebergang | 15-49 Tutorial (ruhig, Harfe) | 50-52 Abspann (Thema voll) | 53 Schlussakkord (klingt aus).
+14 Uebergang | 15-53 Tutorial (ruhig, Harfe) | 54-56 Abspann (Thema voll) | 57 Schlussakkord (klingt aus).
 Aufruf: python musik.py ausgabe.wav
 """
 import sys, wave
@@ -12,7 +12,7 @@ SR = 44100
 BPM = 96
 BEAT = 60 / BPM
 BAR = 4 * BEAT          # 2,5 s
-TAKTE = 54
+TAKTE = 58
 N = int((TAKTE * BAR + 6) * SR)
 rng = np.random.default_rng(11)
 L = np.zeros(N); R = np.zeros(N); HALL = np.zeros(N)
@@ -92,9 +92,9 @@ AKK = {'G': [55, 59, 62], 'Em': [52, 55, 59], 'C': [48, 52, 55], 'D': [50, 54, 5
 FOLGE = ['G', 'Em', 'C', 'D']
 GRUND = {'G': 43, 'Em': 40, 'C': 36, 'D': 38, 'Am': 45}
 def akkord(takt):
-    if takt == 51: return 'C'
-    if takt == 52: return 'D'
-    if takt >= 53: return 'G'
+    if takt == 55: return 'C'
+    if takt == 56: return 'D'
+    if takt >= 57: return 'G'
     return FOLGE[takt % 4]
 
 # Thema (8 Takte, Viertel = 1): Tonhoehe, Start in Schlaegen, Laenge
@@ -110,26 +110,26 @@ for takt in range(TAKTE):
     t0 = takt * BAR
     a = akkord(takt)
     teaser = 4 <= takt <= 13
-    tutorial = 15 <= takt <= 49
-    abspann = takt >= 50
+    tutorial = 15 <= takt <= 53
+    abspann = takt >= 54
     # Flaeche (ab Takt 1)
     if takt >= 1 and takt != 14:
-        laenge = BAR + (3.5 if takt == 53 else 0.15)
+        laenge = BAR + (3.5 if takt == 57 else 0.15)
         setze(flaeche([x + 12 for x in AKK[a]], laenge), t0, pan=-0.2, hall=0.5, vol=1.15 if teaser or abspann else 0.85)
     # Bass
     if takt >= 2 and takt != 14:
-        if takt == 53: setze(bass(GRUND[a], 5.5), t0, vol=1.1)
+        if takt == 57: setze(bass(GRUND[a], 5.5), t0, vol=1.1)
         else:
             setze(bass(GRUND[a], BEAT * 2), t0); setze(bass(GRUND[a] + (7 if teaser else 0), BEAT * 2), t0 + 2 * BEAT, vol=0.85)
     # Harfen-Arpeggio (Achtel)
-    if (takt >= 2 and takt <= 13) or tutorial or (50 <= takt <= 52):
+    if (takt >= 2 and takt <= 13) or tutorial or (54 <= takt <= 56):
         ton = AKK[a] + [AKK[a][0] + 12, AKK[a][1] + 12, AKK[a][2] + 12]
         muster = [0, 1, 2, 3, 4, 3, 2, 1]
         for k, i in enumerate(muster):
             setze(harfe(ton[i] + 12, 1.6), t0 + k * BEAT / 2, pan=0.35 if k % 2 else -0.1, hall=0.35,
                   vol=0.75 if tutorial else 1.0)
     # sanfter Rhythmus im Teaser und im Abspann
-    if teaser or (50 <= takt <= 52):
+    if teaser or (54 <= takt <= 56):
         for b in (0, 2):
             setze(kick(), t0 + b * BEAT, hall=0.05, vol=0.9 if teaser else 0.7)
         for k in range(8):
@@ -142,15 +142,15 @@ thema(0, vol=0.9)            # Intro + Titel (8 Takte Thema laufen bis in den Te
 thema(8, oktave=0, vol=1.0)  # Teaser zweite Haelfte
 for s in (16, 24, 32, 40):   # Tutorial: Thema leise, eine Oktave hoeher, mit Pausen
     thema(s, oktave=1, vol=0.45, pan=-0.25)
-thema(46, vol=0.95)          # Abspann (endet auf G in Takt 53)
+thema(50, vol=0.95)          # Abspann (endet auf G in Takt 53)
 
 # Feenstaub und Glocken an den Uebergaengen
 funkeln(0.2, 4.5, 6)
 funkeln(4 * BAR - 1.0, 1.5, 18)
 funkeln(14 * BAR, BAR, 14)
-for t in (4 * BAR, 12 * BAR, 15 * BAR, 50 * BAR):
+for t in (4 * BAR, 12 * BAR, 15 * BAR, 47 * BAR, 54 * BAR):
     setze(glocke(79), t, hall=0.7, vol=0.8); setze(glocke(86), t + 0.02, hall=0.7, vol=0.5)
-setze(glocke(67), 53 * BAR, hall=0.8, vol=1.0); setze(glocke(74), 53 * BAR, hall=0.8, vol=0.7); setze(glocke(79), 53 * BAR + 0.03, hall=0.8, vol=0.6)
+setze(glocke(67), 57 * BAR, hall=0.8, vol=1.0); setze(glocke(74), 57 * BAR, hall=0.8, vol=0.7); setze(glocke(79), 57 * BAR + 0.03, hall=0.8, vol=0.6)
 # Uebergang Takt 14: Rauschen schwillt an
 n = int(BAR * SR); t = zeit(n); w = rng.standard_normal(n)
 w = np.convolve(w, np.ones(30) / 30, mode='same') * (t / BAR) ** 2 * 0.25

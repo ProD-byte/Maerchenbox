@@ -16,5 +16,6 @@
 {"name": "einstellungen", "bilder": 120, "fps": 15, "z": 5, "anim0": 0, "anim1": 7, "uhr0": 1},
 {"name": "wlan", "bilder": 30, "fps": 15, "z": 3, "uhr0": 1},
 {"name": "gutenacht", "bilder": 60, "fps": 15, "z": 6, "uhr0": 1},
+{"name": "update", "bilder": 75, "fps": 15, "z": 4, "p0": 2, "p1": 100, "uhr0": 1},
 {"name": "schluss", "bilder": 75, "fps": 15, "m": 6, "z": 1, "t0": 263.0}
 ]

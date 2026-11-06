@@ -2,7 +2,7 @@ TITLE
 Fairy Tale Box - 30 animated fairy tales on a round ESP32 display (DIY, no coding)
 
 DESCRIPTION
-30 classic fairy tales as little music-box films - drawn live and set to music by a tiny ESP32-S3 with a round 1.75" AMOLED touch display. Red Riding Hood, the Brave Little Tailor, the Town Musicians of Bremen, Rapunzel, Cinderella and many more, with speech bubbles to read along, a fairy tale book to browse and settings for parents. In English or German.
+30 classic fairy tales as little music-box films - drawn live and set to music by a tiny ESP32-S3 with a round 1.75" AMOLED touch display. Red Riding Hood, the Brave Little Tailor, the Town Musicians of Bremen, Rapunzel, Cinderella and many more, with speech bubbles to read along, a fairy tale book to browse and settings for parents. In English or German. New fairy tales arrive by themselves over the internet - more are on the way.
 
 Build your own in about 5 minutes - no coding, no software to install: flash it straight from your browser.
 
@@ -25,8 +25,9 @@ Chapters
 1:15 Step 4 - Controls
 1:32 Step 5 - For parents
 1:47 Step 6 - Wi-Fi (optional)
-1:57 Bedtime built in
-2:05 Fairy Tale Box
+1:57 Always new fairy tales (updates over the internet)
+2:07 Bedtime built in
+2:15 Fairy Tale Box
 
 All pictures in this video come from the real device. Music: original, generated for this video.
 

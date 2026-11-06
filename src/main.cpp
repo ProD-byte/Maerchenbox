@@ -1663,7 +1663,7 @@ static void fotoUeberUsb() {
   pausiert = altPaus; pauseZeit = altPz; blattSeit = altBlatt; buchAuf = altAuf;
 }
 
-// Videobild ueber USB (fuer Trailer): "V <m> <zustand> <zeit> <seite> <uhr> <auf> <blatt> <anim> <flug> <ruhe> <leucht>"
+// Videobild ueber USB (fuer Trailer): "V <m> <zustand> <zeit> <seite> <uhr> <auf> <blatt> <anim> <flug> <ruhe> <leucht> <prozent>"
 //   auf   = ms seit dem Aufklappen des Buchs (-1 = offen)      blatt = Umblaettern 0..1 (negativ = zurueck, 0 = nicht)
 //   anim  = Stellung des Drehrads in den Einstellungen          flug  = ms seit dem Flug vom Cover ins Maerchen (-1 = keiner)
 //   ruhe  = ms seit der letzten Beruehrung (Touch-Zeichen)      leucht = 1 oben, 2 Mitte, 3 unten leuchtet gerade auf
@@ -1675,6 +1675,9 @@ static void videoBildUeberUsb() {
   int auf = Serial.parseInt();
   float blatt = Serial.parseFloat(), anim = Serial.parseFloat();
   int flug = Serial.parseInt(), ruhe = Serial.parseInt(), leucht = Serial.parseInt();
+  int prozent = Serial.parseInt();  // Fortschritt fuer das Update-Bild (zustand 4); 0 = leer
+  int altProzent = updateProzent;
+  updateProzent = prozent;
   Zustand alt = zustand;
   int altA = auswahl, altS = buchSeite, altP = einstPos, altZ = einstZiel, altN = blattNach;
   float altAn = einstAnim, altPz = pauseZeit;
@@ -1710,6 +1713,7 @@ static void videoBildUeberUsb() {
   zustand = alt; auswahl = altA; buchSeite = altS; einstPos = altP; einstZiel = altZ; einstAnim = altAn; blattNach = altN;
   pausiert = altPaus; pauseZeit = altPz; blattSeit = altBlatt; buchAuf = altAuf; blattVor = altVor;
   flugIns = altFlug; flugZurueck = altZur; letzteTaste = altT; zustandSeit = altZs; tasteOben = a1; tasteMitte = a2; tasteUnten = a3;
+  updateProzent = altProzent;
 }
 #endif
 

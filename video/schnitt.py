@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
 BW, BH, FPS = 1920, 1080, 30
 BAR = 2.5
-DAUER = 54 * BAR + 5.0
+DAUER = 58 * BAR + 5.0
 TMP = os.path.join(os.environ['TEMP'], 'maerchen-video')
 CLIPS = os.path.join(TMP, 'clips')
 FOTO = r'C:\Users\heidr\Documents\Bitrix24\Elektronik\Schneiderlein-Box\esp32-s3-touch-amoled-1.75c-1.jpg'
@@ -172,6 +172,7 @@ def feenstaub(bild, t, t0, dauer, cx, cy, breite=500, menge=40, seed=1):
 
 # ---------------- Text ----------------
 _text_cache = {}
+RAND = set()  # Texte, die dem Bildrand zu nah kommen (Pruefung)
 def textbild(text, f, farbe=WEISS, leucht=None, schatten_=True):
     key = (text, f.path, f.size, farbe, leucht, schatten_)
     if key in _text_cache: return _text_cache[key]
@@ -197,6 +198,7 @@ def schreibe(bild, text, f, x, y, farbe=WEISS, a=1.0, ausr='l', leucht=None, dy=
     w = im.width - 2 * pad
     if ausr == 'm': x -= w / 2
     elif ausr == 'r': x -= w
+    if a > 0.3 and (x + w > BW - 60 or x < 60): RAND.add((text, int(x), int(x + w)))
     bild.alpha_composite(mit_alpha(im, a), (int(x - pad), int(y - pad + dy)))
 
 def kapitel(bild, t, nr, titel, t0, t1):
@@ -204,7 +206,7 @@ def kapitel(bild, t, nr, titel, t0, t1):
     a = fenster(t, t0, t1, 0.5, 0.4)
     if a <= 0: return
     dx = (1 - raus((t - t0) / 0.6)) * -40
-    schreibe(bild, f'STEP {nr}', F_HALB(30), 120 + dx, 92, GOLD, a)
+    schreibe(bild, nr if isinstance(nr, str) else f'STEP {nr}', F_HALB(30), 120 + dx, 92, GOLD, a)
     schreibe(bild, titel, F_KOPF(78), 116 + dx, 128, WEISS, a)
     d = ImageDraw.Draw(bild)
     lw = int(220 * raus((t - t0 - 0.2) / 0.8))
@@ -395,7 +397,9 @@ def zeichne(t):
             bild.alpha_composite(mit_alpha(ring, a), (int(cx - d / 2 - 20), int(cy - d / 2 - 20)))
             bild.alpha_composite(mit_alpha(kb, a), (int(cx - d / 2), int(cy - d / 2)))
             ta = fenster(t, st + 0.2, st + BAR - 0.05, 0.5, 0.3) * (klemm((B(12) + 0.4 - t) / 0.4) if t >= B(12) else 1)
-            schreibe(bild, name, F_KOPF(64 if len(name) < 24 else 54), 1210, 470, WEISS, ta, dy=(1 - raus((t - st - 0.2) / 0.6)) * 20)
+            gr = 64  # so gross wie moeglich, aber mit Rand rechts (bis x = 1840)
+            while gr > 36 and F_KOPF(gr).getlength(name) > 1840 - 1210: gr -= 2
+            schreibe(bild, name, F_KOPF(gr), 1210, 470 + (64 - gr) * 0.6, WEISS, ta, dy=(1 - raus((t - st - 0.2) / 0.6)) * 20)
             schreibe(bild, autor, F_TEXT(34), 1214, 560, GOLD, ta)
         schreibe(bild, f'{min(8, k + 1)} / 30 fairy tales', F_HALB(26), 1214, 640, LEISE, fenster(t, B(4) + 0.3, B(12) + 0.3, 0.6, 0.4))
 
@@ -545,30 +549,57 @@ def zeichne(t):
         zeile(bild, t, 'For the clock and', B(43) + 4.6, B(47), 620, x=1450, groesse=28, farbe=LEISE)
         zeile(bild, t, 'updates over Wi-Fi.', B(43) + 4.6, B(47), 660, x=1450, groesse=28, farbe=LEISE)
 
-    # ---- Gute Nacht (117,5-125) ----
-    if B(47) <= t < B(50):
+    # ---- Updates aus dem Internet (117,5-127,5) ----
+    if B(47) <= t < B(51):
         u = t - B(47)
-        a = fenster(t, B(47) + 0.2, B(50), 0.6, 0.5)
-        setze_geraet(bild, clipbild('gutenacht', u, True), 620, 560, 700, a)
-        zeile(bild, t, 'Bedtime built in.', B(47) + 0.6, B(50), 440, x=1110, groesse=50, f=F_KOPF(64))
-        zeile(bild, t, 'Outside the usage times', B(47) + 1.6, B(50), 540, x=1110, groesse=34, farbe=LEISE)
-        zeile(bild, t, 'the box simply says good night.', B(47) + 1.6, B(50), 590, x=1110, groesse=34, farbe=LEISE)
+        kapitel(bild, t, 'UPDATES', 'Always new fairy tales', B(47), B(51))
+        a = fenster(t, B(47) + 0.2, B(51), 0.6, 0.4)
+        schirm = clipbild('buch_auf', 5.0) if u < 1.6 else clipbild('update', u - 1.6)
+        setze_geraet(bild, schirm, 560, 600, 680, a)
+        zeile(bild, t, 'New fairy tales arrive by themselves.', B(47) + 0.8, B(51), 400, x=1020, f=F_KOPF(52))
+        punkte = ['The box checks for new versions over the internet', 'and installs them while it rests -', 'never in the middle of a story.',
+                  'Wi-Fi and settings stay as they are.']
+        for i, p in enumerate(punkte):
+            st = 1.8 + i * 0.9
+            ta = fenster(u, st, 10, 0.4, 0.4) * a
+            if ta <= 0: continue
+            y = 500 + i * 62 + (14 if i >= 3 else 0)
+            if i in (0, 1, 3): ImageDraw.Draw(bild).ellipse((1024, y + 15, 1038, y + 29), fill=GOLD + (int(255 * ta),))
+            schreibe(bild, p, F_TEXT(32), 1056, y, WEISS, ta, dy=(1 - raus((u - st) / 0.5)) * 12)
+        zeile(bild, t, 'More fairy tales are on the way!', B(47) + 5.6, B(51), 780, x=1020, f=F_HALB(40), farbe=GOLD)
+        feenstaub(bild, t, B(47) + 5.4, 1.6, 1300, 800, 420, 50, seed=13)
 
-    # ---- Abspann (125-140) ----
-    if t >= B(50):
-        u = t - B(50)
+    # ---- Gute Nacht (127,5-135) ----
+    if B(51) <= t < B(54):
+        u = t - B(51)
+        a = fenster(t, B(51) + 0.2, B(54), 0.6, 0.5)
+        setze_geraet(bild, clipbild('gutenacht', u, True), 620, 560, 700, a)
+        zeile(bild, t, 'Bedtime built in.', B(51) + 0.6, B(54), 440, x=1110, groesse=50, f=F_KOPF(64))
+        zeile(bild, t, 'Outside the usage times', B(51) + 1.6, B(54), 540, x=1110, groesse=34, farbe=LEISE)
+        zeile(bild, t, 'the box simply says good night.', B(51) + 1.6, B(54), 590, x=1110, groesse=34, farbe=LEISE)
+
+    # ---- Abspann (135-150) ----
+    if t >= B(54):
+        u = t - B(54)
         a = klemm(u / 0.8) * (klemm((DAUER - 0.3 - t) / 1.8))
         setze_geraet(bild, clipbild('schluss', u, True), BW / 2, 400, 520, a)
-        schreibe(bild, 'Fairy Tale Box', F_TITEL(140), BW / 2, 650, GOLD, fenster(t, B(50) + 0.8, DAUER - 0.3, 0.8, 1.8), ausr='m', leucht=(255, 170, 60))
-        schreibe(bild, 'Free & open source', F_HALB(38), BW / 2, 820, WEISS, fenster(t, B(50) + 1.8, DAUER - 0.3, 0.7, 1.8), ausr='m')
+        schreibe(bild, 'Fairy Tale Box', F_TITEL(140), BW / 2, 650, GOLD, fenster(t, B(54) + 0.8, DAUER - 0.3, 0.8, 1.8), ausr='m', leucht=(255, 170, 60))
+        schreibe(bild, 'Free & open source  ·  new tales over the internet', F_HALB(38), BW / 2, 820, WEISS, fenster(t, B(54) + 1.8, DAUER - 0.3, 0.7, 1.8), ausr='m')
         schreibe(bild, 'daveslab.de/basteln    ·    github.com/ProD-byte/Maerchenbox', F_TEXT(34), BW / 2, 880, LEISE,
-                 fenster(t, B(50) + 2.6, DAUER - 0.3, 0.7, 1.8), ausr='m')
-        feenstaub(bild, t, B(50) + 0.5, 2.5, BW / 2, 680, 600, 80, seed=9)
-        feenstaub(bild, t, B(53), 2.0, BW / 2, 450, 500, 60, seed=10)
+                 fenster(t, B(54) + 2.6, DAUER - 0.3, 0.7, 1.8), ausr='m')
+        feenstaub(bild, t, B(54) + 0.5, 2.5, BW / 2, 680, 600, 80, seed=9)
+        feenstaub(bild, t, B(57), 2.0, BW / 2, 450, 500, 60, seed=10)
 
     return bild.convert('RGB')
 
 if __name__ == '__main__':
+    if sys.argv[1] == 'rand':
+        t = 0.0
+        while t < DAUER:
+            zeichne(t); t += 0.25
+        for r in sorted(RAND): print(r)
+        print('Rand-Treffer:', len(RAND))
+        sys.exit()
     if sys.argv[1] == 'probe':
         os.makedirs(sys.argv[2], exist_ok=True)
         for s in sys.argv[3:]:
