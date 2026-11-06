@@ -40,14 +40,34 @@ function maerchenEinbauen(raw) {
     "var sprache='de',build=null,buildCam=null,buildXiao=null,buildWetter=null,buildMaerchen=null;");
   ersetze('setze ver', "if(vw&&buildWetter!==null)vw.textContent=(W.ver||DE.ver).replace('{0}',buildWetter);",
     "if(vw&&buildWetter!==null)vw.textContent=(W.ver||DE.ver).replace('{0}',buildWetter);\n" +
-    "  var vm=document.getElementById('dl-ver-maerchen');if(vm&&buildMaerchen!==null)vm.textContent=(W.ver||DE.ver).replace('{0}',buildMaerchen);");
+    "  var vm=document.getElementById('dl-ver-maerchen');if(vm&&buildMaerchen!==null)vm.textContent=(W.ver||DE.ver).replace('{0}',buildMaerchen);\n" +
+    MAERCHEN_BILDWECHSEL);
   ersetze('fetch maerchen', "buildWetter=j.build;setze(sprache);}).catch(function(){});",
     "buildWetter=j.build;setze(sprache);}).catch(function(){});\n" + MAERCHEN_SKRIPT);
 
   return {out: fehler.length ? raw : out, fehler};
 }
 
+// Nachruesten einer schon eingebauten Maerchenbox: Bilder wechseln mit der Sprache (bilder/en/ auf Englisch)
+function maerchenNachruesten(raw) {
+  const fehler = [];
+  let out = raw;
+  if (out.includes('data-mae=')) return {out: raw, fehler: ['Bildwechsel ist schon eingebaut']};
+  const bild = /<img src="https:\/\/prod-byte\.github\.io\/Maerchenbox\/bilder\/(\w+)\.png"/g;
+  const n = (out.match(bild) || []).length;
+  if (n !== 9) fehler.push('bilder: ' + n + ' Treffer (erwartet 9)');
+  out = out.replace(bild, '<img data-mae="$1" src="https://prod-byte.github.io/Maerchenbox/bilder/$1.png"');
+  const vm = "var vm=document.getElementById('dl-ver-maerchen');if(vm&&buildMaerchen!==null)vm.textContent=(W.ver||DE.ver).replace('{0}',buildMaerchen);";
+  const t = out.split(vm).length - 1;
+  if (t !== 1) fehler.push('setze: ' + t + ' Treffer');
+  out = out.replace(vm, () => vm + '\n' + MAERCHEN_BILDWECHSEL);
+  return {out: fehler.length ? raw : out, fehler};
+}
+
 var MAERCHEN_SEITE = 'https://prod-byte.github.io/Maerchenbox';
+// in setze(l): Bilder der Maerchenbox passend zur Sprache (Deutsch: bilder/, sonst bilder/en/)
+var MAERCHEN_BILDWECHSEL = "  root.querySelectorAll('img[data-mae]').forEach(function(i){i.src='" + MAERCHEN_SEITE +
+  "/bilder/'+(l==='de'?'':'en/')+i.getAttribute('data-mae')+'.png';});";
 var MAERCHEN_GH = '<a href="https://github.com/ProD-byte/Maerchenbox" target="_blank" rel="noopener">GitHub</a>';
 
 var MAERCHEN_KARTE = `<a class="dl-karte" href="#maerchen" data-p="maerchen" aria-expanded="false"><span class="ic">📖</span><h3>Märchenbox</h3><p data-t="k_maerchen">30 Märchen als Spieluhr-Filme – live gezeichnet und vertont.</p><small>Waveshare AMOLED 1.75C · rund</small><span class="auf-zu" data-t="k_auf">Öffnen</span></a>`;
@@ -79,13 +99,13 @@ function maerchenFlasher(ordner, titelKey, titel, boardKey, board) {
 }
 
 var MAERCHEN_BILDER = ['buch', 'schneiderlein', 'rotkaeppchen', 'bremen', 'rapunzel', 'sterntaler', 'start', 'gutenacht']
-  .map(n => `<img src="${MAERCHEN_SEITE}/bilder/${n}.png" alt="" loading="lazy" style="width:100%;height:auto;display:block;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45))">`).join('');
+  .map(n => `<img data-mae="${n}" src="${MAERCHEN_SEITE}/bilder/${n}.png" alt="" loading="lazy" style="width:100%;height:auto;display:block;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45))">`).join('');
 
 var MAERCHEN_ABSCHNITT = `  <section class="dl-sec" id="maerchen">
     <div class="dl-wrap">
       <h2 class="dl-h2 rv" data-t="mae_h2">Märchenbox <span class="dl-grad">installieren</span></h2>
       <p class="dl-sub rv"><span data-t="mae_sub">30 Märchen als Spieluhr-Filme, die die Box live zeichnet und vertont – mit Märchenbuch, Sprechblasen zum Mitlesen und Einstellungen für Eltern. Für das runde <b>Waveshare ESP32-S3-Touch-AMOLED-1.75C</b> – die Märchen füllen den ganzen Kreis, bedient wird per Touch.</span> <span id="dl-ver-maerchen"></span></p>
-      <div class="rv" style="display:flex;justify-content:center;margin:4px 0 18px"><img src="${MAERCHEN_SEITE}/bilder/geraet.png" alt="Runde Märchenbox" loading="lazy" style="width:min(300px,80%);height:auto;filter:drop-shadow(0 18px 34px rgba(0,0,0,.6))"></div>
+      <div class="rv" style="display:flex;justify-content:center;margin:4px 0 18px"><img data-mae="geraet" src="${MAERCHEN_SEITE}/bilder/geraet.png" alt="Runde Märchenbox" loading="lazy" style="width:min(300px,80%);height:auto;filter:drop-shadow(0 18px 34px rgba(0,0,0,.6))"></div>
       <div class="rv" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin:6px 0 10px">${MAERCHEN_BILDER}</div>
 ${maerchenFlasher('rund', 'mae_rund_h', '◯ Runde Märchenbox', 'mae_rund_b', 'Waveshare ESP32-S3-Touch-AMOLED-1.75C · 466 × 466, Touch')}
       <ol class="dl-schritte" style="margin-top:28px">
@@ -135,9 +155,10 @@ var MAERCHEN_EN = [
   const liste = await (await fetch('/wp-json/wp/v2/pages?slug=basteln&context=edit&_fields=id,content', {headers: kopf, credentials: 'include'})).json();
   if (!Array.isArray(liste) || !liste[0]) { alert('Seite "basteln" nicht gefunden: ' + JSON.stringify(liste).slice(0, 200)); return; }
   const seite = liste[0];
-  const {out, fehler} = maerchenEinbauen(seite.content.raw);
+  const schonDa = seite.content.raw.includes('id="maerchen"');  // schon eingebaut: nur nachruesten
+  const {out, fehler} = schonDa ? maerchenNachruesten(seite.content.raw) : maerchenEinbauen(seite.content.raw);
   if (fehler.length) { alert('Nichts geaendert:\n' + fehler.join('\n')); return; }
-  if (!confirm('Maerchenbox einbauen und Seite "basteln" speichern?\n(' + seite.content.raw.length + ' -> ' + out.length + ' Zeichen)')) return;
+  if (!confirm((schonDa ? 'Maerchenbox nachruesten (Bilder je Sprache)' : 'Maerchenbox einbauen') + ' und Seite "basteln" speichern?\n(' + seite.content.raw.length + ' -> ' + out.length + ' Zeichen)')) return;
   const r = await fetch('/wp-json/wp/v2/pages/' + seite.id, {method: 'POST', headers: kopf, credentials: 'include', body: JSON.stringify({content: out})});
   alert(r.ok ? 'Gespeichert! Jetzt https://daveslab.de/basteln/ neu laden.' : 'Fehler beim Speichern: ' + r.status + ' ' + (await r.text()).slice(0, 200));
 })();

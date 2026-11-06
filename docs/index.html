@@ -139,6 +139,8 @@
   document.documentElement.lang = 'en';
   document.title = 'Fairy Tale Box – Online flasher';
   document.querySelectorAll('[data-en]').forEach(function(e){ e.innerHTML = e.getAttribute('data-en'); });
+  /* Bildschirmfotos der englischen Box (gleiche Namen in bilder/en/) */
+  document.querySelectorAll('img[src^="bilder/"]').forEach(function(i){ i.src = i.getAttribute('src').replace('bilder/', 'bilder/en/'); });
 })();
 /* Flasher-Einstellungen immer frisch laden (nie aus dem Browser-Zwischenspeicher) */
 document.querySelectorAll('esp-web-install-button').forEach(function(b){ var m=b.getAttribute('manifest').split('?')[0]; b.setAttribute('manifest', m+'?t='+Date.now()); });
