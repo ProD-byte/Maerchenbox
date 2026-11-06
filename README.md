@@ -553,6 +553,34 @@ Ein neues Märchen: eine weitere `.cpp` mit einem `Maerchen` (Bausteine aus `fig
 | Ladestatus (LOW = lädt) | 47 |
 | Akkuspannung (ADC2 Kanal 6, Teiler 1:2) | 17 |
 
+## Zweites Gerät: die runde Märchenbox
+
+Dieselbe Firmware läuft auch auf dem **Waveshare ESP32-S3-Touch-AMOLED-1.75C**: rundes AMOLED-Display
+466 × 466 (CO5300 über QSPI), Touch CST9217, Audio ES8311, Power-Management AXP2101, 32 MB Flash.
+Bauen mit `pio run -e rund -t upload` (USB, COM10), danach über WLAN mit `-e rund_wlan`
+an `maerchenbox-rund.local`. Die Board-Teile stehen unter `#ifdef BOARD_RUND`, der Display-Treiber in
+`src/lcd_rund.cpp`.
+
+- **Bild:** Das Märchenbild wird etwa 1,25-fach vergrößert (356 × 300) und sitzt in einem festen Rahmen aus
+  Nachthimmel, Sternen und Goldring. Das Panel nimmt nur Fenster mit gerader Startspalte/-zeile und gerader
+  Breite/Höhe an, deshalb geht das Bild in Teilen zu 20 Zeilen hinaus.
+- **Bedienung per Touch:** oberes Drittel = Lauter / zurückblättern, Mitte = Start (doppelt tippen, lang halten
+  wie beim Knopf), unteres Drittel = Leiser / weiterblättern. Die Zeichen ▲ ★ ▼ am rechten Bildrand zeigen es.
+- **Eltern:** die BOOT-Taste 3 s halten öffnet die Einstellungen und weckt die Box (statt Lauter + Leiser).
+- **Akku:** Spannung, Ladestatus und Prozent kommen vom AXP2101; Ladeschluss 4,1 V, Ladestrom 200 mA.
+
+| Funktion | GPIO |
+|---|---|
+| I2C SDA / SCL (ES8311 0x18, ES7210 0x40, AXP2101 0x34, QMI8658 0x6B, Touch 0x5A) | 15 / 14 |
+| I2S MCLK / BCLK / WS / DOUT | 16 / 9 / 45 / 8 |
+| Lautsprecher-Verstärker | 46 |
+| AMOLED QSPI: SCLK / D0–D3 / CS / Reset (Spaltenversatz 6) | 38 / 4–7 / 12 / 1 |
+| Touch Reset / Interrupt | 2 / 11 |
+| BOOT-Taste | 0 |
+
+Erkannt wurde das Board am 2026-11-06 über eine Pin-Suche (nur 2, 11, 14, 15 haben Pull-ups; an 15/14 antworten
+die Chips) und die Board-Dateien der Xiaozhi-Firmware (`main/boards/waveshare/esp32-s3-touch-amoled-1.75`).
+
 ## Speicher
 
 Zwei Programmplätze zu je 7,9 MB (`partitionen.csv`), damit Updates über WLAN gehen; die Märchen sind Programmcode

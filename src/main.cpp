@@ -33,13 +33,33 @@
 #ifndef OTA_PASSWORT
 #define OTA_PASSWORT ""
 #endif
+#ifdef BOARD_RUND
+#define NAME_IM_NETZ "maerchenbox-rund"
+#else
 #define NAME_IM_NETZ "maerchenbox"
+#endif
 #define SETUP_WLAN "Märchenbox-Setup"
 
+#ifdef BOARD_RUND
+// Rundes Board Waveshare ESP32-S3-Touch-AMOLED-1.75C (Pins wie in der Xiaozhi-Firmware, am Geraet per
+// I2C-Suche bestaetigt): Touch statt drei Knoepfen.
+// Die "Knoepfe" sind Bereiche des Bildschirms: oberes Drittel = Lauter / zurueckblaettern,
+// Mitte = Start, unteres Drittel = Leiser / weiterblaettern (wie die Zeichen am rechten Rand).
+// Die BOOT-Taste 3 s halten = Einstellungen (statt Lauter + Leiser) und Wecken.
+constexpr int PIN_I2C_SDA = 15, PIN_I2C_SCL = 14;
+constexpr int PIN_MCLK = 16, PIN_BCLK = 9, PIN_WS = 45, PIN_DOUT = 8;
+constexpr int PIN_PA = 46;
+constexpr int TASTE_A = -1, TASTE_B = -2, TASTE_C = -3;  // Touch-Bereiche: Mitte, oben, unten
+constexpr int TASTE_BOOT = 0;
+constexpr int PIN_TOUCH_RST = 2, PIN_TOUCH_INT = 11;
+constexpr uint8_t TOUCH_ADDR = 0x5A, PMU_ADDR = 0x34;
+constexpr int BILD_X = 54, BILD_Y = 82;   // Lage des 1,25-fach vergroesserten Maerchenbilds auf dem 466er-Display
+#else
 constexpr int PIN_I2C_SDA = 12, PIN_I2C_SCL = 11;
 constexpr int PIN_MCLK = 5, PIN_BCLK = 15, PIN_WS = 16, PIN_DOUT = 6;
 constexpr int PIN_PA = 4;
 constexpr int TASTE_A = 39, TASTE_B = 0, TASTE_C = 40;  // die drei Knoepfe (GPIO)
+#endif
 constexpr uint8_t ES8311_ADDR = 0x18;
 
 // ---------- Maerchen ----------
@@ -139,6 +159,42 @@ static bool nutzungErlaubt() {
 static void zeitText(char *b, int n, int m) { snprintf(b, n, "%02d:%02d", m / 60, m % 60); }
 
 // ---------- Akku ----------
+#ifdef BOARD_RUND
+// Ladezustand vom Power-Management-Chip AXP2101 (I2C 0x34): Spannung, Ladestatus, Ladung in Prozent
+float akkuMv = 0;
+int akkuRohMv = 0, ladenRoh = -1, akkuSoc = -1;
+bool akkuLaedt = false;
+static int pmuLies(uint8_t reg) {
+  Wire.beginTransmission(PMU_ADDR);
+  Wire.write(reg);
+  if (Wire.endTransmission(false) != 0 || Wire.requestFrom((int)PMU_ADDR, 1) != 1) return -1;
+  return Wire.read();
+}
+static void pmuSchreib(uint8_t reg, uint8_t v) {
+  Wire.beginTransmission(PMU_ADDR);
+  Wire.write(reg); Wire.write(v);
+  Wire.endTransmission();
+}
+static void pmuStart() {
+  int r = pmuLies(0x30);  // ADC: Akkuspannung messen
+  if (r >= 0) pmuSchreib(0x30, r | 0x01);
+  r = pmuLies(0x18);      // Ladungsmesser (Prozent) an
+  if (r >= 0) pmuSchreib(0x18, r | 0x08);
+  pmuSchreib(0x64, 0x02);  // Ladeschluss 4,1 V (schont den Akku), wie in der Xiaozhi-Firmware
+  pmuSchreib(0x62, 0x08);  // Ladestrom 200 mA
+}
+static void akkuMessen() {
+  int hi = pmuLies(0x34), lo = pmuLies(0x35), st = pmuLies(0x01), soc = pmuLies(0xA4), st0 = pmuLies(0x00);
+  bool akkuDa = st0 >= 0 && (st0 & 0x08);
+  if (hi >= 0 && lo >= 0) {
+    int mv = ((hi & 0x3F) << 8) | lo;
+    if (akkuDa && mv > 2500) { akkuRohMv = mv; akkuMv = mv; }
+  }
+  if (st >= 0) { ladenRoh = st; akkuLaedt = ((st >> 5) & 3) == 1; }
+  if (soc >= 0 && soc <= 100 && akkuDa) akkuSoc = soc;
+}
+static int akkuProzent() { return akkuMv <= 0 ? -1 : akkuSoc; }
+#else
 constexpr int PIN_AKKU = 17;   // Akkuspannung ueber Spannungsteiler 1:2 (ADC2 Kanal 6)
 constexpr int PIN_LADEN = 47;  // Ladestatus
 float akkuMv = 0;              // geglaettet, 0 = noch kein Messwert
@@ -169,6 +225,7 @@ static int akkuProzent() {
     if (akkuMv < V[i]) return (int)(P[i - 1] + (P[i] - P[i - 1]) * (akkuMv - V[i - 1]) / (V[i] - V[i - 1]));
   return 100;
 }
+#endif
 volatile uint32_t audioZeitUs = 0;  // wann das war
 constexpr int BLOCK = 256;
 constexpr float LATENZ = 8 * 256 / (float)Synth::RATE;  // DMA-Puffer zwischen Erzeugen und Hoeren
@@ -986,7 +1043,11 @@ static void akkuAnzeige(Gfx &g, float t, bool mitText) {
 static void tastenHinweise(Gfx &g, float t) {
   if (zustand != MENUE && zustand != TITEL) return;
   if (zustand == MENUE && (buchAuf || blattSeit)) return;
+#ifdef BOARD_RUND
+  float x = 275;  // Touch: die Bereiche drehen mit dem Bild
+#else
   float x = gedreht ? 9 : 275;  // bei gedrehtem Bild sitzen die Knoepfe links
+#endif
   const float ys[3] = {52, 120, 188};
   uint32_t jetzt = millis(), zeiten[3] = {tasteOben, tasteMitte, tasteUnten};
   for (int i = 0; i < 3; i++) {
@@ -1494,6 +1555,55 @@ static void wlanStart() {
 // =====================================================================
 // Knoepfe
 // =====================================================================
+#ifdef BOARD_RUND
+// Touch (CST9217 an 0x5A, Protokoll wie in SensorLib): welcher Bereich gerade beruehrt wird
+// (0 keiner, TASTE_A/B/C), alle 15 ms gelesen
+int touchBereich = 0;
+int touchX = -1, touchY = -1;
+static void touchStart() {
+  pinMode(PIN_TOUCH_INT, INPUT_PULLUP);
+  pinMode(PIN_TOUCH_RST, OUTPUT);
+  digitalWrite(PIN_TOUCH_RST, LOW); delay(20);
+  digitalWrite(PIN_TOUCH_RST, HIGH); delay(100);
+  Wire.beginTransmission(TOUCH_ADDR);
+  Serial.printf("Touch CST9217 %s\n", Wire.endTransmission() == 0 ? "antwortet" : "antwortet NICHT");
+}
+static void touchLesen() {
+  static uint32_t zuletzt = 0, zuletztGesehen = 0;
+  if (millis() - zuletzt < 15) return;
+  zuletzt = millis();
+  uint8_t b[15] = {0};
+  Wire.beginTransmission(TOUCH_ADDR);
+  Wire.write(0xD0); Wire.write(0x00);
+  bool ok = Wire.endTransmission(false) == 0 && Wire.requestFrom((int)TOUCH_ADDR, 15) == 15;
+  if (ok) for (int i = 0; i < 15; i++) b[i] = Wire.read();
+  Wire.beginTransmission(TOUCH_ADDR);  // Quittung
+  Wire.write(0xD0); Wire.write(0x00); Wire.write(0xAB);
+  Wire.endTransmission();
+  bool gedrueckt = ok && b[6] == 0xAB && (b[5] & 0x7F) > 0 && (b[0] & 0x0F) == 0x06;
+  if (!gedrueckt) {
+    // der Chip meldet nur bei Aenderungen; ohne gueltige Meldung kurz den alten Zustand halten
+    if (millis() - zuletztGesehen > 120 || (ok && b[6] == 0xAB)) touchBereich = 0;
+    return;
+  }
+  zuletztGesehen = millis();
+  int x = (b[1] << 4) | (b[3] >> 4), y = (b[2] << 4) | (b[3] & 0x0F);
+  x = 465 - x; y = 465 - y;  // Panel gespiegelt (wie in der Xiaozhi-Firmware)
+  if (gedreht) { x = 465 - x; y = 465 - y; }
+  touchX = x; touchY = y;
+  // Drittel des Maerchenbilds: wie die Zeichen am Rand bei 52 / 120 / 188
+  int vorher = touchBereich;
+  touchBereich = y < BILD_Y + 86 * 5 / 4 ? TASTE_B : y < BILD_Y + 154 * 5 / 4 ? TASTE_A : TASTE_C;
+  if (!vorher) Serial.printf("Touch x=%d y=%d\n", x, y);
+}
+static bool knopf(int pin) {
+  if (pin < 0) return touchBereich == pin;
+  return digitalRead(pin) == LOW;
+}
+#else
+static bool knopf(int pin) { return digitalRead(pin) == LOW; }
+#endif
+
 enum Ereignis { NICHTS, KURZ, DOPPEL, LANG };
 struct MitteKnopf {
   int pin = TASTE_A;
@@ -1502,7 +1612,7 @@ struct MitteKnopf {
   int klicks = 0;
   Ereignis lies() {
     uint32_t t = millis();
-    bool jetzt = digitalRead(pin) == LOW;
+    bool jetzt = knopf(pin);
     if (jetzt != unten && t - prell > 25) {
       prell = t;
       unten = jetzt;
@@ -1523,7 +1633,7 @@ struct WiederholKnopf {
   explicit WiederholKnopf(int p) : pin(p) {}
   bool lies() {  // true beim Druecken und beim Gedrueckthalten alle 220 ms
     uint32_t t = millis();
-    bool jetzt = digitalRead(pin) == LOW;
+    bool jetzt = knopf(pin);
     if (jetzt != unten && t - prell > 25) {
       prell = t; unten = jetzt;
       if (jetzt) { seit = t; naechste = t + 500; return true; }
@@ -1539,12 +1649,17 @@ WiederholKnopf leiser(TASTE_C), lauter(TASTE_B);
 static void tastenBelegen() {
   mitte = MitteKnopf();
   mitte.pin = TASTE_A;
+#ifdef BOARD_RUND
+  lauter = WiederholKnopf(TASTE_B);  // der Touch ist schon gedreht
+  leiser = WiederholKnopf(TASTE_C);
+#else
   lauter = WiederholKnopf(gedreht ? TASTE_C : TASTE_B);
   leiser = WiederholKnopf(gedreht ? TASTE_B : TASTE_C);
+#endif
   // gerade gedrueckte Knoepfe nicht als neuen Druck werten
-  mitte.unten = digitalRead(mitte.pin) == LOW; mitte.lang = mitte.unten;
-  lauter.unten = digitalRead(lauter.pin) == LOW; lauter.naechste = UINT32_MAX;
-  leiser.unten = digitalRead(leiser.pin) == LOW; leiser.naechste = UINT32_MAX;
+  mitte.unten = knopf(mitte.pin); mitte.lang = mitte.unten;
+  lauter.unten = knopf(lauter.pin); lauter.naechste = UINT32_MAX;
+  leiser.unten = knopf(leiser.pin); leiser.naechste = UINT32_MAX;
 }
 
 static void drehenUmschalten() {
@@ -1707,16 +1822,27 @@ static void tasteVonFern() {
 // =====================================================================
 void setup() {
   Serial.begin(115200);
+#ifdef BOARD_RUND
+  Serial.println("Maerchenbox rund: Start");
+#endif
   pinMode(PIN_PA, OUTPUT); digitalWrite(PIN_PA, LOW);
+#ifdef BOARD_RUND
+  pinMode(TASTE_BOOT, INPUT_PULLUP);
+#else
   pinMode(TASTE_A, INPUT_PULLUP);
   pinMode(TASTE_B, INPUT_PULLUP);
   pinMode(TASTE_C, INPUT_PULLUP);
+#endif
   lcd::start();
 
   i2sInit();  // MCLK muss laufen, bevor der ES8311 eingestellt wird
   delay(10);
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 100000);
   Serial.println(es8311Init() ? "ES8311 bereit" : "FEHLER: ES8311 antwortet nicht");
+#ifdef BOARD_RUND
+  pmuStart();
+  touchStart();
+#endif
   prefs.begin("box", true);
   lautstaerke = prefs.getInt("laut", 7);
   grenze = constrain(prefs.getInt("grenze", 1), 0, GRENZEN - 1);
@@ -1732,8 +1858,10 @@ void setup() {
   lcd::drehen(gedreht);
   lcd::helligkeit(HELL_PWM[hell]);
   tastenBelegen();
+#ifndef BOARD_RUND
   pinMode(PIN_LADEN, INPUT_PULLUP);  // Ladeanzeige des Ladereglers ist open-drain: zieht nur beim Laden auf LOW
   analogSetPinAttenuation(PIN_AKKU, ADC_11db);
+#endif
   akkuMessen();
   synth.start();
   xTaskCreatePinnedToCore(audioTask, "audio", 6144, nullptr, 5, nullptr, 0);
@@ -1752,14 +1880,22 @@ void loop() {
   if (otaGestartet) ArduinoOTA.handle();
   if (zustand == UPDATE) return;
 
+#ifdef BOARD_RUND
+  touchLesen();
+#endif
   Ereignis e = mitte.lies();
   int l = (lauter.lies() ? 1 : 0) - (leiser.lies() ? 1 : 0);
   // Einstellungen: Lauter + Leiser zusammen 3 s halten
   static uint32_t beideSeit = 0;
   static bool beideErledigt = false;
   static int lautRuhe = lautstaerke;
-  bool obenUnten = digitalRead(lauter.pin) == LOW, untenUnten = digitalRead(leiser.pin) == LOW;
-  if (obenUnten && untenUnten) {
+  bool obenUnten = knopf(lauter.pin), untenUnten = knopf(leiser.pin);
+#ifdef BOARD_RUND
+  bool kombi = knopf(TASTE_BOOT);  // ein Finger kann nicht oben und unten zugleich: BOOT-Taste halten
+#else
+  bool kombi = obenUnten && untenUnten;
+#endif
+  if (kombi) {
     if (!beideSeit) beideSeit = millis();
     l = 0;
     kombiFortschritt = beideErledigt ? 0 : klemme((millis() - beideSeit) / (float)KOMBI_MS);

@@ -1,3 +1,4 @@
+#ifndef BOARD_RUND  // fuer das Waveshare-Board: lcd_ws185.cpp
 #include "lcd.h"
 #include <Arduino.h>
 #include <driver/spi_master.h>
@@ -121,3 +122,4 @@ void helligkeit(float h) {
 bool lichtAn() { return an; }
 
 }  // namespace lcd
+#endif
