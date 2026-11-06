@@ -347,6 +347,87 @@ Nach dem englischen Märchen.
 | 1:34 | „Wer hat von meinem Brei gegessen?“ … „und da liegt sie ja noch!“ |
 | 2:20 | Sie springt aus dem Fenster und läuft nach Hause |
 
+## Tischlein deck dich (knapp 3 Minuten)
+
+Nach den Brüdern Grimm (Tischchen deck dich, Goldesel und Knüppel aus dem Sack).
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der Schneider und seine drei Söhne; jeder soll ein Handwerk lernen |
+| 0:22 | Beim Schreiner: „Tischlein, deck dich!“ – das schönste Essen steht da |
+| 0:48 | Im Wirtshaus tauscht der Wirt nachts den Tisch; daheim bleibt er leer |
+| 1:16 | Beim Müller: der Esel – „Bricklebrit!“ – Goldstücke; auch er wird vertauscht |
+| 1:46 | Beim Drechsler: „Knüppel, aus dem Sack!“ – der Wirt gibt alles zurück |
+| 2:24 | Daheim: Essen und Gold, ein großes Fest |
+
+## Der gestiefelte Kater (gut 3 Minuten)
+
+Nach den Brüdern Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Das Erbe: Mühle, Esel – und der Kater: „Lass mir ein Paar Stiefel machen!“ |
+| 0:24 | Rebhühner im Sack |
+| 0:48 | Beim König: „Mein Herr, der Graf, schickt Euch das!“ – Gold dafür |
+| 1:12 | Am See: „Hilfe, mein Herr Graf ertrinkt!“ – neue Kleider, die Kutsche |
+| 1:44 | Auf dem Feld: „Das gehört dem Grafen!“ |
+| 2:08 | Der Zauberer wird zum Löwen – und zur Maus |
+| 2:42 | Hochzeit; der Kater wird erster Minister |
+
+## Hans im Glück (3 Minuten)
+
+Nach den Brüdern Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Sieben Jahre Arbeit: ein Klumpen Gold, so groß wie sein Kopf |
+| 0:20 | Gold gegen Pferd – das Pferd wirft ihn ab |
+| 0:48 | Pferd gegen Kuh – kein Tropfen Milch, dafür ein Tritt |
+| 1:18 | Kuh gegen Schwein |
+| 1:40 | Schwein gegen Gans |
+| 2:04 | Gans gegen Schleifstein beim singenden Scherenschleifer |
+| 2:28 | Plumps, in den Brunnen – „So glücklich wie ich …“; heim zur Mutter |
+
+## König Drosselbart (3 Minuten)
+
+Nach den Brüdern Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die stolze Prinzessin verspottet die Freier – „König Drosselbart!“ |
+| 0:32 | Sie muss den Spielmann heiraten |
+| 0:58 | „Wem gehört der schöne Wald?“ – „Ach, hätt ich genommen den König Drosselbart!“ |
+| 1:28 | Das kleine Haus; der Husar reitet durch die Töpfe |
+| 1:58 | Küchenmagd im Schloss, der Tanz, die Töpfchen fallen – „Ich bin der Spielmann …“ |
+| 2:34 | Die richtige Hochzeit |
+
+## Die zertanzten Schuhe (knapp 3 Minuten)
+
+Nach den Brüdern Grimm.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Zwölf Prinzessinnen, jeden Morgen zertanzte Schuhe |
+| 0:26 | Die alte Frau: „Trink den Wein nicht“ – das unsichtbare Mäntelchen |
+| 0:50 | Der Wein wird ausgegossen, die Treppe unter dem Bett |
+| 1:24 | Silberwald, Goldwald, Diamantwald – „Knack!“ – „Das sind Freudenschüsse“ |
+| 1:50 | Zwölf Boote, zwölf Prinzen, der Ball bis drei Uhr |
+| 2:20 | Zweige und Becher vor dem König – Hochzeit mit der Ältesten |
+
+## Däumelinchen (gut 3 Minuten)
+
+Nach dem Märchen von Hans Christian Andersen.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Ein Gerstenkorn, eine Tulpe – darin ein Mädchen, nicht größer als ein Daumen |
+| 0:28 | Die Kröte holt sie für ihren Sohn, das Seerosenblatt |
+| 0:52 | Die Fische nagen den Stiel durch, der Schmetterling zieht sie fort |
+| 1:20 | Winter; die Feldmaus nimmt sie auf, der Maulwurf will sie heiraten |
+| 1:46 | Sie wärmt die erfrorene Schwalbe, das Herz klopft wieder |
+| 2:14 | Die Schwalbe trägt sie über die Berge |
+| 2:40 | Im Land der Blumen: der Blumenprinz, Flügel und der Name Maja |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
