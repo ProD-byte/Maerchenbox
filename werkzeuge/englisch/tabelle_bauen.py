@@ -14,6 +14,8 @@ for i, e in enumerate(texte):
     paare[e['de']] = en
 paare.update(json.load(open(os.path.join(d, 'en', 'main.json'), encoding='utf-8')))
 paare.update(json.load(open(os.path.join(d, 'en', 'inc.json'), encoding='utf-8')))
+for f in sorted(glob.glob(os.path.join(d, 'en', 'd_*.json'))):  # Woerterbuecher neuer Maerchen (deutsch -> englisch)
+    paare.update(json.load(open(f, encoding='utf-8')))
 # Zeichen pruefen, die die Schrift nicht kennt
 schlecht = [(k, v) for k, v in paare.items() if any(c in v for c in '’”‘')]
 def c(s):  # als C-String (die Quelltexte sind mit Backslash-Escapes geschrieben: so lassen)

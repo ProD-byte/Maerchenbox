@@ -70,7 +70,7 @@ var MAERCHEN_BILDWECHSEL = "  root.querySelectorAll('img[data-mae]').forEach(fun
   "/bilder/'+(l==='de'?'':'en/')+i.getAttribute('data-mae')+'.png';});";
 var MAERCHEN_GH = '<a href="https://github.com/ProD-byte/Maerchenbox" target="_blank" rel="noopener">GitHub</a>';
 
-var MAERCHEN_KARTE = `<a class="dl-karte" href="#maerchen" data-p="maerchen" aria-expanded="false"><span class="ic">📖</span><h3>Märchenbox</h3><p data-t="k_maerchen">30 Märchen als Spieluhr-Filme – live gezeichnet und vertont.</p><small>Waveshare AMOLED 1.75C · rund</small><span class="auf-zu" data-t="k_auf">Öffnen</span></a>`;
+var MAERCHEN_KARTE = `<a class="dl-karte" href="#maerchen" data-p="maerchen" aria-expanded="false"><span class="ic">📖</span><h3>Märchenbox</h3><p data-t="k_maerchen">32 Märchen als Spieluhr-Filme – live gezeichnet und vertont.</p><small>Waveshare AMOLED 1.75C · rund</small><span class="auf-zu" data-t="k_auf">Öffnen</span></a>`;
 
 // Flasher-Paar (Update / Neuinstallation) im Stil der anderen Projekte
 function maerchenFlasher(ordner, titelKey, titel, boardKey, board) {
@@ -104,7 +104,7 @@ var MAERCHEN_BILDER = ['buch', 'schneiderlein', 'rotkaeppchen', 'bremen', 'rapun
 var MAERCHEN_ABSCHNITT = `  <section class="dl-sec" id="maerchen">
     <div class="dl-wrap">
       <h2 class="dl-h2 rv" data-t="mae_h2">Märchenbox <span class="dl-grad">installieren</span></h2>
-      <p class="dl-sub rv"><span data-t="mae_sub">30 Märchen als Spieluhr-Filme, die die Box live zeichnet und vertont – mit Märchenbuch, Sprechblasen zum Mitlesen und Einstellungen für Eltern. Für das runde <b>Waveshare ESP32-S3-Touch-AMOLED-1.75C</b> – die Märchen füllen den ganzen Kreis, bedient wird per Touch.</span> <span id="dl-ver-maerchen"></span></p>
+      <p class="dl-sub rv"><span data-t="mae_sub">32 Märchen als Spieluhr-Filme, die die Box live zeichnet und vertont – mit Märchenbuch, Sprechblasen zum Mitlesen und Einstellungen für Eltern. Für das runde <b>Waveshare ESP32-S3-Touch-AMOLED-1.75C</b> – die Märchen füllen den ganzen Kreis, bedient wird per Touch.</span> <span id="dl-ver-maerchen"></span></p>
       <div class="rv" style="display:flex;justify-content:center;margin:4px 0 18px"><img data-mae="geraet" src="${MAERCHEN_SEITE}/bilder/geraet.png" alt="Runde Märchenbox" loading="lazy" style="width:min(300px,80%);height:auto;filter:drop-shadow(0 18px 34px rgba(0,0,0,.6))"></div>
       <div class="rv" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin:6px 0 10px">${MAERCHEN_BILDER}</div>
 ${maerchenFlasher('rund', 'mae_rund_h', '◯ Runde Märchenbox', 'mae_rund_b', 'Waveshare ESP32-S3-Touch-AMOLED-1.75C · 466 × 466, Touch')}
@@ -128,9 +128,9 @@ ${maerchenFlasher('rund', 'mae_rund_h', '◯ Runde Märchenbox', 'mae_rund_b', '
 var MAERCHEN_SKRIPT = `fetch('${MAERCHEN_SEITE}/version.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){buildMaerchen=j.build;setze(sprache);}).catch(function(){});`;
 
 var MAERCHEN_EN = [
-  `k_maerchen:'30 fairy tales as music-box films – drawn and set to music live.'`,
+  `k_maerchen:'32 fairy tales as music-box films – drawn and set to music live.'`,
   `mae_h2:'Install the <span class="dl-grad">fairy tale box</span>'`,
-  `mae_sub:'30 fairy tales as music-box films that the box draws and sets to music live – with a fairy tale book, speech bubbles to read along and settings for parents. For the round <b>Waveshare ESP32-S3-Touch-AMOLED-1.75C</b> – the fairy tales fill the whole circle, controlled by touch.'`,
+  `mae_sub:'32 fairy tales as music-box films that the box draws and sets to music live – with a fairy tale book, speech bubbles to read along and settings for parents. For the round <b>Waveshare ESP32-S3-Touch-AMOLED-1.75C</b> – the fairy tales fill the whole circle, controlled by touch.'`,
   `mae_rund_h:'◯ Round fairy tale box'`,
   `mae_rund_b:'Waveshare ESP32-S3-Touch-AMOLED-1.75C · 466 × 466, touch'`,
   `mae_upd_p:'Install new firmware – <b>Wi-Fi and settings are kept.</b> When asked “Erase device?”, do <b>not</b> tick the box.'`,

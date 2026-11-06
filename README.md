@@ -428,6 +428,50 @@ Nach dem Märchen von Hans Christian Andersen.
 | 2:14 | Die Schwalbe trägt sie über die Berge |
 | 2:40 | Im Land der Blumen: der Blumenprinz, Flügel und der Name Maja |
 
+## Der Krautesel (gut 7 Minuten)
+
+Nach den Brüdern Grimm (KHM 122, Ausgabe 1857), ausführlich erzählt.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der Jäger gibt der alten Frau ein Almosen, sie verrät ihm Wunschmantel und Vogelherz |
+| 0:32 | Neun Vögel zanken um den Mantel – der Schuss, das Herz wird verschluckt |
+| 1:00 | Jeden Morgen ein Goldstück unter dem Kissen; er zieht in die Welt |
+| 1:24 | Das Schloss: die Hexe und ihr „Herzenstöchterchen“ am Fenster |
+| 1:52 | Der Trank – das Vogelherz kommt heraus, das Mädchen muss es verschlucken |
+| 2:20 | Die Alte will auch den Mantel; das Mädchen tut traurig |
+| 2:44 | Mit dem Mantel auf den Granatenberg – sie wünscht sich allein heim |
+| 3:18 | Die drei Riesen: „Erdwurm“, „Tritt ihn tot“, „die Wolken tragen ihn fort“ |
+| 3:52 | Die Wolke setzt ihn in den Krautgarten |
+| 4:10 | Die eine Sorte macht zum Esel, die andere wieder zum Menschen |
+| 4:44 | Verkleidet als Bote des Königs: die Alte, die Magd und die Tochter werden Eselinnen |
+| 5:30 | Beim Müller: dreimal Schläge, einmal Schläge, keine Schläge (nur erzählt) |
+| 6:06 | Vergebung – „Behalt es nur, es ist einerlei“ |
+| 6:46 | Hochzeit |
+
+## Der Frieder und das Katherlieschen (gut 10 Minuten)
+
+Nach den Brüdern Grimm (KHM 59), ausführlich erzählt.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | „Geh nur, Friederchen, will dir's schon recht machen“ |
+| 0:26 | Die Wurst in der Pfanne, das Bier im Keller – „Der Hund ist nicht angebunden!“ |
+| 0:52 | Der Hund mit der Wurst, „Hin ist hin!“, das Bier läuft aus |
+| 1:20 | Das Weizenmehl im Keller – „Wo eins ist, muss das andere auch sein“ |
+| 1:50 | Frieder kommt heim – „Hättest mir's sagen müssen!“ |
+| 2:20 | Die gelben Gickelinge unter der Kuhkrippe |
+| 2:46 | Die Krämer graben das Gold aus; die Töpfe ohne Boden auf den Zaunpfählen |
+| 3:44 | „Das war eitel Gold!“ – den Dieben nach |
+| 4:14 | Butter in die Wagengleise, die Käse laufen einander nach |
+| 4:54 | Trockenes Brot; die Haustür auf dem Rücken |
+| 6:08 | Die Nacht im Baum, die Diebe am Feuer, Frieders Steine |
+| 6:42 | Hutzeln („Die Vögel misten“) und Essig („Der Tau tröpfelt“) |
+| 7:22 | Die Tür fällt – „Der Teufel kommt vom Baum herab!“ |
+| 7:52 | Das Gold ist wieder da |
+| 8:18 | Auf dem Feld: „Bin ich's, oder bin ich's nicht?“ |
+| 8:52 | Am Fenster, bei den Dieben, im Rübenland – der Pfarrer mit dem lahmen Fuß |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |

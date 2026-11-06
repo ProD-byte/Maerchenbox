@@ -53,3 +53,5 @@ extern const Maerchen HANS_GLUECK;
 extern const Maerchen DROSSELBART;
 extern const Maerchen ZERTANZT;
 extern const Maerchen DAEUMELINCHEN;
+extern const Maerchen KRAUTESEL;
+extern const Maerchen KATHERLIESCHEN;
