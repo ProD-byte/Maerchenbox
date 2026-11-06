@@ -14,6 +14,11 @@ class Synth {
  public:
   static constexpr int RATE = 24000;
   static constexpr int STIMMEN = 40;
+#ifdef BOARD_RUND
+  static constexpr float VOR = 1.7f;  // kleiner Lautsprecher: vor dem weichen Begrenzer ~4,6 dB mehr
+#else
+  static constexpr float VOR = 1.0f;
+#endif
 
   void start();                       // Maerchenzeit auf 0, alles leise
   float zeit() const { return (float)pos / RATE; }  // aktuelle Maerchenzeit

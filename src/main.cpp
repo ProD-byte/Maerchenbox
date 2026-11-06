@@ -276,6 +276,9 @@ static bool es8311Init() {
 static void setzeLautstaerke(bool merken) {
   // 0xBF = 0 dB, je Registerschritt 0,5 dB; oberste Kinder-Stufe = Hoechstlautstaerke, je Stufe 4 dB leiser
   int r = 0xBF + GRENZE_DB[grenze] * 2 - (MAXLAUT - lautstaerke) * 8;
+#ifdef BOARD_RUND
+  r += 8 * 2;  // der kleine Lautsprecher des runden Boards braucht 8 dB mehr (oben bei 0 dB gekappt)
+#endif
   uint8_t reg = lautstaerke == 0 ? 0 : (uint8_t)constrain(r, 1, 0xBF);
   esWrite(0x32, reg);
   if (merken) { prefs.begin("box", false); prefs.putInt("laut", lautstaerke); prefs.end(); }
@@ -1557,19 +1560,27 @@ static void wlanStart() {
 // =====================================================================
 #ifdef BOARD_RUND
 // Touch (CST9217 an 0x5A, Protokoll wie in SensorLib): welcher Bereich gerade beruehrt wird
-// (0 keiner, TASTE_A/B/C), alle 15 ms gelesen
+// (0 keiner, TASTE_A/B/C). Gelesen wird nur, nachdem der Chip ueber INT eine Beruehrung gemeldet hat,
+// und dann alle 15 ms, solange der Finger liegt: ohne Beruehrung haelt der Chip den Bus fest (bis 1 s),
+// das liess das Bild alle paar Sekunden haengen.
 int touchBereich = 0;
 int touchX = -1, touchY = -1;
+static volatile bool touchMeldung = false;
+static void IRAM_ATTR touchIsr() { touchMeldung = true; }
 static void touchStart() {
   pinMode(PIN_TOUCH_INT, INPUT_PULLUP);
   pinMode(PIN_TOUCH_RST, OUTPUT);
   digitalWrite(PIN_TOUCH_RST, LOW); delay(20);
   digitalWrite(PIN_TOUCH_RST, HIGH); delay(100);
+  Wire.setTimeOut(20);  // eine haengende Abfrage darf das Bild nicht lange aufhalten
   Wire.beginTransmission(TOUCH_ADDR);
   Serial.printf("Touch CST9217 %s\n", Wire.endTransmission() == 0 ? "antwortet" : "antwortet NICHT");
+  attachInterrupt(PIN_TOUCH_INT, touchIsr, FALLING);
 }
 static void touchLesen() {
-  static uint32_t zuletzt = 0, zuletztGesehen = 0;
+  static uint32_t zuletzt = 0, zuletztGesehen = 0, aktivBis = 0;
+  if (touchMeldung) { touchMeldung = false; aktivBis = millis() + 250; }
+  if ((int32_t)(millis() - aktivBis) > 0) { touchBereich = 0; return; }  // keine Beruehrung gemeldet
   if (millis() - zuletzt < 15) return;
   zuletzt = millis();
   uint8_t b[15] = {0};
@@ -1584,9 +1595,11 @@ static void touchLesen() {
   if (!gedrueckt) {
     // der Chip meldet nur bei Aenderungen; ohne gueltige Meldung kurz den alten Zustand halten
     if (millis() - zuletztGesehen > 120 || (ok && b[6] == 0xAB)) touchBereich = 0;
+    if (ok && b[6] == 0xAB) aktivBis = millis();  // losgelassen: Ruhe bis zur naechsten Meldung
     return;
   }
   zuletztGesehen = millis();
+  aktivBis = millis() + 250;  // Finger liegt noch: weiter lesen
   int x = (b[1] << 4) | (b[3] >> 4), y = (b[2] << 4) | (b[3] & 0x0F);
   x = 465 - x; y = 465 - y;  // Panel gespiegelt (wie in der Xiaozhi-Firmware)
   if (gedreht) { x = 465 - x; y = 465 - y; }

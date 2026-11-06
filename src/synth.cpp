@@ -169,7 +169,7 @@ IRAM_ATTR void Synth::render(int16_t *aus, int n) {
       if (++ai[k] >= al[k]) ai[k] = 0;
       hall = y;
     }
-    float x = (musik * 0.6f + ger + hall * 0.9f) * 1.6f;
+    float x = (musik * 0.6f + ger + hall * 0.9f) * (1.6f * VOR);
     // weich begrenzen
     if (x > 3) x = 3;
     if (x < -3) x = -3;
