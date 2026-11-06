@@ -45,7 +45,9 @@ jobs:
           mkdir -p ../Himmelsstation
           printf '[geheim]\nota_passwort =\n' > ../Himmelsstation/geheim.ini
 
-      - name: Firmware bauen (runde Box)
+      - name: Firmware bauen (runde Box, mit Build-Nummer fuer die Updates aus dem Internet)
+        env:
+          PLATFORMIO_BUILD_FLAGS: -DFIRMWARE_BUILD=${{ github.run_number }}
         run: pio run -e rund
 
       - name: Flasher-Dateien zusammenstellen

@@ -24,6 +24,15 @@
 #include <Preferences.h>
 #include <driver/i2s.h>
 #include <time.h>
+#ifdef BOARD_RUND
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+#include <HTTPUpdate.h>
+#include "update_wurzeln.h"
+#endif
+#ifndef FIRMWARE_BUILD
+#define FIRMWARE_BUILD 0  // setzt GitHub beim Bauen (Build-Nummer); 0 = selbst gebaut
+#endif
 #include "gfx.h"
 #include "lcd.h"
 #include "synth.h"
@@ -1801,6 +1810,70 @@ static void otaStarten() {
   Serial.printf("WLAN: %s (" NAME_IM_NETZ ".local)\n", WiFi.localIP().toString().c_str());
 }
 
+#ifdef BOARD_RUND
+// ---------- Updates aus dem Internet (neue Maerchen) ----------
+// GitHub baut bei jedem Hochladen eine neue Firmware (Build-Nummer in FIRMWARE_BUILD) und legt sie auf GitHub Pages.
+// Die Box schaut kurz nach dem WLAN-Start und dann alle 6 Stunden in version.json nach. Gibt es einen neueren Build,
+// spielt sie ihn ein, sobald sie nicht benutzt wird (kein Maerchen, Display aus) - WLAN und Einstellungen bleiben.
+// Selbst gebaute Firmware (FIRMWARE_BUILD 0, z. B. aus PlatformIO) sucht nicht danach.
+static const char *UPDATE_SEITE = "https://prod-byte.github.io/Maerchenbox/";
+static int onlineBuild = 0;  // > FIRMWARE_BUILD: es gibt etwas Neues
+static void netzUpdatePruefen() {
+  WiFiClientSecure c;
+  c.setCACert(UPDATE_WURZELN);  // nur echtes prod-byte.github.io (Zertifikat wird geprueft)
+  HTTPClient h;
+  h.setTimeout(8000);
+  if (!h.begin(c, String(UPDATE_SEITE) + "version.json?t=" + millis())) return;
+  if (h.GET() == 200) {
+    String s = h.getString();
+    int i = s.indexOf("\"build\":");
+    if (i >= 0) {
+      int b = s.substring(i + 8).toInt();
+      onlineBuild = b > FIRMWARE_BUILD ? b : 0;
+      Serial.printf("Update: online Build %d, hier Build %d\n", b, FIRMWARE_BUILD);
+    }
+  }
+  h.end();
+}
+static void netzUpdateInstallieren() {
+  Serial.printf("Update: lade Build %d\n", onlineBuild);
+  setCpuFrequencyMhz(240);  // im Schlaf laeuft die Box langsamer
+  anfStopp = true;
+  updateProzent = 0;
+  wechsle(UPDATE);
+  if (lcd::lichtAn()) neuesBild();
+  WiFiClientSecure c;
+  c.setCACert(UPDATE_WURZELN);  // nur echtes prod-byte.github.io (Zertifikat wird geprueft)
+  httpUpdate.rebootOnUpdate(false);
+  httpUpdate.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+  httpUpdate.onProgress([](int fertig, int gesamt) {
+    int p = gesamt > 0 ? (int)((int64_t)fertig * 100 / gesamt) : 0;
+    if (p / 5 != updateProzent / 5) { updateProzent = p; if (lcd::lichtAn()) neuesBild(); }
+  });
+  t_httpUpdate_return r = httpUpdate.update(c, String(UPDATE_SEITE) + "rund/firmware.bin");
+  if (r == HTTP_UPDATE_OK) {
+    Serial.println("Update: fertig, starte neu");
+    delay(500);
+    ESP.restart();
+  }
+  Serial.printf("Update fehlgeschlagen: %s\n", httpUpdate.getLastErrorString().c_str());
+  onlineBuild = 0;  // nicht dauernd neu versuchen - beim naechsten Pruefen wieder
+  wechsle(TITEL);
+}
+static void netzUpdateSchritt() {
+  static uint32_t geprueft = 0, verbundenSeit = 0;
+  if (FIRMWARE_BUILD == 0 || WiFi.status() != WL_CONNECTED) { verbundenSeit = 0; return; }
+  if (time(nullptr) < 1700000000) return;  // Zertifikate pruefen geht erst mit richtiger Uhrzeit (NTP)
+  if (!verbundenSeit) verbundenSeit = millis();
+  uint32_t jetzt = millis();
+  bool faellig = geprueft == 0 ? jetzt - verbundenSeit > 60000 : jetzt - geprueft > 6UL * 3600 * 1000;
+  if (faellig && zustand != SPIELT && zustand != UPDATE) { geprueft = jetzt; netzUpdatePruefen(); }
+  // einspielen nur, wenn die Box gerade nicht benutzt wird
+  bool frei = (zustand == SCHLAF || zustand == TITEL || zustand == MENUE) && !lcd::lichtAn() && jetzt - letzteTaste > 5UL * 60 * 1000;
+  if (onlineBuild && frei) netzUpdateInstallieren();
+}
+#endif
+
 static void wlanStart() {
   prefs.begin("wlan", true);
   String ssid = prefs.getString("ssid", ""), pass = prefs.getString("pass", "");
@@ -2156,6 +2229,9 @@ void loop() {
   if (serverLaeuft) server.handleClient();
   if (!otaGestartet && WiFi.status() == WL_CONNECTED) otaStarten();
   if (otaGestartet) ArduinoOTA.handle();
+#ifdef BOARD_RUND
+  netzUpdateSchritt();  // neue Firmware von prod-byte.github.io (Zertifikat geprueft), nur wenn die Box ruht
+#endif
   if (zustand == UPDATE) return;
 
 #ifdef BOARD_RUND
@@ -2166,6 +2242,10 @@ void loop() {
     else if (c == 'F') fotoUeberUsb();
     else if (c == 'V') videoBildUeberUsb();
     else if (c == 'E') { spracheSetzen(true); Serial.println("Sprache: Englisch"); }  // fest Englisch (fuer Videos)
+    else if (c == 'U') {  // Update-Stand zeigen und gleich im Internet nachsehen
+      Serial.printf("Build %d, WLAN %s\n", FIRMWARE_BUILD, WiFi.status() == WL_CONNECTED ? "verbunden" : "aus");
+      if (FIRMWARE_BUILD && WiFi.status() == WL_CONNECTED) netzUpdatePruefen();
+    }
     else if (c == 'S') { spracheSetzen(!englisch); Serial.println(englisch ? "Sprache: Englisch" : "Sprache: Deutsch"); }  // nur zum Pruefen, wird nicht gespeichert
   }
 #endif
