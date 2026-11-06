@@ -5,6 +5,7 @@
 #include "figuren.h"
 #include "melodien.h"
 #include <stdio.h>
+#include <string.h>
 #include <initializer_list>
 
 // ---------- Sprechblasen ----------
@@ -155,8 +156,9 @@ static void bild(Gfx &g, float t) {
       g.rechteck(i * 10, bandY + 3, 5, 1.5f, GOLD, 200);
       g.rechteck(i * 10 + 3, bandY + 40, 5, 1.5f, GOLD, 200);
     }
-    const char *spruch = "Siebene auf einen Streich!";
-    int n = (int)klemme((u - 0.6f) / 0.26f, 0, 26);
+    const char *spruch = Gfx::uebersetze("Siebene auf einen Streich!");  // wird Buchstabe fuer Buchstabe gestickt
+    const int laenge = (int)strlen(spruch);
+    int n = (int)klemme((u - 0.6f) / 0.26f, 0, laenge);
     char teil[32];
     snprintf(teil, sizeof teil, "%.*s", n, spruch);
     int voll = g.textBreite(SCHRIFT_M, spruch);
@@ -165,7 +167,7 @@ static void bild(Gfx &g, float t) {
     g.text(SCHRIFT_M, teil, tx, bandY + 29, GOLD);
     // Nadel mit Faden an der Schreibstelle
     float nx = tx + g.textBreite(SCHRIFT_M, teil) + 4, ny = bandY + 14 + sinf(u * 18) * 6;
-    if (n < 26) {
+    if (n < laenge) {
       g.kurve(nx, ny, nx + 30, ny - 50, nx + 60, ny - 70, 1.4f, GOLD);
       g.linie(nx - 3, ny + 8, nx + 6, ny - 14, 2.2f, FARBE(0xC7D0DC));
     }

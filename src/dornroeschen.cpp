@@ -399,7 +399,7 @@ static void szeneHecke(Gfx &g, float u) {
   }
   g.kameraAus();
   char jahr[24];
-  snprintf(jahr, sizeof jahr, "%d Jahre", (int)(jahre * 100));
+  snprintf(jahr, sizeof jahr, Gfx::uebersetze("%d Jahre"), (int)(jahre * 100));
   g.text(SCHRIFT_M, jahr, 142, 228, WEISS, 1, (uint8_t)(255 * aufzu(u, 2, 32)));
   vers(g, {"Rings um das Schloss begann eine", "Dornenhecke zu wachsen."}, aufzu(u, 0.4f, 8));
   vers(g, {"Königssöhne kamen und wollten", "hindurch, aber sie konnten nicht."}, aufzu(u, 14, 24));

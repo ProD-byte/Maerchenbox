@@ -589,6 +589,13 @@ an `maerchenbox-rund.local`. Die Board-Teile stehen unter `#ifdef BOARD_RUND`, d
 Erkannt wurde das Board am 2026-11-06 über eine Pin-Suche (nur 2, 11, 14, 15 haben Pull-ups; an 15/14 antworten
 die Chips) und die Board-Dateien der Xiaozhi-Firmware (`main/boards/waveshare/esp32-s3-touch-amoled-1.75`).
 
+## Deutsch oder Englisch
+
+In den Eltern-Einstellungen gibt es den Punkt **„Sprache: Deutsch“ / „Language: English“** (Start drücken schaltet
+um, wird gespeichert). Auf Englisch erscheinen alle Märchen, Verse, Sprechblasen, Titel, das Buch und die Menüs
+englisch. Die Übersetzung liegt als Tabelle in `src/uebersetzung_en.cpp` und wird aus `werkzeuge/englisch/`
+erzeugt (siehe `werkzeuge/englisch/LIESMICH.md`). Die WLAN-Einrichtungsseite auf dem Handy bleibt deutsch.
+
 ## Online-Flasher und daveslab.de/basteln
 
 Bei jedem Hochladen nach `master` baut GitHub Actions (`.github/workflows/build.yml`) die **runde** Box und stellt den

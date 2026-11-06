@@ -72,8 +72,18 @@ Zustand zustand = TITEL;
 int auswahl = 0;            // aktuelles Maerchen
 // Maerchenbuch: nur die Maerchen (Seite 0..ANZAHL-1). Die Einstellungen sind versteckt:
 // Lauter + Leiser 3 s gleichzeitig halten. SEITE_DREHEN / SEITE_WLAN sind nur Bilder dafuer.
-constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3, SEITE_ZEIT = ANZAHL + 4, SEITE_HELL = ANZAHL + 5;
-constexpr int EINST_PUNKTE = 7;  // drehen, laut, hell, lesen, Nutzungszeit, WLAN, zurueck
+constexpr int SEITEN = ANZAHL, SEITE_DREHEN = ANZAHL, SEITE_WLAN = ANZAHL + 1, SEITE_LAUT = ANZAHL + 2, SEITE_LESEN = ANZAHL + 3, SEITE_ZEIT = ANZAHL + 4, SEITE_HELL = ANZAHL + 5, SEITE_SPRACHE = ANZAHL + 6;
+constexpr int EINST_PUNKTE = 8;  // drehen, laut, hell, lesen, Nutzungszeit, Sprache, WLAN, zurueck
+
+// ---------- Sprache ----------
+// Deutsch steht im Quelltext; auf Englisch schlaegt Gfx::text jeden Text in uebersetzung_en.cpp nach.
+const char *aufEnglisch(const char *de);
+bool englisch = false;
+#define U(s) Gfx::uebersetze(s)  // fuer Vorlagen von snprintf und Textteile
+static void spracheSetzen(bool e) {
+  englisch = e;
+  Gfx::uebersetzer = e ? aufEnglisch : nullptr;
+}
 constexpr uint32_t KOMBI_MS = 3000;
 int einstZiel = 0;          // Drehrad: Ziel (ohne Kreis-Rest), einstPos = Rest
 float einstAnim = 0;        // Drehrad: aktuelle, weich nachlaufende Stellung
@@ -697,8 +707,8 @@ static void cover(Gfx &g, const Maerchen *m, float t) {
   bool passt;
   const Schrift *sch = &SCHRIFT_B;
   float zh = 20;
-  int n = zeilen(g, m->titel, z, w - 26, SCHRIFT_B, &passt);
-  if (!passt || n > 3) { sch = &SCHRIFT_K; zh = 16; n = zeilen(g, m->titel, z, w - 26, SCHRIFT_K); }  // lange Titel kleiner
+  int n = zeilen(g, U(m->titel), z, w - 26, SCHRIFT_B, &passt);
+  if (!passt || n > 3) { sch = &SCHRIFT_K; zh = 16; n = zeilen(g, U(m->titel), z, w - 26, SCHRIFT_K); }  // lange Titel kleiner
   float ty = y + (zh > 16 ? 30 : 27);
   for (int i = 0; i < n; i++) {
     g.text(*sch, z[i], cx + 1, ty + i * zh + 1, dunkel, 1);
@@ -783,7 +793,7 @@ static void linkeSeite(Gfx &g, int seite, float t) {
       g.linie(mx, my, mx + sinf(am) * r * 0.78f, my - cosf(am) * r * 0.78f, 1.6f, TINTE);
       char b[24], z[8];
       zeitText(z, sizeof z, m);
-      snprintf(b, sizeof b, "jetzt %s", z);
+      snprintf(b, sizeof b, U("jetzt %s"), z);
       g.text(SCHRIFT_K, b, mx, 128, TINTE, 1);
     } else {
       g.text(SCHRIFT_K, "Uhrzeit fehlt", mx, 128, LEDER, 1);
@@ -809,6 +819,21 @@ static void linkeSeite(Gfx &g, int seite, float t) {
     g.kreis(sx - 2, 113, 10, FARBE(0xC98A4A));
     g.konturAus();
     g.bogen(sx - 2, 113, 5, 0, 5, 1.6f, LEDER);
+  } else if (seite == SEITE_SPRACHE) {
+    // zwei Sprechblasen "DE" und "EN", die gewaehlte gross und golden
+    g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
+    for (int i = 0; i < 2; i++) {
+      bool an = (i == 1) == englisch;
+      float x = i ? 92 : 56, y = i ? 98 : 74, w = an ? 40 : 32, h = an ? 28 : 22;
+      float puls = an ? 1 + sinf(t * 3) * 0.04f : 1;
+      w *= puls; h *= puls;
+      g.kontur(1.4f, TINTE);
+      g.rundRechteck(x - w / 2, y - h / 2, w, h, 8, an ? GOLD : WEISS);
+      g.konturAus();
+      float sp[] = {x - 5, y + h / 2 - 1, x + 4, y + h / 2 - 1, i ? x + 8 : x - 8, y + h / 2 + 8};
+      g.polygon(sp, 3, an ? GOLD : WEISS);
+      g.text(an ? SCHRIFT_B : SCHRIFT_K, i ? "EN" : "DE", x, y + (an ? 7 : 5), an ? TINTE : FARBE(0x9A7650), 1);
+    }
   } else if (seite == SEITE_DREHEN) {
     // kleiner Bildschirm, der sich dreht
     g.rundRechteck(26, 44, 104, 88, 4, FARBE(0xFFF6E4));
@@ -857,7 +882,7 @@ static void rechteSeite(Gfx &g, int seite, float t) {
     g.kameraAus();
     schnoerkel(g, cx, 160, 30, GOLD_D);
     char d[24];
-    snprintf(d, sizeof d, "%d Minuten", (int)(m->dauer / 60 + 0.5f));
+    snprintf(d, sizeof d, U("%d Minuten"), (int)(m->dauer / 60 + 0.5f));
     g.text(SCHRIFT_K, d, cx, 177, FARBE(0x9A7650), 1);
     startKnopf(g, cx, 196, t, 11);
   }
@@ -972,7 +997,7 @@ static void buchBild(Gfx &g, float t) {
 static void einstellungenBild(Gfx &g, float t) {
   BuchTexteFest fest;
   buchRahmenOffen(g, t);
-  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_HELL : einstPos == 3 ? SEITE_LESEN : einstPos == 4 ? SEITE_ZEIT : einstPos == 5 ? SEITE_WLAN : auswahl, t);
+  linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_HELL : einstPos == 3 ? SEITE_LESEN : einstPos == 4 ? SEITE_ZEIT : einstPos == 5 ? SEITE_SPRACHE : einstPos == 6 ? SEITE_WLAN : auswahl, t);
   seitenGrund(g, false);
   const float cx = MITTE + BW / 2;
   g.text(SCHRIFT_B, "Für Eltern", cx, 50, TINTE, 1);
@@ -980,13 +1005,16 @@ static void einstellungenBild(Gfx &g, float t) {
   char zeitZeile[40], v[8], b[8];
   zeitText(v, sizeof v, vonMin);
   zeitText(b, sizeof b, bisMin);
-  if (zeitFeld == 0) snprintf(zeitZeile, sizeof zeitZeile, "Zeitgrenze: %s", zeitAn ? "an" : "aus");
-  else if (zeitFeld == 1) snprintf(zeitZeile, sizeof zeitZeile, "Von: %s", v);
-  else if (zeitFeld == 2) snprintf(zeitZeile, sizeof zeitZeile, "Bis: %s", b);
-  else if (zeitAn) snprintf(zeitZeile, sizeof zeitZeile, "Zeit: %s-%s", v, b);
-  else snprintf(zeitZeile, sizeof zeitZeile, "Zeit: immer");
+  // zusammengesetzte Texte: Vorlage und Teile einzeln uebersetzen (der Rest geht ueber Gfx::text)
+  if (zeitFeld == 0) snprintf(zeitZeile, sizeof zeitZeile, U("Zeitgrenze: %s"), U(zeitAn ? "an" : "aus"));
+  else if (zeitFeld == 1) snprintf(zeitZeile, sizeof zeitZeile, U("Von: %s"), v);
+  else if (zeitFeld == 2) snprintf(zeitZeile, sizeof zeitZeile, U("Bis: %s"), b);
+  else if (zeitAn) snprintf(zeitZeile, sizeof zeitZeile, U("Zeit: %s-%s"), v, b);
+  else snprintf(zeitZeile, sizeof zeitZeile, "%s", U("Zeit: immer"));
   const char *namen[EINST_PUNKTE] = {gedreht ? "Bild drehen: an" : "Bild drehen: aus", GRENZE_TEXT[grenze],
-                                     HELL_TEXT[hell], LESE_TEXT[lesen], zeitZeile, "WLAN einrichten", "Zurück zum Buch"};
+                                     HELL_TEXT[hell], LESE_TEXT[lesen], zeitZeile,
+                                     englisch ? "Language: English" : "Sprache: Deutsch", "WLAN einrichten",
+                                     "Zurück zum Buch"};
   // Drehrad: die Punkte liegen auf einer Walze, die sich nach oben oder unten dreht (endlos im Kreis)
   const float MY = 134, R = 66, SCHRITT = 0.42f;
   int reihe[EINST_PUNKTE];
@@ -1129,6 +1157,7 @@ static void flugBild(Gfx &g, float uhr, float k) {
 // Startbild fuer alle Maerchen: helle Bildunterschrift mit Titel und goldenem Siegel
 static void startBild(Gfx &g, float uhr) {
   const Maerchen *m = LISTE[auswahl];
+  const char *titel = U(m->titel);  // schon uebersetzt: die Zeilen werden aus dem angezeigten Titel gebildet
   m->vorschau(g, uhr);
   g.kameraAus();
   const Schrift *sch = &SCHRIFT_B;
@@ -1137,20 +1166,20 @@ static void startBild(Gfx &g, float uhr) {
   const float bx = 38, bb = 186, knopfX = 60, titelX = 145, platz = 140;
   float y = 172, h = 40;
   char z1[80] = "", z2[80] = "";
-  if (g.textBreite(SCHRIFT_B, m->titel) > platz) sch = &SCHRIFT_K;
-  if (sch == &SCHRIFT_K && g.textBreite(SCHRIFT_K, m->titel) > platz && strlen(m->titel) < sizeof z1) {
+  if (g.textBreite(SCHRIFT_B, titel) > platz) sch = &SCHRIFT_K;
+  if (sch == &SCHRIFT_K && g.textBreite(SCHRIFT_K, titel) > platz && strlen(titel) < sizeof z1) {
     int best = -1, bestW = 1 << 30;
-    for (int i = 1; m->titel[i]; i++) {
-      if (m->titel[i] != ' ') continue;
-      memcpy(z1, m->titel, i); z1[i] = 0;
-      int a = g.textBreite(SCHRIFT_K, z1), b = g.textBreite(SCHRIFT_K, m->titel + i + 1), mx = a > b ? a : b;
+    for (int i = 1; titel[i]; i++) {
+      if (titel[i] != ' ') continue;
+      memcpy(z1, titel, i); z1[i] = 0;
+      int a = g.textBreite(SCHRIFT_K, z1), b = g.textBreite(SCHRIFT_K, titel + i + 1), mx = a > b ? a : b;
       if (mx < bestW) { bestW = mx; best = i; }
     }
-    if (best > 0) { memcpy(z1, m->titel, best); z1[best] = 0; strcpy(z2, m->titel + best + 1); y = 160; h = 54; }
+    if (best > 0) { memcpy(z1, titel, best); z1[best] = 0; strcpy(z2, titel + best + 1); y = 160; h = 54; }
   }
 #else
   const float bx = 10, bb = 264, y = 190, h = 40, knopfX = 34, titelX = 160, platz = 196;
-  if (g.textBreite(SCHRIFT_B, m->titel) > platz) sch = &SCHRIFT_K;
+  if (g.textBreite(SCHRIFT_B, titel) > platz) sch = &SCHRIFT_K;
 #endif
   g.rundRechteck(bx, y + 2, bb, h, 14, FARBE(0x000000), 60);
   g.kontur(1.2f, FARBE(0xB8862B));
@@ -1164,7 +1193,7 @@ static void startBild(Gfx &g, float uhr) {
     return;
   }
 #endif
-  g.text(*sch, m->titel, titelX, y + h / 2 + (sch == &SCHRIFT_B ? 6 : 5), TINTE, 1);
+  g.text(*sch, titel, titelX, y + h / 2 + (sch == &SCHRIFT_B ? 6 : 5), TINTE, 1);
 }
 
 // Gute Nacht: Mond, Sterne, das geschlossene Buch schlaeft
@@ -1968,7 +1997,12 @@ static void ereignis(Ereignis e, int laut) {
         uiKlang = 3;
       }
       else if (einstPos == 4) { zeitFeld = 0; uiKlang = 3; }
-      else if (einstPos == 5) einrichtungStarten();
+      else if (einstPos == 5) {  // Sprache umschalten: Deutsch <-> Englisch
+        spracheSetzen(!englisch);
+        prefs.begin("box", false); prefs.putBool("englisch", englisch); prefs.end();
+        uiKlang = 3;
+      }
+      else if (einstPos == 6) einrichtungStarten();
       else buchOeffnen();
     }
     if (e == LANG) buchOeffnen();
@@ -2047,6 +2081,7 @@ void setup() {
   bisMin = constrain(prefs.getInt("bis", 19 * 60), 0, 1439);
   gedreht = prefs.getBool("gedreht", false);
   auswahl = constrain(prefs.getInt("auswahl", 0), 0, ANZAHL - 1);
+  spracheSetzen(prefs.getBool("englisch", false));
   prefs.end();
   setzeLautstaerke(false);
   lcd::drehen(gedreht);
@@ -2080,6 +2115,7 @@ void loop() {
     int c = Serial.read();
     if (c == 'P') pruefen();
     else if (c == 'F') fotoUeberUsb();
+    else if (c == 'S') { spracheSetzen(!englisch); Serial.println(englisch ? "Sprache: Englisch" : "Sprache: Deutsch"); }  // nur zum Pruefen, wird nicht gespeichert
   }
 #endif
   Ereignis e = mitte.lies();

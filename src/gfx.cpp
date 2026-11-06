@@ -371,6 +371,7 @@ static const Glyph *finde(const Schrift &f, uint32_t code) {
 }
 
 int Gfx::textBreite(const Schrift &f, const char *s) {
+  s = uebersetze(s);
   int w = 0;
   while (*s) { const Glyph *g = finde(f, naechstesZeichen(s)); if (g) w += g->adv; }
   return w;
@@ -378,6 +379,7 @@ int Gfx::textBreite(const Schrift &f, const char *s) {
 
 void (*Gfx::textPruefer)(const char *, float, float, float, float, uint8_t) = nullptr;
 bool Gfx::textAnpassen = true;
+const char *(*Gfx::uebersetzer)(const char *) = nullptr;
 
 #ifdef BOARD_RUND
 static bool rechteckImKreis(float x, float y, float w, float h) {
@@ -388,6 +390,7 @@ static bool rechteckImKreis(float x, float y, float w, float h) {
 #endif
 
 void Gfx::text(const Schrift &f, const char *s, float x, float y, Farbe c, int ausr, uint8_t a) {
+  s = uebersetze(s);
   int tw = textBreite(f, s);
   if (ausr) x -= tw * (ausr == 1 ? 0.5f : 1.0f);
 #ifdef BOARD_RUND
