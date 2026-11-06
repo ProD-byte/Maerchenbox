@@ -173,6 +173,27 @@ static void teilSchicken(int b, int start) {
   offen++;
 }
 
+// Randzeile fuer die Fortsetzung oben/unten: je Spalte der dunkelste Wert (je Farbkanal) aus 3 Randzeilen und
+// +-4 Spalten. So werden kleine helle Punkte (Sterne, Funken) nicht zu senkrechten Strichen ausgezogen.
+static uint16_t randZeile[W];
+static void randZeileBauen(const uint16_t *p, int r0) {
+  for (int x = 0; x < W; x++) {
+    int r = 31, gg = 63, b = 31;
+    for (int y = r0; y < r0 + 3; y++)
+      for (int dx = -4; dx <= 4; dx++) {
+        int xx = x + dx < 0 ? 0 : x + dx >= W ? W - 1 : x + dx;
+        uint16_t v = p[y * W + xx];
+        v = (uint16_t)((v >> 8) | (v << 8));
+        int vr = v >> 11, vg = (v >> 5) & 63, vb = v & 31;
+        if (vr < r) r = vr;
+        if (vg < gg) gg = vg;
+        if (vb < b) b = vb;
+      }
+    uint16_t v = (uint16_t)((r << 11) | (gg << 5) | b);
+    randZeile[x] = (uint16_t)((v >> 8) | (v << 8));
+  }
+}
+
 // erste Ausgabezeile, die zur Bildzeile ys (oder spaeter) gehoert: Bildzeile = oy * 284 / 464 - 22
 static int ersteZeile(int ys) { return ys <= 0 ? 0 : ys >= H ? SH : ((ys + UEBER) * SH + W - 1) / W; }
 
@@ -190,6 +211,8 @@ void senden(uint16_t *p, int y) {
   if (y == 0) { teilGefuellt = 0; teilStart = 0; }
   // Ausgabezeilen dieses Streifens (der oberste Streifen bekommt auch den Himmel darueber, der unterste den Boden darunter)
   const int oa = ersteZeile(ys), ob = ys + STREIFEN >= H ? SH : ersteZeile(ys + STREIFEN);
+  if (ys == 0) randZeileBauen(p, 0);                             // Himmel ueber dem Bild
+  else if (ys + STREIFEN >= H) randZeileBauen(p, STREIFEN - 3);  // Boden unter dem Bild
   for (int n = 0; n < ob - oa; n++) {
     int oy = umgedreht ? ob - 1 - n : oa + n;   // Bildschirmzeile
     if (teilGefuellt == 0) {
@@ -198,9 +221,7 @@ void senden(uint16_t *p, int y) {
       teilStart = umgedreht ? oy - TEIL_ZEILEN + 1 : oy;
     }
     int iy = oy * W / SW - UEBER - ys;
-    if (iy < 0) iy = 0;
-    if (iy >= STREIFEN) iy = STREIFEN - 1;
-    const uint16_t *zi = p + iy * W;
+    const uint16_t *zi = (iy < 0 || iy >= STREIFEN) ? randZeile : p + iy * W;  // ausserhalb: gesaeuberte Randzeile
     uint16_t *zo = teil[teilNaechster] + (oy - teilStart) * SW;
     for (int c = 0; c < SW; c++) zo[c] = zi[xmap[c]];
     if (++teilGefuellt == TEIL_ZEILEN) {
