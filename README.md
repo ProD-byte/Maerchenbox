@@ -320,6 +320,20 @@ Nach dem Märchen von Hans Christian Andersen.
 | 1:28 | Der Kaiser sieht auch nichts – „Oh, es ist sehr hübsch!“ – die Anprobe vor dem Spiegel |
 | 2:02 | Der Festzug: „Aber er hat ja gar nichts an!“ – und die Kammerherren tragen die Schleppe, die gar nicht da ist |
 
+## Die drei kleinen Schweinchen (gut 3 Minuten)
+
+Nach dem englischen Volksmärchen, in der kinderfreundlichen Fassung (niemand wird gefressen).
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Die Mutter schickt die drei hinaus in die Welt |
+| 0:22 | Ein Haus aus Stroh, eines aus Holz, eines aus Stein |
+| 0:48 | „Kleines Schweinchen, lass mich herein!“ – „Nein, nein, beim Barthaar an meinem Kinn!“ – das Strohhaus fliegt |
+| 1:22 | Am Holzhaus dasselbe – Krach! |
+| 1:52 | Am Steinhaus pustet er umsonst und wird ganz schwindlig |
+| 2:26 | Durch den Schornstein – Platsch! – in den Topf; er rennt davon und kommt nie wieder |
+| 2:54 | Die drei tanzen vor dem Steinhaus |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -420,6 +434,7 @@ pio run -e ostb2st -t upload
 - `src/erbse.cpp` – Die Prinzessin auf der Erbse (Andersen)
 - `src/rumpelstilzchen.cpp` – Rumpelstilzchen
 - `src/kaiser.cpp` – Des Kaisers neue Kleider (Andersen)
+- `src/schweinchen.cpp` – Die drei kleinen Schweinchen
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 

@@ -45,3 +45,4 @@ extern const Maerchen ENTLEIN;
 extern const Maerchen ERBSE;
 extern const Maerchen RUMPELSTILZCHEN;
 extern const Maerchen KAISER_KLEIDER;
+extern const Maerchen SCHWEINCHEN;
