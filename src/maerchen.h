@@ -55,3 +55,6 @@ extern const Maerchen ZERTANZT;
 extern const Maerchen DAEUMELINCHEN;
 extern const Maerchen KRAUTESEL;
 extern const Maerchen KATHERLIESCHEN;
+extern const Maerchen FROST;
+extern const Maerchen TALER;
+extern const Maerchen SCHNEEKOENIGIN;

@@ -472,6 +472,60 @@ Nach den Brüdern Grimm (KHM 59), ausführlich erzählt.
 | 8:18 | Auf dem Feld: „Bin ich's, oder bin ich's nicht?“ |
 | 8:52 | Am Fenster, bei den Dieben, im Rübenland – der Pfarrer mit dem lahmen Fuß |
 
+## Väterchen Frost (5 Minuten)
+
+Russisches Volksmärchen (nach Afanasjew).
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Marfuscha und die böse Stiefmutter; die faule Stiefschwester auf dem Ofen |
+| 0:24 | „Bring sie in den Wald zu Väterchen Frost!“ – unter die große Tanne |
+| 1:12 | „Ist dir warm, Mädchen?“ – dreimal: „Warm, Väterchen Frost“ |
+| 2:02 | Pelze, eine Truhe voller Schätze |
+| 2:24 | Das Hündchen unter dem Tisch: „Des Alten Tochter fährt mit Gold und Silber heim“ |
+| 2:52 | Marfuscha kommt reich beschenkt heim |
+| 3:16 | Die Stiefschwester antwortet unhöflich – Frost wird zornig (nur angedeutet) |
+| 4:36 | Marfuschas Hochzeit |
+
+## Das Märchen vom goldenen Taler (gut 5½ Minuten)
+
+Nach Hans Fallada („Geschichte vom goldenen Taler“, Geschichten aus der Murkelei).
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | „Ja, Kind, wenn wir bloß den goldenen Taler hätten!“ |
+| 0:24 | Die Großmutter schläft ein: „Diene um den Taler, bis du ihn bekommst“ |
+| 0:48 | Hans Geiz aus Überall und der Schimmel Unverzagt |
+| 1:38 | Die Halle unter der Erde, die Höllenhunde Neid und Gier |
+| 2:04 | Kupfer putzen; das Putzwassermännlein: „Mehr! Mehr!“ |
+| 2:58 | Silber; die Ratten rauben das Männlein |
+| 3:24 | Gold – „Wenn ihn dein Herz nicht erkennt …“; die letzten Krümel |
+| 3:52 | Der rote Fleck und die Träne |
+| 4:16 | Der Kuss – „Du hast mich erlöst, Anna Barbara!“ |
+| 4:40 | Flucht mit Putzwasser; Unverzagt hilft aus dem Schacht |
+| 5:10 | Heim ins Haus der Großmutter |
+
+## Die Schneekönigin (7½ Minuten)
+
+Nach Hans Christian Andersen.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Der Spiegel des Trolls zerspringt |
+| 0:26 | Kay und Gerda zwischen den Rosen in der Dachrinne |
+| 0:52 | „Die weißen Bienen schwärmen“ – die Schneekönigin am Fenster |
+| 1:18 | Die Splitter in Auge und Herz; Kay wird böse |
+| 2:06 | Der große weiße Schlitten, der Kuss auf die Stirn |
+| 2:36 | Die roten Schuhe für den Fluss, das Boot |
+| 3:02 | Der Blumengarten der alten Frau |
+| 3:32 | Die Krähe, Prinz und Prinzessin, die goldene Kutsche |
+| 4:02 | Das Räubermädchen, die Tauben, das Rentier |
+| 4:56 | Lappin und Finnin – „Ihre Macht sitzt in ihrem Herzen“ |
+| 5:24 | Die Schneeflocken-Wache und die Engel |
+| 5:46 | Kay im Eisschloss und das Wort „Ewigkeit“ |
+| 6:10 | Gerdas heiße Tränen tauen sein Herz auf |
+| 6:42 | Heimreise in den Frühling, daheim bei der Großmutter |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
