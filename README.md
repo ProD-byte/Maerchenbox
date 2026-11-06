@@ -334,6 +334,19 @@ Nach dem englischen Volksmärchen, in der kinderfreundlichen Fassung (niemand wi
 | 2:26 | Durch den Schornstein – Platsch! – in den Topf; er rennt davon und kommt nie wieder |
 | 2:54 | Die drei tanzen vor dem Steinhaus |
 
+## Goldlöckchen und die drei Bären (knapp 3 Minuten)
+
+Nach dem englischen Märchen.
+
+| Zeit | Szene |
+|---|---|
+| 0:00 | Ein großer, ein mittlerer und ein kleiner Bär; der Brei ist noch zu heiß |
+| 0:22 | Goldlöckchen und der Brei: zu heiß, zu kalt, genau richtig |
+| 0:50 | Die Stühle: zu hart, zu weich, genau richtig – Krach! |
+| 1:12 | Die Betten: zu hart, zu weich, genau richtig – sie schläft ein |
+| 1:34 | „Wer hat von meinem Brei gegessen?“ … „und da liegt sie ja noch!“ |
+| 2:20 | Sie springt aus dem Fenster und läuft nach Hause |
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
@@ -435,6 +448,7 @@ pio run -e ostb2st -t upload
 - `src/rumpelstilzchen.cpp` – Rumpelstilzchen
 - `src/kaiser.cpp` – Des Kaisers neue Kleider (Andersen)
 - `src/schweinchen.cpp` – Die drei kleinen Schweinchen
+- `src/goldloeckchen.cpp` – Goldlöckchen und die drei Bären
 - `src/erzaehlen.h` – gemeinsame Erzähl-Bausteine (Sprechblasen, Verse, Glitzern, Startbild, Ende)
 - `werkzeuge/schriften_erzeugen.py` – Schrift Lato als `src/schriften.h`
 
