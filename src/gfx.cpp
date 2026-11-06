@@ -377,6 +377,7 @@ int Gfx::textBreite(const Schrift &f, const char *s) {
 }
 
 void (*Gfx::textPruefer)(const char *, float, float, float, float, uint8_t) = nullptr;
+bool Gfx::textAnpassen = true;
 
 #ifdef BOARD_RUND
 static bool rechteckImKreis(float x, float y, float w, float h) {
@@ -394,7 +395,7 @@ void Gfx::text(const Schrift &f, const char *s, float x, float y, Farbe c, int a
   // wandern, wird er am Leerzeichen nahe der Mitte in zwei Zeilen geteilt und bleibt etwa an seinem Platz.
   float hb = f.asc + f.desc, bx0 = x + wx, by0 = y + wy - f.asc;
   bool sichtbar = bx0 + tw > 0 && bx0 < W && by0 + hb > 0 && by0 < H;
-  if (sichtbar && !rechteckImKreis(bx0, by0, tw, hb)) {
+  if (textAnpassen && sichtbar && !rechteckImKreis(bx0, by0, tw, hb)) {
     float cx = bx0 + tw / 2, cy = by0 + hb / 2, nx = cx, ny = cy;
     inKreis(nx, ny, tw, hb, 3);
     if (fabsf(ny - cy) > 24 && strlen(s) < 120) {

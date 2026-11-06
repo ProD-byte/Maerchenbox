@@ -80,6 +80,8 @@ class Gfx {
   int textBreite(const Schrift &s, const char *utf8);
   // Pruefhilfe: wird (wenn gesetzt) bei jedem Text mit seinem Rechteck aufgerufen (Bildschirmkoordinaten)
   static void (*textPruefer)(const char *utf8, float x0, float y0, float x1, float y1, uint8_t a);
+  // rundes Board: Texte in den Kreis ruecken (aus z. B. fuer das Maerchenbuch, dessen Texte an ihrem Platz bleiben)
+  static bool textAnpassen;
 
   // Kontur-Hilfe: Ist sie aktiv, zeichnen kreis/ellipse/... zuerst eine etwas groessere dunkle Flaeche.
   void kontur(float dicke, Farbe c) { kDicke = dicke; kFarbe = c; }

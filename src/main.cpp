@@ -909,7 +909,15 @@ static void blatt(Gfx &g, float k, bool vor, Farbe vorne, Farbe hinten) {
   }
 }
 
+// Im Maerchenbuch bleiben die Texte an ihrem Platz auf Cover und Seite; die Buchecken enden am Kreisrand.
+struct BuchTexteFest {
+  bool alt = Gfx::textAnpassen;
+  BuchTexteFest() { Gfx::textAnpassen = false; }
+  ~BuchTexteFest() { Gfx::textAnpassen = alt; }
+};
+
 static void buchBild(Gfx &g, float t) {
+  BuchTexteFest fest;
   if (buchAuf && bildMs - buchAuf < 1050) buchTisch(g, t);
   uint32_t jetzt = bildMs;
   // Aufklappen: zu (Titel), Deckel rueckt nach rechts, Deckel klappt auf
@@ -962,6 +970,7 @@ static void buchBild(Gfx &g, float t) {
 
 // ---------- Einstellungen (fuer Eltern) ----------
 static void einstellungenBild(Gfx &g, float t) {
+  BuchTexteFest fest;
   buchRahmenOffen(g, t);
   linkeSeite(g, einstPos == 0 ? SEITE_DREHEN : einstPos == 1 ? SEITE_LAUT : einstPos == 2 ? SEITE_HELL : einstPos == 3 ? SEITE_LESEN : einstPos == 4 ? SEITE_ZEIT : einstPos == 5 ? SEITE_WLAN : auswahl, t);
   seitenGrund(g, false);
@@ -1327,6 +1336,7 @@ static const char *gemeldet[96];
 static int nGemeldet = 0, nRand = 0;
 static void pruefeText(const char *s, float x0, float y0, float x1, float y1, uint8_t a) {
   if (a < 60) return;  // fast unsichtbar (blendet ein / aus)
+  if (!Gfx::textAnpassen) return;  // Maerchenbuch: Texte bleiben bewusst an ihrem Platz
   if (x1 <= 0 || x0 >= Gfx::W || y1 <= 0 || y0 >= Gfx::H) return;  // ganz ausserhalb des Bildes (auch frueher unsichtbar)
   float ueber = 0;
   const float xs[2] = {x0, x1}, ys[2] = {y0, y1};
