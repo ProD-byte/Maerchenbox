@@ -589,6 +589,20 @@ an `maerchenbox-rund.local`. Die Board-Teile stehen unter `#ifdef BOARD_RUND`, d
 Erkannt wurde das Board am 2026-11-06 über eine Pin-Suche (nur 2, 11, 14, 15 haben Pull-ups; an 15/14 antworten
 die Chips) und die Board-Dateien der Xiaozhi-Firmware (`main/boards/waveshare/esp32-s3-touch-amoled-1.75`).
 
+## Online-Flasher und daveslab.de/basteln
+
+Bei jedem Hochladen nach `master` baut GitHub Actions (`.github/workflows/build.yml`) beide Boxen und stellt den
+Online-Flasher auf GitHub Pages bereit: **https://prod-byte.github.io/Maerchenbox/** (Seite aus `docs/`, Firmware in
+`rund/` und `eckig/`, je „Update“ = Einzelteile, WLAN und Einstellungen bleiben, und „Neuinstallation“ = alles in
+einer Datei ab 0x0). `version.json` trägt die Build-Nummer. Die Bilder in `docs/bilder/` sind Bildschirmfotos des
+runden Boards (USB-Befehl `F`).
+Einmalig nötig: im Repo **Settings → Pages → Source: GitHub Actions**. Boxen aus dem Online-Flasher nehmen
+Updates über WLAN ohne Passwort an (in GitHub gibt es die `geheim.ini` nicht).
+
+`website/basteln-maerchen.js` baut Karte und Abschnitt „Märchenbox“ in daveslab.de/basteln ein (wie bei der
+Wetterstation: in wp-admin in die Browser-Konsole einfügen, fragt vor dem Speichern nach). Danach muss auf
+daveslab.de nichts mehr geändert werden – neue Firmware kommt automatisch über GitHub Pages.
+
 ## Speicher
 
 Zwei Programmplätze zu je 7,9 MB (`partitionen.csv`), damit Updates über WLAN gehen; die Märchen sind Programmcode

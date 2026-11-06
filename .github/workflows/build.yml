@@ -1,0 +1,92 @@
+# ============================================================
+#  Baut die Firmware fuer beide Maerchenboxen bei jedem Hochladen (Push):
+#    eckig = Xiaozhi-Board "ostb-2st" (16 MB)   -> pio-Umgebung ostb2st
+#    rund  = Waveshare ESP32-S3-Touch-AMOLED-1.75C (32 MB) -> pio-Umgebung rund
+#  - Ergebnis zum Herunterladen unter "Actions" -> Lauf anklicken -> Artifacts
+#  - Der Online-Flasher (GitHub Pages) wird mit der neuesten Firmware aktualisiert;
+#    daveslab.de/basteln holt sich dort Flasher-Dateien, Bilder und Build-Nummer.
+#  Einmalig im Repo einschalten: Settings -> Pages -> Source: "GitHub Actions".
+# ============================================================
+name: Firmware bauen
+
+on:
+  push:
+    branches: [master]
+    paths: ['src/**', 'platformio.ini', 'partitionen.csv', 'docs/**', '.github/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  bauen:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: PlatformIO-Zwischenspeicher
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('platformio.ini') }}
+
+      - name: PlatformIO und esptool installieren
+        run: pip install platformio esptool==4.8.1
+
+      # platformio.ini liest das Update-Passwort aus ../Himmelsstation/geheim.ini.
+      # Hier leer: Boxen aus dem Online-Flasher nehmen Updates ueber WLAN ohne Passwort an.
+      - name: Geheime Datei leer anlegen
+        run: |
+          mkdir -p ../Himmelsstation
+          printf '[geheim]\nota_passwort =\n' > ../Himmelsstation/geheim.ini
+
+      - name: Firmware bauen (beide Boxen)
+        run: pio run -e ostb2st -e rund
+
+      - name: Flasher-Dateien zusammenstellen
+        run: |
+          BOOT_APP0=$(find ~/.platformio/packages/framework-arduinoespressif32 -name boot_app0.bin | head -n 1)
+          mkdir -p seite
+          cp -r docs/* seite/
+          for paar in "ostb2st:eckig:16MB" "rund:rund:32MB"; do
+            IFS=: read ENV ZIEL GROESSE <<< "$paar"
+            B=.pio/build/$ENV
+            mkdir -p seite/$ZIEL
+            # Neuinstallation: alles in einer Datei ab 0x0 (loescht dabei auch die Einstellungen)
+            python -m esptool --chip esp32s3 merge_bin -o seite/$ZIEL/maerchenbox-komplett.bin \
+              --flash_mode keep --flash_size $GROESSE \
+              0x0 $B/bootloader.bin 0x8000 $B/partitions.bin 0xe000 "$BOOT_APP0" 0x10000 $B/firmware.bin
+            # Update: Einzelteile (WLAN und Einstellungen im nvs bleiben erhalten)
+            cp $B/bootloader.bin $B/partitions.bin "$BOOT_APP0" $B/firmware.bin seite/$ZIEL/
+          done
+          sed -i "s/__VERSION__/Build ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::7})/" seite/*/manifest-*.json seite/index.html
+          # version.json: daraus zeigt daveslab.de/basteln die aktuelle Build-Nummer
+          echo "{\"build\":${GITHUB_RUN_NUMBER},\"commit\":\"${GITHUB_SHA::7}\"}" > seite/version.json
+          ls -laR seite
+
+      - name: Ergebnis aufheben
+        uses: actions/upload-artifact@v4
+        with:
+          name: maerchenbox-firmware
+          path: seite/
+
+      - name: Flasher-Seite hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: seite
+
+  flasher:
+    needs: bauen
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
