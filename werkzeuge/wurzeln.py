@@ -8,9 +8,14 @@ pem = ''
 for name, b in bloecke:
     if name in gesucht:
         pem += b + '\n'; print('mit:', name)
+# neue Let's-Encrypt-Wurzeln (Gen Y, von letsencrypt.org/certificates) - die Kette ueber das querbeglaubigte
+# Root YR schafft die mbedTLS-Version auf dem ESP32 nicht, mit Root YR als eigener Wurzel klappt es
+import os
+for n in ('root-yr.pem', 'root-ye.pem'):
+    pem += open(os.path.join(os.path.dirname(__file__), 'zertifikate', n), encoding='ascii').read().strip() + '\n'; print('mit:', n)
 with open(sys.argv[1], 'w', encoding='utf-8', newline='\n') as o:
     o.write('// Stammzertifikate, mit denen die Box prueft, dass das Update wirklich von prod-byte.github.io kommt\n')
-    o.write('// (GitHub Pages: Let\'s Encrypt -> ISRG Root X1; die anderen als Reserve). Erzeugt mit werkzeuge/wurzeln.py.\n')
+    o.write('// (GitHub Pages: Let\'s Encrypt YR1 -> Root YR; dazu ISRG Root X1/X2 und Reserven). Erzeugt mit werkzeuge/wurzeln.py.\n')
     o.write('#pragma once\nstatic const char UPDATE_WURZELN[] =\n')
     for z in pem.strip().split('\n'):
         o.write('  "' + z + '\\n"\n')

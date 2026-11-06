@@ -29,6 +29,7 @@
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
 #include "update_wurzeln.h"
+#include <mbedtls/x509_crt.h>
 #endif
 #ifndef FIRMWARE_BUILD
 #define FIRMWARE_BUILD 0  // setzt GitHub beim Bauen (Build-Nummer); 0 = selbst gebaut
@@ -1575,7 +1576,14 @@ static void einrichtungStarten() {
 }
 
 // --- Entwicklungshilfen im Heimnetz ---
-static uint16_t fotoPuffer[lcd::W * lcd::STREIFEN];
+// Puffer fuer Bildschirmfotos: nur bei Bedarf und moeglichst im PSRAM (der interne Speicher wird fuer HTTPS gebraucht)
+constexpr size_t FOTO_BYTES = lcd::W * lcd::STREIFEN * 2;
+static uint16_t *fotoPufferHolen() {
+  static uint16_t *p = nullptr;
+  if (!p) p = (uint16_t *)heap_caps_malloc(FOTO_BYTES, psramFound() ? MALLOC_CAP_SPIRAM : MALLOC_CAP_8BIT);
+  return p;
+}
+#define fotoPuffer fotoPufferHolen()
 static void sendeBildschirmfoto() {
   bool mitZeit = server.hasArg("t");
   float t = mitZeit ? server.arg("t").toFloat() : (zustand == SPIELT ? hoerZeit() : 0);
@@ -1656,7 +1664,7 @@ static void fotoUeberUsb() {
     g.streifen(fotoPuffer, s * lcd::STREIFEN, (s + 1) * lcd::STREIFEN);
     g.kameraAus(); g.wackeln(0, 0); g.ausschnittAus(); g.konturAus();
     zeichneInhalt(g, t, 2.0f);
-    Serial.write((const uint8_t *)fotoPuffer, sizeof fotoPuffer);
+    Serial.write((const uint8_t *)fotoPuffer, FOTO_BYTES);
   }
   Serial.flush();
   zustand = alt; auswahl = altA; buchSeite = altS; einstPos = altP; einstZiel = altZ; einstAnim = altAn;
@@ -1707,7 +1715,7 @@ static void videoBildUeberUsb() {
     g.streifen(fotoPuffer, s * lcd::STREIFEN, (s + 1) * lcd::STREIFEN);
     g.kameraAus(); g.wackeln(0, 0); g.ausschnittAus(); g.konturAus();
     zeichneInhalt(g, t, uhr);
-    Serial.write((const uint8_t *)fotoPuffer, sizeof fotoPuffer);
+    Serial.write((const uint8_t *)fotoPuffer, FOTO_BYTES);
   }
   Serial.flush();
   zustand = alt; auswahl = altA; buchSeite = altS; einstPos = altP; einstZiel = altZ; einstAnim = altAn; blattNach = altN;
@@ -1827,8 +1835,15 @@ static void netzUpdatePruefen() {
   c.setCACert(UPDATE_WURZELN);  // nur echtes prod-byte.github.io (Zertifikat wird geprueft)
   HTTPClient h;
   h.setTimeout(8000);
-  if (!h.begin(c, String(UPDATE_SEITE) + "version.json?t=" + millis())) return;
-  if (h.GET() == 200) {
+  if (!h.begin(c, String(UPDATE_SEITE) + "version.json?t=" + millis())) { Serial.println("Update: Verbindung geht nicht"); return; }
+  int code = h.GET();
+  if (code != 200) {
+    char tls[120] = "";
+    c.lastError(tls, sizeof tls);
+    Serial.printf("Update: Abfrage fehlgeschlagen (%d %s) TLS: %s, Speicher frei %u, groesster Block %u\n", code,
+                  h.errorToString(code).c_str(), tls, ESP.getFreeHeap(), heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+  }
+  if (code == 200) {
     String s = h.getString();
     int i = s.indexOf("\"build\":");
     if (i >= 0) {
@@ -1867,8 +1882,12 @@ static void netzUpdateInstallieren() {
 static void netzUpdateSchritt() {
   static uint32_t geprueft = 0, verbundenSeit = 0;
   if (FIRMWARE_BUILD == 0 || WiFi.status() != WL_CONNECTED) { verbundenSeit = 0; return; }
-  if (time(nullptr) < 1700000000) return;  // Zertifikate pruefen geht erst mit richtiger Uhrzeit (NTP)
-  if (!verbundenSeit) verbundenSeit = millis();
+  static uint32_t gemeldet = 0;
+  if (time(nullptr) < 1700000000) {  // Zertifikate pruefen geht erst mit richtiger Uhrzeit (NTP)
+    if (millis() - gemeldet > 30000) { gemeldet = millis(); Serial.println("Update: warte auf die Uhrzeit aus dem Netz"); }
+    return;
+  }
+  if (!verbundenSeit) { verbundenSeit = millis(); Serial.println("Update: suche in 1 Minute nach neuen Maerchen"); }
   uint32_t jetzt = millis();
   bool faellig = geprueft == 0 ? jetzt - verbundenSeit > 60000 : jetzt - geprueft > 6UL * 3600 * 1000;
   if (faellig && zustand != SPIELT && zustand != UPDATE) { geprueft = jetzt; netzUpdatePruefen(); }
@@ -2178,6 +2197,9 @@ void setup() {
   Serial.begin(115200);
 #ifdef BOARD_RUND
   Serial.println("Maerchenbox rund: Start");
+  // PSRAM nur fuer grosse Bloecke: HTTPS (mbedTLS mit Krypto-Hardware) rechnet mit Puffern im PSRAM falsch -
+  // die Zertifikatspruefung schlaegt dann fehl. Alles unter 64 KB bleibt im internen Speicher.
+  if (psramFound()) heap_caps_malloc_extmem_enable(64 * 1024);
 #endif
   pinMode(PIN_PA, OUTPUT); digitalWrite(PIN_PA, LOW);
 #ifdef BOARD_RUND
@@ -2249,6 +2271,41 @@ void loop() {
     else if (c == 'U') {  // Update-Stand zeigen und gleich im Internet nachsehen
       Serial.printf("Build %d, WLAN %s\n", FIRMWARE_BUILD, WiFi.status() == WL_CONNECTED ? "verbunden" : "aus");
       if (FIRMWARE_BUILD && WiFi.status() == WL_CONNECTED) netzUpdatePruefen();
+    }
+    else if (c == 'T') {  // Verbindungstest: "T host" - geprueftes HTTPS zu host (fuer die Fehlersuche)
+      String host = Serial.readStringUntil('\n'); host.trim();
+      {  // wie viele Wurzeln lassen sich ueberhaupt einlesen?
+        mbedtls_x509_crt k;
+        mbedtls_x509_crt_init(&k);
+        int r = mbedtls_x509_crt_parse(&k, (const unsigned char *)UPDATE_WURZELN, strlen(UPDATE_WURZELN) + 1);
+        int n = 0;
+        for (mbedtls_x509_crt *p = &k; p && p->raw.len; p = p->next) {
+          char name[80]; mbedtls_x509_dn_gets(name, sizeof name, &p->subject); Serial.printf("  Wurzel %d: %s\n", ++n, name);
+        }
+        Serial.printf("  eingelesen %d, nicht lesbar %d (Rueckgabe %d)\n", n, r > 0 ? r : 0, r);
+        mbedtls_x509_crt_free(&k);
+      }
+      WiFiClientSecure c2;
+      c2.setCACert(UPDATE_WURZELN);
+      bool ok = c2.connect(host.c_str(), 443);
+      char tls[120] = ""; c2.lastError(tls, sizeof tls);
+      Serial.printf("TEST %s: %s %s\n", host.c_str(), ok ? "OK" : "FEHLER", ok ? "" : tls);
+      c2.stop();
+    }
+    else if (c == 'W') {  // WLAN-Zustand (ohne Passwort)
+      prefs.begin("wlan", true);
+      String ssid = prefs.getString("ssid", "");
+      bool pw = prefs.getString("pass", "").length() > 0;
+      prefs.end();
+      Serial.printf("Speicher: intern frei %u, PSRAM %u von %u\n", ESP.getFreeHeap(), ESP.getFreePsram(), ESP.getPsramSize());
+    { time_t jt = time(nullptr); struct tm u; gmtime_r(&jt, &u); Serial.printf("Uhrzeit (UTC): %04d-%02d-%02d %02d:%02d:%02d\n", u.tm_year + 1900, u.tm_mon + 1, u.tm_mday, u.tm_hour, u.tm_min, u.tm_sec); }
+    Serial.printf("WLAN: Status %d, gespeichert \"%s\" (Passwort %s), Signal %d dBm, IP %s, Uhr %s\n", (int)WiFi.status(),
+                    ssid.c_str(), pw ? "ja" : "nein", WiFi.RSSI(), WiFi.localIP().toString().c_str(),
+                    time(nullptr) > 1700000000 ? "gestellt" : "fehlt");
+      Serial.printf("Netz: Router %s, DNS %s / %s\n", WiFi.gatewayIP().toString().c_str(), WiFi.dnsIP(0).toString().c_str(),
+                    WiFi.dnsIP(1).toString().c_str());
+      IPAddress ip;
+      Serial.printf("DNS-Test github.io: %s\n", WiFi.hostByName("prod-byte.github.io", ip) ? ip.toString().c_str() : "geht nicht");
     }
     else if (c == 'S') { spracheSetzen(!englisch); Serial.println(englisch ? "Sprache: Englisch" : "Sprache: Deutsch"); }  // nur zum Pruefen, wird nicht gespeichert
   }
