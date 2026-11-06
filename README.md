@@ -589,6 +589,19 @@ an `maerchenbox-rund.local`. Die Board-Teile stehen unter `#ifdef BOARD_RUND`, d
 Erkannt wurde das Board am 2026-11-06 über eine Pin-Suche (nur 2, 11, 14, 15 haben Pull-ups; an 15/14 antworten
 die Chips) und die Board-Dateien der Xiaozhi-Firmware (`main/boards/waveshare/esp32-s3-touch-amoled-1.75`).
 
+## Updates aus dem Internet (runde Box)
+
+Firmware aus dem Online-Flasher trägt ihre Build-Nummer (`FIRMWARE_BUILD`, setzt GitHub Actions). Die Box liest kurz
+nach dem WLAN-Start und dann alle 6 Stunden `https://prod-byte.github.io/Maerchenbox/version.json`; gibt es einen
+neueren Build, lädt sie `rund/firmware.bin`, sobald sie ruht (kein Märchen, Display aus, 5 Minuten keine
+Berührung), und startet neu – WLAN und Einstellungen bleiben. HTTPS mit Zertifikatsprüfung (`src/update_wurzeln.h`:
+Let's Encrypt Root YR/YE, ISRG Root X1/X2 und Reserven, erzeugt mit `werkzeuge/wurzeln.py`), erst wenn die Uhrzeit
+aus dem Netz da ist. Selbst gebaute Firmware (Build 0) sucht nicht nach Updates.
+Wichtig: PSRAM ist an, aber mbedTLS darf seine Puffer nicht im PSRAM haben (mit der Krypto-Hardware des ESP32-S3
+schlägt sonst jede Zertifikatsprüfung fehl) – deshalb `heap_caps_malloc_extmem_enable(64 KB)` in `setup()`.
+USB-Befehle zur Fehlersuche: `U` (Build, sofort nachsehen), `W` (WLAN, Speicher, Uhr, DNS), `T host` (HTTPS-Test).
+Getestet am 2026-11-06: Build 1 hat sich selbst auf Build 9 aktualisiert.
+
 ## Deutsch oder Englisch
 
 In den Eltern-Einstellungen gibt es den Punkt **„Sprache: Deutsch“ / „Language: English“** (Start drücken schaltet
