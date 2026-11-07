@@ -225,16 +225,7 @@ static void kueche(Gfx &g, float t, float nacht, float linsen = 0) {
   g.verlauf(0, 200, mischeFarbe(FARBE(0xD9B48A), FARBE(0x5E4A3A), nacht), mischeFarbe(FARBE(0xB88E64), FARBE(0x3E3028), nacht));
   g.rechteck(0, 200, 284, 40, FARBE(0x7E6A56));
   // Herd mit Feuer und Asche
-  g.kontur(2, OUT);
-  g.rundRechteck(150, 110, 110, 92, 6, FARBE(0xA89888));
-  g.konturAus();
-  g.rechteck(166, 30, 78, 82, FARBE(0x988878));
-  g.rundRechteck(168, 140, 74, 60, 24, FARBE(0x2E2620));
-  for (int i = 0; i < 4; i++) {
-    float fx = 182 + i * 14, h = 18 + 6 * sinf(t * 9 + i * 1.7f);
-    float f[] = {fx - 7, 196, fx + 7, 196, fx + sinf(t * 7 + i) * 2, 196 - h};
-    g.polygon(f, 3, FARBE(0xFF8A2A));
-  }
+  herd(g, 150, 202, 110, 92, t, 1);
   g.ellipse(120, 214, 40, 8, FARBE(0x9A9490));  // Aschehaufen vor dem Herd
   g.ellipse(120, 211, 26, 5, FARBE(0xB5B0AC));
   for (int i = 0; i < (int)(linsen * 40); i++) g.kreis(88 + zufall(i + 300) * 64, 208 + zufall(i + 340) * 10, 1.3f, FARBE(0xB08850));

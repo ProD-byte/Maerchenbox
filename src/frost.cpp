@@ -252,16 +252,7 @@ static void stube(Gfx &g, float t, int kuchen = 0) {
   for (int i = 0; i < 6; i++) g.linie(0, 30 + i * 32, 284, 30 + i * 32, 1.6f, FARBE(0x8E6A44));
   g.rechteck(0, 200, 284, 40, FARBE(0x7A5A3A));
   // Ofen
-  g.kontur(2, OUT);
-  g.rundRechteck(180, 70, 100, 132, 8, FARBE(0xF2EEE4));
-  g.konturAus();
-  g.rundRechteck(200, 140, 50, 40, 16, FARBE(0x3A2E26));
-  for (int i = 0; i < 3; i++) {
-    float h = 10 + 4 * sinf(t * 9 + i * 1.7f);
-    float f[] = {212 + i * 13 - 6, 178, 212 + i * 13 + 6, 178, 212 + i * 13, 178 - h};
-    g.polygon(f, 3, FARBE(0xFF8A2A));
-  }
-  g.linie(184, 100, 276, 100, 2, FARBE(0xC8C0B0));
+  herd(g, 180, 202, 100, 132, t, 1, FARBE(0xF2EEE4), false);
   // Fenster mit Eisblumen
   g.kontur(1.6f, OUT);
   g.rundRechteck(30, 50, 60, 56, 4, HOLZ);

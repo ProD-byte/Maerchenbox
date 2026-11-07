@@ -153,12 +153,7 @@ static void weg(Gfx &g, float t, float scroll, float sonneY = 30) {
 // 1) Sieben Jahre gedient - der Lohn: ein Klumpen Gold, so gross wie sein Kopf
 static void szeneLohn(Gfx &g, float u) {
   weg(g, u, 0);
-  g.kontur(1.6f, OUT);
-  g.rechteck(10, 130, 76, 82, FARBE(0xF0DCC0));
-  float d[] = {2, 132, 48, 94, 94, 132};
-  g.polygon(d, 3, FARBE(0xC0503A));
-  g.konturAus();
-  g.rundRechteck(36, 168, 22, 44, 8, HOLZ_D);
+  haeuschen(g, 48, 212, 76, 82, FARBE(0xF0DCC0), FARBE(0xC0503A), u);
   Pose m = posis(MEISTER, u);
   m.armV = u > 6 && u < 10 ? 1.6f : 0.4f;
   m.mund = u > 6 && u < 10 ? 0.5f : 0;
@@ -348,12 +343,7 @@ static void szeneBrunnen(Gfx &g, float u) {
   float v = u - 16;
   float k = seg(v, 0, 8);
   // er springt froh nach Hause, die Mutter wartet an der Tuer
-  g.kontur(1.6f, OUT);
-  g.rechteck(206, 130, 72, 82, FARBE(0xF0DCC0));
-  float dd[] = {198, 132, 242, 96, 286, 132};
-  g.polygon(dd, 3, FARBE(0xC0503A));
-  g.konturAus();
-  g.rundRechteck(230, 168, 22, 44, 8, HOLZ_D);
+  haeuschen(g, 242, 212, 72, 82, FARBE(0xF0DCC0), FARBE(0xC0503A), u);
   FrauPose m = fposis(MUTTER, u);
   m.armV = k > 0.8f ? 1.8f + sinf(u * 3) * 0.2f : 2.6f + sinf(u * 5) * 0.3f;
   m.armH = k > 0.8f ? 1.8f : 0.3f;

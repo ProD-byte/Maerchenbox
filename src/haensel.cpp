@@ -98,12 +98,9 @@ static void ente(Gfx &g, float x, float y, float s, float t) {
 static void huette(Gfx &g, float t, float nacht) {
   g.verlauf(0, 200, mischeFarbe(FARBE(0xC9B08A), FARBE(0x3A3050), nacht), mischeFarbe(FARBE(0xA88E6A), FARBE(0x2A2240), nacht));
   g.rechteck(0, 200, 284, 40, FARBE(0x6E5A46));
-  g.kontur(1.6f, OUT);
-  g.rundRechteck(190, 50, 60, 54, 4, HOLZ);
-  g.konturAus();
-  g.rundRechteck(195, 55, 50, 44, 2, mischeFarbe(FARBE(0x9FD8FF), FARBE(0x22285A), nacht));
+  fenster(g, 195, 55, 50, 44, 0, true, false);
+  if (nacht > 0) g.rechteck(195, 55, 50, 44, FARBE(0x22285A), (uint8_t)(220 * nacht));
   if (nacht > 0.5f) g.kreis(226, 70, 8, FARBE(0xFFF1B0));
-  g.rechteck(218, 55, 3, 44, HOLZ);
   // Kinderbett
   g.kontur(1.4f, OUT);
   g.rundRechteck(20, 176, 90, 26, 4, HOLZ);
@@ -111,8 +108,7 @@ static void huette(Gfx &g, float t, float nacht) {
   g.rundRechteck(24, 166, 26, 14, 6, WEISS);
   g.rundRechteck(40, 168, 66, 16, 6, FARBE(0x8E9A6A));
   // Herd mit wenig Feuer
-  g.rundRechteck(130, 150, 46, 52, 4, FARBE(0x7A6A5A));
-  g.ellipse(153, 194, 10, 3 + sinf(t * 7) * 1.2f, FARBE(0xFF8A2A));
+  herd(g, 126, 202, 54, 52, t, 0.35f, FARBE(0x7A6A5A), false);
 }
 
 static void wald(Gfx &g, float t, float nacht, float scroll = 0) {
@@ -186,20 +182,13 @@ static void stall(Gfx &g, float x, float y) {
 }
 
 static void hexenOfen(Gfx &g, float x, float y, float t, float tuer, float feuer) {
-  g.kontur(1.8f, OUT);
-  g.rundRechteck(x - 50, y - 90, 100, 90, 24, FARBE(0x8E7A6A));
-  g.konturAus();
-  g.rundRechteck(x - 30, y - 60, 60, 44, 18, FARBE(0x2E2220));
-  for (int i = 0; i < 3; i++) {
-    float h = (10 + 6 * sinf(t * 9 + i)) * feuer;
-    float f[] = {x - 16 + i * 16 - 6, y - 18, x - 16 + i * 16 + 6, y - 18, x - 16 + i * 16, y - 18 - h};
-    g.polygon(f, 3, FARBE(0xFF8A2A));
-  }
+  herd(g, x - 50, y, 100, 90, t, feuer, FARBE(0x8E7A6A), false);
   if (tuer > 0) {  // die eiserne Tuer
     g.kontur(1.4f, OUT);
-    g.rundRechteck(x - 30, y - 60, 60 * tuer, 44, 18, FARBE(0x4E4A54));
+    g.rundRechteck(x - 32, y - 56, 64 * tuer, 50, 22, FARBE(0x4E4A54));
     g.konturAus();
-    if (tuer > 0.9f) g.rechteck(x + 22, y - 42, 12, 4, FARBE(0x8E94A6));  // Riegel
+    for (int i = 0; i < 3; i++) g.kreis(x - 24 + i * 22 * tuer, y - 30, 2, FARBE(0x8E94A6));  // Nieten
+    if (tuer > 0.9f) g.rechteck(x + 22, y - 34, 14, 4, FARBE(0x8E94A6));  // Riegel
   }
   g.rechteck(x + 30, y - 120, 16, 34, FARBE(0x7A6A5A));
 }

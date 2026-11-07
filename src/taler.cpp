@@ -518,12 +518,7 @@ static void szeneHeim(Gfx &g, float u) {
   himmel(g, 0, u, 200);
   sonne(g, 240, 34, 11, u);
   boden(g, 200);
-  g.kontur(1.8f, OUT);
-  g.rechteck(150, 110, 110, 92, FARBE(0xF0DCC0));
-  float d[] = {140, 112, 205, 64, 270, 112};
-  g.polygon(d, 3, FARBE(0xC0503A));
-  g.konturAus();
-  g.rundRechteck(196, 150, 26, 52, 8, HOLZ_D);
+  haeuschen(g, 205, 202, 110, 92, FARBE(0xF0DCC0), FARBE(0xC0503A), u);
   laubbaum(g, 40, 206, 0.8f, FARBE(0x5DAE48));
   for (int i = 0; i < 5; i++) g.kreis(24 + i * 8, 140 + (i & 1) * 8, 3, FARBE(0xE8473D));
   schimmel(g, 66, 222, 0.6f, 1, -1, 0.5f + 0.3f * sinf(u));

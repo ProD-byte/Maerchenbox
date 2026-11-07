@@ -1639,6 +1639,7 @@ static void sendeBildschirmfoto() {
   flugIns = altIns; flugZurueck = altZur; lautGezeigt = altLaut;
 }
 static void tasteVonFern();
+static void messeVonFern();
 
 #ifdef BOARD_RUND
 // Bildschirmfoto ueber USB: "F <maerchen> <zustand> <zeit> <buchseite> <einstPos>" -> "FOTO\n" + 284x240 RGB565 (wie zum Display)
@@ -1788,6 +1789,7 @@ static void heimnetzServer() {
   server.on("/bild.bmp", sendeBildschirmfoto);
   server.on("/taste", tasteVonFern);
   server.on("/messtest", sendeMesstest);
+  server.on("/messen", messeVonFern);
   server.on("/status", []() {
     char s[520], uz[8] = "--:--";
     int um = uhrMinuten();
@@ -2177,6 +2179,55 @@ static void ereignis(Ereignis e, int laut) {
   }
 }
 
+// Messung ueber USB: "B" (alle) oder "B <nr>" - zeichnet jedes Maerchen alle 1,5 s einmal komplett
+// (ohne Senden ans Display) und meldet mittlere und laengste Zeichenzeit je Bild.
+static void messeEins(int m, float &mittel, float &max, float &tmax) {
+  static uint16_t *buf = nullptr;
+  if (!buf) buf = (uint16_t *)heap_caps_malloc(Gfx::W * lcd::STREIFEN * 2, MALLOC_CAP_8BIT);
+  const Maerchen *mm = LISTE[m];
+  float summe = 0;
+  int n = 0;
+  max = 0; tmax = 0;
+  for (float t = 0.5f; t < mm->dauer; t += 1.5f) {
+    uint32_t a = micros();
+    for (int st = 0; st < lcd::ANZAHL; st++) {
+      g.streifen(buf, st * lcd::STREIFEN, (st + 1) * lcd::STREIFEN);
+      g.kameraAus();
+      g.wackeln(0, 0);
+      g.ausschnittAus();
+      g.konturAus();
+      mm->bild(g, t);
+    }
+    float ms = (micros() - a) / 1000.0f;
+    summe += ms;
+    n++;
+    if (ms > max) { max = ms; tmax = t; }
+    yield();
+  }
+  mittel = summe / n;
+}
+static void messeZeichnen() {
+  String arg = Serial.readStringUntil('\n');
+  arg.trim();
+  int nur = arg.length() ? arg.toInt() : -1;
+  for (int m = 0; m < ANZAHL; m++) {
+    if (nur >= 0 && m != nur) continue;
+    float mi, mx, tm;
+    messeEins(m, mi, mx, tm);
+    Serial.printf("BENCH|%d|%s|%.1f|%.1f|%.0f\n", m, LISTE[m]->titel, mi, mx, tm);
+  }
+  Serial.println("BENCH FERTIG");
+}
+// ueber WLAN: /messen?m=<nr> -> "BENCH|nr|titel|mittel|max|zeit"
+static void messeVonFern() {
+  int m = constrain(server.arg("m").toInt(), 0, ANZAHL - 1);
+  float mi, mx, tm;
+  messeEins(m, mi, mx, tm);
+  char s[160];
+  snprintf(s, sizeof s, "BENCH|%d|%s|%.1f|%.1f|%.0f", m, LISTE[m]->titel, mi, mx, tm);
+  server.send(200, "text/plain; charset=utf-8", s);
+}
+
 static void tasteVonFern() {
   String k = server.arg("k");
   merke(("fern " + k).c_str());
@@ -2266,6 +2317,7 @@ void loop() {
     int c = Serial.read();
     if (c == 'P') pruefen();
     else if (c == 'F') fotoUeberUsb();
+    else if (c == 'B') messeZeichnen();
     else if (c == 'V') videoBildUeberUsb();
     else if (c == 'E') { spracheSetzen(true); Serial.println("Sprache: Englisch"); }  // fest Englisch (fuer Videos)
     else if (c == 'U') {  // Update-Stand zeigen und gleich im Internet nachsehen

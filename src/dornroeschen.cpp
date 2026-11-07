@@ -164,17 +164,8 @@ static void turmstube(Gfx &g, float t) {
 static void kueche(Gfx &g, float t, bool schlaf) {
   g.verlauf(0, 200, FARBE(0xE8D2B0), FARBE(0xD6B88E));
   g.rechteck(0, 200, 284, 40, FARBE(0x9E7656));
-  g.kontur(1.8f, OUT);
-  g.rundRechteck(170, 120, 100, 82, 6, FARBE(0xA89888));
-  g.konturAus();
-  g.rundRechteck(186, 150, 68, 50, 18, FARBE(0x2E2620));
-  if (!schlaf)
-    for (int i = 0; i < 3; i++) {
-      float fx = 200 + i * 20, h = 16 + 6 * sinf(t * 9 + i * 1.7f);
-      float f[] = {fx - 7, 196, fx + 7, 196, fx + sinf(t * 7 + i) * 2, 196 - h};
-      g.polygon(f, 3, FARBE(0xFF8A2A));
-    }
-  else for (int i = 0; i < 3; i++) g.ellipse(200 + i * 20, 194, 6, 2, FARBE(0xC0603A));  // das Feuer steht still
+  herd(g, 170, 202, 100, 82, t, schlaf ? 0 : 1);
+  if (schlaf) for (int i = 0; i < 3; i++) g.ellipse(200 + i * 20, 194, 6, 2, FARBE(0xC0603A));  // das Feuer steht still
   // Braten am Spiess
   g.linie(176, 140, 266, 140, 2, FARBE(0x8E94A6));
   g.ellipse(220, 140, 18, 9, FARBE(0xC9702E));

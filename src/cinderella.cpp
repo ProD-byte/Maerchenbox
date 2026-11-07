@@ -223,16 +223,7 @@ static void kutscher(Gfx &g, float x, float y, float s, float dir, float t) {
 static void kueche(Gfx &g, float t, float nacht) {
   g.verlauf(0, 200, mischeFarbe(FARBE(0xD9B48A), FARBE(0x5E4A3A), nacht), mischeFarbe(FARBE(0xB88E64), FARBE(0x3E3028), nacht));
   g.rechteck(0, 200, 284, 40, FARBE(0x7E6A56));
-  g.kontur(2, OUT);
-  g.rundRechteck(150, 110, 110, 92, 6, FARBE(0xA89888));
-  g.konturAus();
-  g.rechteck(166, 30, 78, 82, FARBE(0x988878));
-  g.rundRechteck(168, 140, 74, 60, 24, FARBE(0x2E2620));
-  for (int i = 0; i < 4; i++) {
-    float fx = 182 + i * 14, h = 14 + 5 * sinf(t * 9 + i * 1.7f);
-    float f[] = {fx - 6, 196, fx + 6, 196, fx + sinf(t * 7 + i) * 2, 196 - h};
-    g.polygon(f, 3, FARBE(0xFF8A2A));
-  }
+  herd(g, 150, 202, 110, 92, t, 1);
   g.ellipse(130, 214, 36, 7, FARBE(0x9A9490));  // Asche
   g.ellipse(130, 211, 22, 4, FARBE(0xB5B0AC));
   g.rechteck(20, 70, 90, 5, HOLZ_D);
@@ -243,9 +234,9 @@ static void kueche(Gfx &g, float t, float nacht) {
   }
   if (nacht > 0) g.kreis(205, 170, 70, FARBE(0xFFB050), (uint8_t)(30 * nacht));
   g.kontur(1.8f, OUT);
-  g.rundRechteck(30, 100, 50, 46, 4, HOLZ);
   g.konturAus();
-  g.rundRechteck(34, 104, 42, 38, 2, mischeFarbe(FARBE(0xBFE6FF), FARBE(0x34306E), nacht));
+  fenster(g, 34, 104, 42, 38, 0, true, false);
+  if (nacht > 0) g.rechteck(34, 104, 42, 38, FARBE(0x34306E), (uint8_t)(200 * nacht));
   if (nacht > 0.5f) g.kreis(64, 116, 5, FARBE(0xFFF6D8));
 }
 

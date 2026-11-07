@@ -231,19 +231,11 @@ static void haus(Gfx &g, float t, int toepfe = 0, float nacht = 0, bool tuerWeg 
   wolke(g, 50, 50, 0.8f, (uint8_t)(255 * (1 - nacht)));
   boden(g, 200, mischeFarbe(GRAS, FARBE(0x2F4A40), nacht));
   Farbe w = mischeFarbe(FARBE(0xF0DCC0), FARBE(0x6E6A8E), nacht);
-  g.kontur(1.8f, OUT);
-  g.rechteck(120, 110, 120, 96, w);
-  float d[] = {108, 112, 180, 58, 252, 112};
-  g.polygon(d, 3, mischeFarbe(FARBE(0xC0503A), FARBE(0x5A3A4A), nacht));
-  g.konturAus();
-  g.rechteck(214, 60, 14, 30, FARBE(0x8E5A4A));
-  for (int i = 0; i < 3; i++) {
-    float k = fmodf(t * 0.4f + i * 0.33f, 1);
-    g.kreis(221 + k * 10, 54 - k * 30, 4 + k * 4, WEISS, (uint8_t)(140 * (1 - k) * (1 - nacht)));
-  }
+  schornstein(g, 220, 88, t, 1 - nacht * 0.7f, nacht);
+  hauswand(g, 120, 110, 120, 96, w, false);
+  ziegeldach(g, 120, 240, 110, 54, mischeFarbe(FARBE(0xC0503A), FARBE(0x5A3A4A), nacht));
   // Fenster und Tuer (zweiteilige Bauerntuer)
-  g.rundRechteck(196, 130, 30, 28, 3, nacht > 0.5f ? FARBE(0xFFD27A) : FARBE(0x9FD8FF));
-  g.rechteck(210, 130, 2, 28, HOLZ_D);
+  fenster(g, 196, 130, 30, 28, nacht > 0.5f ? 1 : 0, true, true);
   g.kontur(1.4f, OUT);
   g.rechteck(140, 146, 34, 60, FARBE(0x2E2620));
   g.rechteck(140, 146, 34, 28, HOLZ);
@@ -267,30 +259,20 @@ static void kueche(Gfx &g, float t, bool wurstDa = true, bool brutzelt = false, 
   g.verlauf(0, 200, FARBE(0xE0C49A), FARBE(0xC0A07A));
   g.rechteck(0, 200, 284, 40, FARBE(0x8E6A46));
   // Herd
-  g.kontur(2, OUT);
-  g.rundRechteck(160, 120, 100, 82, 6, FARBE(0xA89888));
-  g.konturAus();
-  float rf[] = {150, 20, 270, 20, 252, 120, 168, 120};
-  g.polygon(rf, 4, FARBE(0x988878));
+  herd(g, 160, 202, 100, 82, t, 1);
   for (int i = 0; i < wuersteOben; i++) {
     g.linie(180 + i * 18, 40, 180 + i * 18, 52, 1.2f, OUT);
     wurst(g, 180 + i * 18, 64, 0.9f, 1.5f);
   }
-  g.rundRechteck(176, 150, 68, 50, 18, FARBE(0x2E2620));
-  for (int i = 0; i < 3; i++) {
-    float h = 12 + 5 * sinf(t * 9 + i * 1.7f);
-    float f[] = {192 + i * 18 - 7, 198, 192 + i * 18 + 7, 198, 192 + i * 18 + sinf(t * 7 + i) * 2, 198 - h};
-    g.polygon(f, 3, FARBE(0xFF8A2A));
-  }
   // Pfanne
   g.kontur(1.4f, OUT);
-  g.ellipse(208, 122, 24, 6, FARBE(0x3A3A44));
+  g.ellipse(208, 110, 24, 6, FARBE(0x3A3A44));
   g.konturAus();
-  g.linie(184, 122, 160, 118, 3, FARBE(0x3A3A44));
-  if (wurstDa) wurst(g, 208, 118, 1.1f);
+  g.linie(184, 110, 160, 106, 3, FARBE(0x3A3A44));
+  if (wurstDa) wurst(g, 208, 106, 1.1f);
   if (brutzelt) for (int i = 0; i < 4; i++) {
     float k = fmodf(t * 0.9f + i * 0.25f, 1);
-    g.kreis(196 + i * 8 + sinf(t * 4 + i) * 3, 112 - k * 30, 2 + k * 3, WEISS, (uint8_t)(160 * (1 - k)));
+    g.kreis(196 + i * 8 + sinf(t * 4 + i) * 3, 100 - k * 30, 2 + k * 3, WEISS, (uint8_t)(160 * (1 - k)));
   }
   // Kellertuer
   g.kontur(1.6f, OUT);

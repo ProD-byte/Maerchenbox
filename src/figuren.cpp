@@ -224,10 +224,14 @@ void herz(Gfx &g, float x, float y, float r, Farbe c, uint8_t a) {
 }
 
 void wolke(Gfx &g, float x, float y, float s, uint8_t a) {
-  g.kreis(x, y, 9 * s, WEISS, a);
-  g.kreis(x + 10 * s, y - 4 * s, 11 * s, WEISS, a);
-  g.kreis(x + 21 * s, y, 8 * s, WEISS, a);
-  g.rundRechteck(x - 2 * s, y, 26 * s, 8 * s, 4 * s, WEISS, a);
+  const Farbe schatten = FARBE(0xD8E4F2);
+  g.rundRechteck(x - 4 * s, y + 1 * s, 30 * s, 9 * s, 4.5f * s, schatten, a);
+  g.kreis(x + 1 * s, y + 1 * s, 9 * s, schatten, a);
+  g.kreis(x + 21 * s, y + 1 * s, 8 * s, schatten, a);
+  g.kreis(x, y - 1 * s, 8.5f * s, WEISS, a);
+  g.kreis(x + 10 * s, y - 5 * s, 11 * s, WEISS, a);
+  g.kreis(x + 21 * s, y - 1 * s, 7.5f * s, WEISS, a);
+  g.kreis(x + 7 * s, y - 9 * s, 4 * s, FARBE(0xFFFFFF), (uint8_t)(a * 0.8f));
 }
 
 void sonne(Gfx &g, float x, float y, float r, float t) {
@@ -263,46 +267,97 @@ void himmel(Gfx &g, float nacht, float t, float bis) {
 // Hügelreihe, die beim Laufen mit dem Faktor f verschoben wird
 void huegel(Gfx &g, float scroll, float f, float y, float h, float abstand, Farbe c) {
   float off = fmodf(scroll * f, abstand);
+  const Farbe hell = mischeFarbe(c, FARBE(0xF6FFD0), 0.3f);
   for (int k = -1; k < 284 / abstand + 2; k++) {
     float x = k * abstand - off;
     g.ellipse(x, y, abstand * 0.75f, h, c);
+    g.ellipse(x - abstand * 0.12f, y - h * 0.45f, abstand * 0.4f, h * 0.35f, hell, 110);
   }
 }
 
 void laubbaum(Gfx &g, float x, float y, float s, Farbe krone) {
+  const Farbe dunkel = mischeFarbe(krone, FARBE(0x1E3A28), 0.35f), hell = mischeFarbe(krone, FARBE(0xF6FFD0), 0.4f);
+  const Farbe rinde = FARBE(0x8E5B3A), rindeD = FARBE(0x6A4028);
+  g.ellipse(x + 4 * s, y, 26 * s, 5 * s, FARBE(0x1E3A28), 50);  // Schatten am Boden
+  // Stamm: unten breiter, mit Wurzeln und Rinde
   g.kontur(1.5f, OUT);
-  g.rundRechteck(x - 6 * s, y - 40 * s, 12 * s, 40 * s, 4 * s, FARBE(0x8E5B3A));
-  g.kreis(x - 16 * s, y - 48 * s, 18 * s, krone);
-  g.kreis(x + 16 * s, y - 50 * s, 18 * s, krone);
-  g.kreis(x, y - 66 * s, 22 * s, krone);
+  float st[] = {x - 8 * s, y, x + 8 * s, y, x + 5 * s, y - 42 * s, x - 5 * s, y - 42 * s};
+  g.polygon(st, 4, rinde);
   g.konturAus();
-  g.kreis(x - 6 * s, y - 72 * s, 7 * s, FARBE(0x8FDC7C), 150);
-  g.kreis(x + 14 * s, y - 56 * s, 5 * s, FARBE(0x8FDC7C), 120);
+  float w1[] = {x - 8 * s, y, x - 15 * s, y + 1 * s, x - 6 * s, y - 8 * s};
+  float w2[] = {x + 8 * s, y, x + 14 * s, y + 1 * s, x + 6 * s, y - 7 * s};
+  g.polygon(w1, 3, rinde);
+  g.polygon(w2, 3, rinde);
+  g.rechteck(x + 1 * s, y - 40 * s, 3.5f * s, 38 * s, rindeD, 160);
+  g.linie(x - 3 * s, y - 30 * s, x - 2 * s, y - 20 * s, 1.1f * s, rindeD);
+  g.linie(x + 2 * s, y - 14 * s, x + 3 * s, y - 6 * s, 1.1f * s, rindeD);
+  g.linie(x, y - 36 * s, x - 10 * s, y - 50 * s, 3 * s, rinde);  // Ast
+  // Krone: hintere dunkle Lage, vordere Lage, Lichter
+  g.kontur(1.5f, OUT);
+  g.kreis(x - 18 * s, y - 50 * s, 17 * s, dunkel);
+  g.kreis(x + 18 * s, y - 52 * s, 17 * s, dunkel);
+  g.kreis(x + 4 * s, y - 74 * s, 19 * s, dunkel);
+  g.konturAus();
+  g.kreis(x - 14 * s, y - 52 * s, 15 * s, krone);
+  g.kreis(x + 14 * s, y - 54 * s, 15 * s, krone);
+  g.kreis(x - 4 * s, y - 70 * s, 18 * s, krone);
+  g.kreis(x + 8 * s, y - 64 * s, 14 * s, krone);
+  g.kreis(x - 8 * s, y - 76 * s, 9 * s, hell, 170);
+  g.kreis(x - 18 * s, y - 58 * s, 7 * s, hell, 150);
+  g.kreis(x + 10 * s, y - 70 * s, 6 * s, hell, 130);
+  g.ellipse(x + 2 * s, y - 42 * s, 22 * s, 5 * s, dunkel, 150);  // Schatten unter der Krone
+  if (s > 0.35f)
+    for (int i = 0; i < 7; i++)  // einzelne Blaetter
+      g.ellipse(x - 20 * s + zufall(i + (int)(x * 3)) * 40 * s, y - 80 * s + zufall(i + 17 + (int)x) * 38 * s, 2.4f * s, 1.4f * s,
+                i & 1 ? dunkel : hell, 200, i);
 }
 
 void tanne(Gfx &g, float x, float y, float s, Farbe c) {
+  const Farbe dunkel = mischeFarbe(c, FARBE(0x0E1E18), 0.4f), hell = mischeFarbe(c, FARBE(0xE8FFD8), 0.3f);
+  g.ellipse(x + 3 * s, y, 22 * s, 4 * s, FARBE(0x1E3A28), 50);
   g.rechteck(x - 4 * s, y - 14 * s, 8 * s, 14 * s, FARBE(0x6E4426));
-  g.kontur(1.3f, OUT);
-  for (int i = 0; i < 3; i++) {
-    float w = (30 - i * 7) * s, yy = y - 12 * s - i * 20 * s;
-    float q[] = {x - w, yy, x + w, yy, x, yy - 32 * s};
-    g.polygon(q, 3, c);
+  g.rechteck(x + 1 * s, y - 14 * s, 3 * s, 14 * s, FARBE(0x4E2E18), 160);
+  for (int i = 0; i < 4; i++) {
+    float w = (31 - i * 6.5f) * s, yy = y - 10 * s - i * 16 * s, h = 28 * s;
+    // Zweig-Lage mit gezacktem Rand
+    float q[] = {x - w, yy, x - w * 0.6f, yy - 3 * s, x - w * 0.3f, yy + 1 * s, x, yy - 3 * s, x + w * 0.3f, yy + 1 * s,
+                 x + w * 0.6f, yy - 3 * s, x + w, yy, x, yy - h};
+    g.kontur(1.3f, OUT);
+    g.polygon(q, 8, c);
+    g.konturAus();
+    float sch[] = {x, yy - h, x + w, yy, x + w * 0.6f, yy - 3 * s, x + w * 0.3f, yy + 1 * s, x, yy - 3 * s};
+    g.polygon(sch, 5, dunkel, 150);
+    g.linie(x - 2 * s, yy - h + 4 * s, x - w * 0.55f, yy - 4 * s, 1.4f * s, hell, 160);
   }
-  g.konturAus();
 }
 
 void blumen(Gfx &g, float scroll, float y, int n, int seed) {
   for (int i = 0; i < n; i++) {
     float x = fmodf(zufall(i + seed) * 400 - scroll + 4000, 400) - 60;
     float yy = y + zufall(i + seed + 50) * 30;
-    g.linie(x, yy, x, yy - 6, 1.3f, GRAS_D);
-    g.kreis(x, yy - 7, 3, i % 3 == 0 ? FARBE(0xFF7FA8) : i % 3 == 1 ? GOLD : WEISS);
+    Farbe c = i % 3 == 0 ? FARBE(0xFF7FA8) : i % 3 == 1 ? GOLD : WEISS;
+    g.linie(x, yy, x, yy - 7, 1.3f, GRAS_D);
+    g.ellipse(x + 3, yy - 3, 3, 1.4f, GRAS_D, 255, -0.5f);
+    for (int k = 0; k < 5; k++) g.kreis(x + cosf(k * 1.2566f) * 2.4f, yy - 8 + sinf(k * 1.2566f) * 2.4f, 1.8f, c);
+    g.kreis(x, yy - 8, 1.3f, i % 3 == 1 ? FARBE(0xE07A2A) : GOLD);
   }
 }
 
 void boden(Gfx &g, float y, Farbe c) {
-  g.rechteck(0, y, 284, 240 - y, c);
-  g.rechteck(0, y, 284, 3, GRAS_H);
+  const Farbe hell = mischeFarbe(c, FARBE(0xF6FFD0), 0.3f), dunkel = mischeFarbe(c, FARBE(0x1E3A28), 0.22f);
+  g.verlauf(y, 240, c, dunkel);
+  g.rechteck(0, y, 284, 3, hell);
+  // Grasbueschel an der Kante und ein paar im Feld
+  for (int i = 0; i < 24; i++) {
+    float x = i * 12.3f + zufall(i + 900) * 6, h = 3 + zufall(i + 930) * 4;
+    float b[] = {x - 2.4f, y + 1, x + 2.4f, y + 1, x + 0.8f, y - h};
+    g.polygon(b, 3, i & 1 ? hell : dunkel);
+  }
+  for (int i = 0; i < 10; i++) {
+    float x = zufall(i + 960) * 284, yy = y + 12 + zufall(i + 980) * (230 - y);
+    g.linie(x, yy, x - 2, yy - 4, 1, dunkel, 180);
+    g.linie(x + 2, yy, x + 3, yy - 4, 1, dunkel, 180);
+  }
 }
 
 void mond(Gfx &g, float x, float y, float r) {
@@ -819,4 +874,185 @@ void fisch(Gfx &g, float x, float y, float s, float w, uint8_t a) {
                  x - 10 * s * c + 4 * s * sn, y - 10 * s * sn - 4 * s * c};
   g.polygon(sch, 3, FARBE(0xFF7A1C), a);
   g.kreis(x + 3 * s * c, y + 3 * s * sn - 1 * s, 1 * s, SCHWARZ, a);
+}
+
+// =====================================================================
+// Haeuser und Oefen
+// =====================================================================
+void fenster(Gfx &g, float x, float y, float w, float h, float licht, bool vorhang, bool blumen) {
+  const Farbe rahmen = FARBE(0xF2EEE4), glas = mischeFarbe(FARBE(0x9FD8FF), FARBE(0xFFD27A), licht);
+  g.kontur(1.4f, OUT);
+  g.rundRechteck(x - 2, y - 2, w + 4, h + 4, 3, rahmen);
+  g.konturAus();
+  g.rechteck(x, y, w, h, glas);
+  if (licht < 0.5f) {  // Spiegelung des Himmels
+    float r[] = {x + w * 0.15f, y + h, x + w * 0.45f, y, x + w * 0.65f, y, x + w * 0.35f, y + h};
+    g.polygon(r, 4, WEISS, 90);
+  } else g.kreis(x + w / 2, y + h / 2, w * 1.2f, FARBE(0xFFD27A), (uint8_t)(50 * licht));
+  if (vorhang) {
+    float v1[] = {x, y, x + w * 0.32f, y, x + w * 0.12f, y + h * 0.75f, x, y + h * 0.8f};
+    float v2[] = {x + w, y, x + w * 0.68f, y, x + w * 0.88f, y + h * 0.75f, x + w, y + h * 0.8f};
+    g.polygon(v1, 4, FARBE(0xE8473D), 210);
+    g.polygon(v2, 4, FARBE(0xE8473D), 210);
+    g.rechteck(x, y, w, 3, FARBE(0xC0392B));
+  }
+  g.rechteck(x + w / 2 - 1.2f, y, 2.4f, h, rahmen);
+  g.rechteck(x, y + h / 2 - 1.2f, w, 2.4f, rahmen);
+  g.kontur(1, OUT);
+  g.rechteck(x - 5, y + h + 2, w + 10, 4, FARBE(0xC8B8A0));  // Fensterbank
+  g.konturAus();
+  if (blumen) {
+    g.rechteck(x - 2, y + h + 6, w + 4, 6, HOLZ);
+    for (int i = 0; i < 5; i++) {
+      float bx = x + 1 + i * (w - 2) / 4;
+      g.kreis(bx, y + h + 4, 2.6f, GRAS_D);
+      g.kreis(bx, y + h + 1, 2, i & 1 ? FARBE(0xFF7FA8) : FARBE(0xE8473D));
+    }
+  }
+}
+
+void holztuer(Gfx &g, float x, float y, float w, float h, Farbe holz, bool rund) {
+  const Farbe dunkel = mischeFarbe(holz, OUT, 0.35f), hell = mischeFarbe(holz, WEISS, 0.15f);
+  g.kontur(1.4f, OUT);
+  g.rundRechteck(x, y - h, w, h, rund ? w * 0.45f : 2, holz);
+  g.konturAus();
+  for (int i = 1; i < 4; i++) g.linie(x + w * i / 4, y - h + (rund ? w * 0.2f : 2), x + w * i / 4, y - 1, 1, dunkel);
+  g.rechteck(x + 1, y - h * 0.75f, w - 2, 2.4f, OUT, 160);  // Beschlaege
+  g.rechteck(x + 1, y - h * 0.3f, w - 2, 2.4f, OUT, 160);
+  g.rechteck(x + 2, y - h + w * 0.3f, w * 0.3f, h * 0.9f - w * 0.3f, hell, 70);
+  g.kreis(x + w * 0.78f, y - h * 0.48f, 1.8f, GOLD);
+  g.ellipse(x + w / 2, y + 1, w * 0.7f, 2.4f, STEIN);  // Trittstein
+}
+
+void ziegeldach(Gfx &g, float xl, float xr, float y, float hoehe, Farbe c, float schnee) {
+  const Farbe dunkel = mischeFarbe(c, OUT, 0.3f), hell = mischeFarbe(c, WEISS, 0.18f);
+  float xm = (xl + xr) / 2, ue = (xr - xl) * 0.06f;
+  float d[] = {xl - ue, y + 2, xm, y - hoehe, xr + ue, y + 2};
+  g.kontur(1.6f, OUT);
+  g.polygon(d, 3, c);
+  g.konturAus();
+  // Ziegelreihen
+  int reihen = (int)(hoehe / 7);
+  for (int r = 1; r <= reihen; r++) {
+    float k = r / (float)(reihen + 1), yy = y - hoehe + k * hoehe;
+    float hb = (xr - xl + 2 * ue) / 2 * k;
+    g.linie(xm - hb + 2, yy, xm + hb - 2, yy, 1, dunkel, 200);
+    for (float zx = xm - hb + 4 + (r & 1) * 3; zx < xm + hb - 3; zx += 6) g.linie(zx, yy, zx, yy - 5, 0.8f, dunkel, 140);
+  }
+  float l[] = {xl - ue, y + 2, xm, y - hoehe, xm - 3, y - hoehe + 4, xl - ue + 3, y + 2};
+  g.polygon(l, 4, hell, 160);  // Licht an der linken Kante
+  g.rechteck(xl - ue, y, xr - xl + 2 * ue, 3, dunkel);  // Traufe
+  if (schnee > 0) {
+    float s1[] = {xl - ue, y + 2, xm, y - hoehe, xr + ue, y + 2, xm, y - hoehe + hoehe * 0.35f * schnee};
+    g.polygon(s1, 4, FARBE(0xF2F6FF));
+  }
+}
+
+void hauswand(Gfx &g, float x, float y, float w, float h, Farbe c, bool fachwerk) {
+  const Farbe schatten = mischeFarbe(c, OUT, 0.15f);
+  g.kontur(1.6f, OUT);
+  g.rechteck(x, y, w, h, c);
+  g.konturAus();
+  for (int i = 0; i < 8; i++) g.ellipse(x + zufall(i + (int)x) * w, y + zufall(i + 7 + (int)y) * h * 0.8f, 3, 1.4f, schatten, 90);
+  g.rechteck(x + w - 6, y, 6, h, schatten, 80);  // Schattenseite
+  if (fachwerk) {
+    const Farbe balken = FARBE(0x6A4028);
+    g.rechteck(x, y, w, 3, balken);
+    g.rechteck(x, y + h * 0.48f, w, 3, balken);
+    for (int i = 0; i <= 3; i++) g.rechteck(x + i * (w - 3) / 3, y, 3, h - 10, balken);
+    g.linie(x + 2, y + h * 0.48f, x + (w - 3) / 3, y + 2, 2.4f, balken);
+    g.linie(x + w - 2, y + h * 0.48f, x + w - (w - 3) / 3, y + 2, 2.4f, balken);
+  }
+  // Sockel aus Feldsteinen
+  g.rechteck(x, y + h - 10, w, 10, FARBE(0x9A968E));
+  for (int i = 0; i < (int)(w / 12) + 1; i++) {
+    g.ellipse(x + 6 + i * 12, y + h - 5 - (i & 1) * 1.5f, 5, 3.2f, i & 1 ? STEIN : FARBE(0xB8B4AC));
+  }
+}
+
+void schornstein(Gfx &g, float x, float y, float t, float rauch, float nacht) {
+  g.kontur(1.4f, OUT);
+  g.rechteck(x - 6, y - 26, 12, 26, FARBE(0xA8452E));
+  g.rechteck(x - 8, y - 30, 16, 5, FARBE(0x8E3A26));
+  g.konturAus();
+  for (int r = 0; r < 4; r++) g.linie(x - 6, y - 20 + r * 6, x + 6, y - 20 + r * 6, 0.8f, FARBE(0x7A2E1E));
+  for (int i = 0; i < 4; i++) {
+    float k = fmodf(t * 0.35f + i * 0.25f, 1);
+    g.kreis(x + k * 14 + sinf(t + i) * 2, y - 34 - k * 34, 3 + k * 6, mischeFarbe(WEISS, FARBE(0x8E8AA8), nacht),
+            (uint8_t)(150 * (1 - k) * rauch));
+  }
+}
+
+void haeuschen(Gfx &g, float x, float y, float w, float h, Farbe wand, Farbe dach, float t, float nacht, bool fachwerk,
+               float schnee) {
+  float xl = x - w / 2;
+  schornstein(g, x + w * 0.25f, y - h - h * 0.35f, t, 1, nacht);
+  hauswand(g, xl, y - h, w, h, wand, fachwerk);
+  ziegeldach(g, xl, xl + w, y - h, h * 0.75f, dach, schnee);
+  float fw = w * 0.2f, fh = h * 0.32f;
+  fenster(g, xl + w * 0.1f, y - h * 0.78f, fw, fh, nacht, true, true);
+  fenster(g, xl + w * 0.7f, y - h * 0.78f, fw, fh, nacht, true, true);
+  holztuer(g, x - w * 0.11f, y - 1, w * 0.22f, h * 0.5f);
+}
+
+void flammen(Gfx &g, float x, float y, float breite, float hoehe, float t, float staerke) {
+  if (staerke <= 0) return;
+  g.kreis(x, y - hoehe * 0.4f, breite * 1.3f, FARBE(0xFFB050), (uint8_t)(40 * staerke));  // Schein
+  const Farbe lagen[] = {FARBE(0xE8402A), FARBE(0xFF8A2A), FARBE(0xFFD54A), FARBE(0xFFF6C8)};
+  for (int l = 0; l < 4; l++) {
+    float bw = breite * (1 - l * 0.22f), bh = hoehe * (1 - l * 0.2f) * staerke;
+    int n = 5 - l;
+    for (int i = 0; i < n; i++) {
+      float fx = x - bw / 2 + (i + 0.5f) * bw / n;
+      float hh = bh * (0.65f + 0.35f * sinf(t * (8 + l) + i * 1.9f + l));
+      float f[] = {fx - bw / n * 0.75f, y, fx + bw / n * 0.75f, y, fx + sinf(t * 7 + i + l) * bw * 0.06f, y - hh};
+      g.polygon(f, 3, lagen[l]);
+    }
+  }
+  for (int i = 0; i < 4; i++) {  // Funken
+    float k = fmodf(t * 0.9f + i * 0.27f, 1);
+    g.kreis(x + sinf(t * 3 + i * 2) * breite * 0.4f, y - hoehe * staerke - k * hoehe * 0.8f, 1.2f, FARBE(0xFFE070), (uint8_t)(230 * (1 - k) * staerke));
+  }
+}
+
+void herd(Gfx &g, float x, float y, float w, float h, float t, float feuer, Farbe stein, bool rauchfang) {
+  const Farbe fuge = mischeFarbe(stein, OUT, 0.35f), hell = mischeFarbe(stein, WEISS, 0.2f);
+  if (rauchfang) {  // Rauchfang ueber dem Herd
+    float rf[] = {x - w * 0.05f, y - h - 4, x + w * 1.05f, y - h - 4, x + w * 0.8f, y - h - 70, x + w * 0.2f, y - h - 70};
+    g.kontur(1.6f, OUT);
+    g.polygon(rf, 4, mischeFarbe(stein, OUT, 0.12f));
+    g.konturAus();
+    g.rechteck(x + w * 0.28f, y - h - 120, w * 0.44f, 52, mischeFarbe(stein, OUT, 0.12f));
+    g.linie(x - w * 0.05f, y - h - 6, x + w * 1.05f, y - h - 6, 3, fuge);
+  }
+  g.kontur(2, OUT);
+  g.rundRechteck(x, y - h, w, h, 5, stein);
+  g.konturAus();
+  // Mauersteine
+  for (int r = 0; r * 9 < h - 4; r++) {
+    float yy = y - h + 4 + r * 9;
+    g.linie(x + 2, yy, x + w - 2, yy, 1, fuge, 200);
+    for (float zx = x + 4 + (r & 1) * 8; zx < x + w - 3; zx += 16) g.linie(zx, yy, zx, yy + 9, 1, fuge, 200);
+  }
+  g.rechteck(x + 3, y - h + 2, w * 0.4f, 3, hell, 160);
+  // Herdplatte
+  g.kontur(1.4f, OUT);
+  g.rechteck(x - 4, y - h - 5, w + 8, 7, FARBE(0x4A4A54));
+  g.konturAus();
+  g.ellipse(x + w * 0.3f, y - h - 2, w * 0.13f, 2, FARBE(0x6E6E78));
+  g.ellipse(x + w * 0.7f, y - h - 2, w * 0.13f, 2, FARBE(0x6E6E78));
+  // Feuerloch mit Bogen
+  float ox = x + w * 0.18f, ow = w * 0.64f, oy = y - 6, oh = h * 0.55f;
+  g.rundRechteck(ox - 3, oy - oh - 3, ow + 6, oh + 6, ow * 0.4f, fuge);
+  g.rundRechteck(ox, oy - oh, ow, oh, ow * 0.38f, FARBE(0x1E1612));
+  // Holzscheite und Glut
+  for (int i = 0; i < 3; i++) {
+    g.kontur(0.8f, OUT);
+    g.ellipse(ox + ow * (0.25f + i * 0.25f), oy - 4, ow * 0.16f, 3.2f, HOLZ_D, 255, (i - 1) * 0.3f);
+    g.konturAus();
+    g.kreis(ox + ow * (0.25f + i * 0.25f) + ow * 0.14f, oy - 4, 2, FARBE(0xC8A070));
+  }
+  for (int i = 0; i < 6; i++) g.kreis(ox + ow * (0.15f + i * 0.14f), oy - 1, 2, FARBE(0xFF7A2A), (uint8_t)(200 * feuer * (0.6f + 0.4f * sinf(t * 6 + i))));
+  flammen(g, ox + ow / 2, oy - 5, ow * 0.85f, oh * 0.8f, t, feuer);
+  g.rechteck(x + 2, y - 4, w - 4, 4, fuge);  // Sockel
 }

@@ -149,14 +149,7 @@ static void huette(Gfx &g, float t) {
   himmel(g, 0, t, 196);
   sonne(g, 240, 34, 11, t);
   boden(g, 196);
-  g.kontur(1.6f, OUT);
-  g.rechteck(140, 120, 110, 82, FARBE(0xF0DCC0));
-  float d[] = {130, 122, 195, 76, 260, 122};
-  g.polygon(d, 3, FARBE(0xC0503A));
-  g.konturAus();
-  g.rundRechteck(180, 156, 22, 46, 6, HOLZ_D);
-  g.rundRechteck(150, 140, 20, 18, 3, FARBE(0x9FD8FF));
-  g.rundRechteck(214, 140, 20, 18, 3, FARBE(0x9FD8FF));
+  haeuschen(g, 195, 202, 110, 82, FARBE(0xF0DCC0), FARBE(0xC0503A), t);
   // Garten mit Gemuese und Obstbaum, Huehner und Enten
   laubbaum(g, 46, 202, 0.7f);
   for (int i = 0; i < 4; i++) g.kreis(30 + i * 10, 152 + (i & 1) * 6, 3, FARBE(0xE8473D));

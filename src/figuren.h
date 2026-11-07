@@ -124,3 +124,22 @@ void frau(Gfx &g, float x, float y, float s, float dir, const FrauPose &p, float
 void taube(Gfx &g, float x, float y, float s, float dir, float flug = -1, float pick = 0);
 void eimer(Gfx &g, float x, float y, float s, float kipp);  // Wassereimer, kipp in Bogenmass
 void fisch(Gfx &g, float x, float y, float s, float w, uint8_t a = 255);  // kleiner Fisch, w = Drehung
+
+// ---------- Bausteine fuer Haeuser und Oefen (detailliert) ----------
+// Fenster mit Rahmen, Sprossen, Glanz, Vorhaengen, Fensterbank und Blumenkasten; licht = 0 Tag .. 1 Nacht (hell erleuchtet)
+void fenster(Gfx &g, float x, float y, float w, float h, float licht = 0, bool vorhang = true, bool blumen = true);
+// Holztuer mit Brettern, Beschlaegen, Klinke und Trittstein; (x, y) = links unten
+void holztuer(Gfx &g, float x, float y, float w, float h, Farbe holz = HOLZ_D, bool rund = true);
+// Satteldach mit Ziegelreihen und Ueberstand: von xl bis xr auf Hoehe y, Spitze bei Hoehe y - hoehe
+void ziegeldach(Gfx &g, float xl, float xr, float y, float hoehe, Farbe c, float schnee = 0);
+// Wand mit Putz, Sockel aus Steinen und (fachwerk) dunklen Balken; (x, y) = links oben
+void hauswand(Gfx &g, float x, float y, float w, float h, Farbe c, bool fachwerk = false);
+// Schornstein mit Rauch; (x, y) = Fuss auf dem Dach
+void schornstein(Gfx &g, float x, float y, float t, float rauch = 1, float nacht = 0);
+// ganzes Haeuschen: (x, y) = Mitte unten
+void haeuschen(Gfx &g, float x, float y, float w, float h, Farbe wand, Farbe dach, float t, float nacht = 0, bool fachwerk = true,
+               float schnee = 0);
+// Feuer mit mehreren Flammenlagen, Glut und Funken; (x, y) = Mitte unten
+void flammen(Gfx &g, float x, float y, float breite, float hoehe, float t, float staerke = 1);
+// gemauerter Herd/Ofen mit Feuerloch, Holzscheiten, Kacheln und Rauchfang; (x, y) = links unten
+void herd(Gfx &g, float x, float y, float w, float h, float t, float feuer = 1, Farbe stein = FARBE(0xA89888), bool rauchfang = true);
