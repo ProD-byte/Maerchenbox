@@ -526,6 +526,30 @@ Nach Hans Christian Andersen.
 | 6:10 | Gerdas heiße Tränen tauen sein Herz auf |
 | 6:42 | Heimreise in den Frühling, daheim bei der Großmutter |
 
+## Der Fischer und seine Frau (gut 5 Minuten)
+
+Nach den Brüdern Grimm (KHM 19). Der verwunschene Butt, „Männlein, Männlein, Timpe Te“, Hütte, Schloss, König, Kaiser, Papst – das Meer wird mit jedem Wunsch dunkler, bis die Ilsebill wieder im Pisspott sitzt.
+
+## Die goldene Gans (knapp 5 Minuten)
+
+Nach den Brüdern Grimm (KHM 64). Aschenkuchen und saures Bier für das graue Männlein, die Gans in den Baumwurzeln, die drei Wirtstöchter, Pfarrer, Küster und zwei Bauern bleiben kleben, die Königstochter lacht, Weinkeller, Brotberg und das Schiff zu Land und zu Wasser.
+
+## Die Wichtelmänner (gut 3 Minuten)
+
+Nach den Brüdern Grimm (KHM 39, erstes Märchen). Leder für ein Paar Schuhe, die fertigen Schuhe am Morgen, die Nacht vor Weihnachten, die neuen Kleider – „Sind wir nicht Knaben glatt und fein?“
+
+## Die sieben Raben (knapp 5 Minuten)
+
+Nach den Brüdern Grimm (KHM 25). Der Krug im Brunnen, der Fluch, Sonne, Mond und Sterne, das Hinkelbeinchen, der Glasberg (das Fingerchen nur angedeutet), Tellerchen und Becherchen, das Ringlein.
+
+## Die kleine Meerjungfrau (6 Minuten)
+
+Nach Hans Christian Andersen. Der fünfzehnte Geburtstag, Schiff und Sturm, der Tempel, die Meerhexe und die Stimme, das Findelkind, die Hochzeit, das Messer der Schwestern (nur angedeutet), die Töchter der Luft.
+
+## Der standhafte Zinnsoldat (gut 4½ Minuten)
+
+Nach Hans Christian Andersen. Die Tänzerin aus Papier, der Kobold in der Dose, der Sturz aus dem Fenster, Papierschiff, Wasserratte und Fisch – am Ende ein kleines Herz aus Zinn.
+
 ## Bedienung
 
 | Knopf | im Film / Startbild | im Märchenbuch |
