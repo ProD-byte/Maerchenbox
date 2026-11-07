@@ -317,15 +317,12 @@ static void huetteAussen(Gfx &g, float t, float nacht, float schnee, float bluet
   tanne(g, 20, 196, 1, mischeFarbe(FARBE(0x2F8F4E), FARBE(0xDDE8E0), schnee * 0.5f));
   tanne(g, 262, 196, 1.1f, mischeFarbe(FARBE(0x2F8F4E), FARBE(0xDDE8E0), schnee * 0.5f));
   boden(g, 196, mischeFarbe(GRAS, WEISS, schnee));
-  g.kontur(1.8f, OUT);
-  g.rechteck(84, 104, 116, 92, FARBE(0xE8D3A2));
-  float d[] = {72, 106, 142, 56, 212, 106};
-  g.polygon(d, 3, mischeFarbe(FARBE(0x9A7A4A), WEISS, schnee * 0.8f));
-  g.konturAus();
-  g.rundRechteck(128, 146, 28, 50, 12, HOLZ);
-  g.kreis(152, 168, 1.8f, GOLD);
-  g.rundRechteck(96, 120, 22, 20, 2, mischeFarbe(FARBE(0x8FD3FF), FARBE(0xFFD24A), nacht));
-  g.rundRechteck(168, 120, 22, 20, 2, mischeFarbe(FARBE(0x8FD3FF), FARBE(0xFFD24A), nacht));
+  schornstein(g, 176, 84, t, 1, nacht);
+  hauswand(g, 84, 104, 116, 92, FARBE(0xE8D3A2), true);
+  ziegeldach(g, 84, 200, 106, 50, FARBE(0x9A7A4A), schnee);
+  holztuer(g, 128, 196, 28, 50, HOLZ, true);
+  fenster(g, 96, 120, 22, 20, nacht, true, schnee < 0.5f);
+  fenster(g, 168, 120, 22, 20, nacht, true, schnee < 0.5f);
   rosenbusch(g, 104, 198, 0.75f, WEISS, t, bluete);
   rosenbusch(g, 182, 198, 0.75f, FARBE(0xE8283F), t, bluete);
 }
@@ -335,16 +332,7 @@ static void stube(Gfx &g, float t) {
   g.rechteck(0, 190, 284, 50, FARBE(0x7E5A3E));
   for (int i = 0; i < 4; i++) g.rechteck(0, 200 + i * 12, 284, 1.5f, FARBE(0x5E3E26));
   // Herd mit Feuer
-  g.kontur(2, OUT);
-  g.rundRechteck(14, 104, 86, 92, 6, FARBE(0xA89888));
-  g.konturAus();
-  g.rundRechteck(24, 132, 66, 62, 24, FARBE(0x2E2620));
-  for (int i = 0; i < 4; i++) {
-    float fx = 36 + i * 14, h = 18 + 6 * sinf(t * 9 + i * 1.7f);
-    float f[] = {fx - 7, 192, fx + 7, 192, fx + sinf(t * 7 + i) * 2, 192 - h};
-    g.polygon(f, 3, FARBE(0xFF8A2A));
-  }
-  g.kreis(57, 170, 70, FARBE(0xFFB050), 26);
+  herd(g, 14, 196, 86, 92, t, 1, FARBE(0xA89888), false);
   // Fenster mit Schnee
   g.kontur(1.8f, OUT);
   g.rundRechteck(116, 50, 54, 50, 4, HOLZ);

@@ -162,16 +162,19 @@ static void wirtshaus(Gfx &g, float t, float nacht) {
   himmel(g, nacht, t, 190);
   if (nacht < 0.5f) sonne(g, 40, 30, 10, t); else mond(g, 40, 34, 9);
   boden(g, 200, mischeFarbe(GRAS, FARBE(0x2E4A3A), nacht));
-  g.kontur(1.8f, OUT);
-  g.rechteck(120, 100, 130, 100, mischeFarbe(FARBE(0xF0DCC0), FARBE(0x6E6480), nacht));
-  float d[] = {110, 102, 185, 52, 260, 102};
-  g.polygon(d, 3, mischeFarbe(FARBE(0xA8452E), FARBE(0x5A2E3A), nacht));
+  schornstein(g, 140, 82, t, 1, nacht);
+  hauswand(g, 120, 100, 130, 100, mischeFarbe(FARBE(0xF0DCC0), FARBE(0x6E6480), nacht), true);
+  ziegeldach(g, 120, 250, 102, 50, mischeFarbe(FARBE(0xA8452E), FARBE(0x5A2E3A), nacht));
+  holztuer(g, 172, 200, 26, 48, HOLZ_D, true);
+  g.kontur(1, OUT);
+  g.rundRechteck(166, 144, 38, 6, 2, HOLZ);  // Vordach ueber der Tuer
   g.konturAus();
-  for (int i = 0; i < 3; i++) g.linie(120, 120 + i * 30, 250, 120 + i * 30, 1.6f, HOLZ_D);
-  g.rundRechteck(172, 152, 26, 48, 10, HOLZ_D);
-  Farbe fenster = nacht > 0.5f ? FARBE(0xFFD86A) : FARBE(0x8FD3FF);
-  g.rundRechteck(134, 126, 20, 18, 2, fenster);
-  g.rundRechteck(216, 126, 20, 18, 2, fenster);
+  fenster(g, 134, 126, 20, 18, nacht > 0.5f ? 1 : 0, true, true);
+  fenster(g, 216, 126, 20, 18, nacht > 0.5f ? 1 : 0, true, true);
+  // Bank vor dem Wirtshaus
+  g.rechteck(208, 186, 36, 4, HOLZ);
+  g.rechteck(212, 190, 3, 10, HOLZ_D);
+  g.rechteck(237, 190, 3, 10, HOLZ_D);
   // Wirtshausschild
   g.linie(250, 112, 272, 112, 2, OUT);
   g.kontur(1.2f, OUT);
@@ -186,12 +189,7 @@ static void wirtshaus(Gfx &g, float t, float nacht) {
 // 1) Der Vater schickt die drei Soehne in die Welt
 static void szeneAnfang(Gfx &g, float u) {
   landschaft(g, u, 0);
-  g.kontur(1.6f, OUT);
-  g.rechteck(10, 130, 70, 70, FARBE(0xF0DCC0));
-  float d[] = {2, 132, 45, 96, 88, 132};
-  g.polygon(d, 3, FARBE(0xC0503A));
-  g.konturAus();
-  g.rundRechteck(34, 160, 20, 40, 8, HOLZ_D);
+  haeuschen(g, 45, 200, 70, 70, FARBE(0xF0DCC0), FARBE(0xC0503A), u);
   Pose v = posis(VATER, u);
   v.armV = 2.4f + sinf(u * 3) * 0.3f * (u > 12);
   v.mund = u > 4 && u < 10 ? 0.5f : 0;

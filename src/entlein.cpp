@@ -190,12 +190,13 @@ static void hof(Gfx &g, float t) {
 static void huette(Gfx &g, float t) {
   g.verlauf(0, 200, FARBE(0xC9B08A), FARBE(0xA88E6A));
   g.rechteck(0, 200, 284, 40, FARBE(0x6E5A46));
+  for (int i = 0; i < 6; i++) g.linie(0, 40 + i * 28, 284, 40 + i * 28, 1, FARBE(0x9A8466), 120);  // Balken
+  g.rechteck(0, 196, 284, 5, FARBE(0x5A4A38));
   g.kontur(1.6f, OUT);
   g.rundRechteck(190, 40, 60, 54, 4, HOLZ);
   g.konturAus();
-  g.rundRechteck(195, 45, 50, 44, 2, FARBE(0xC0D0E0));
-  g.rundRechteck(20, 150, 70, 52, 4, FARBE(0x7A6A5A));  // Ofen
-  g.ellipse(55, 194, 10, 3 + sinf(t * 7) * 1.2f, FARBE(0xFF8A2A));
+  fenster(g, 195, 45, 50, 44, 0, true, false);
+  herd(g, 20, 202, 70, 52, t, 0.5f, FARBE(0x7A6A5A), false);  // Ofen
 }
 
 // =====================================================================

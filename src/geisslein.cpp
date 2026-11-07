@@ -270,20 +270,18 @@ static void haus(Gfx &g, float t, float tuer, int pfote = 0) {
   laubbaum(g, 30, 200, 0.9f);
   boden(g, 196);
   blumen(g, 0, 200, 8, 91);
-  g.kontur(1.8f, OUT);
-  g.rechteck(110, 100, 130, 96, FARBE(0xF1DDB0));
-  float d[] = {98, 102, 175, 56, 252, 102};
-  g.polygon(d, 3, FARBE(0xC0632E));
-  g.konturAus();
+  schornstein(g, 128, 80, t);
+  hauswand(g, 110, 100, 130, 96, FARBE(0xF1DDB0), true);
+  ziegeldach(g, 110, 240, 102, 46, FARBE(0xC0632E));
+  fenster(g, 122, 118, 18, 20, 0, true, true);
   g.rundRechteck(146, 136, 34, 60, 14, FARBE(0x3A2A20));
-  if (tuer < 1) {
+  if (tuer <= 0) holztuer(g, 146, 196, 34, 60, HOLZ);
+  else if (tuer < 1) {
     g.kontur(1.4f, OUT);
     g.rundRechteck(146, 136, 34 * (1 - tuer * 0.85f), 60, 14 * (1 - tuer * 0.8f), HOLZ);
     g.konturAus();
   }
-  g.rundRechteck(196, 120, 30, 26, 3, FARBE(0x8FD3FF));
-  g.rechteck(210, 120, 2, 26, HOLZ);
-  g.rechteck(192, 146, 38, 4, HOLZ_D);
+  fenster(g, 196, 120, 30, 26, 0, true, false);
   if (pfote) {  // die Pfote liegt im Fenster
     g.kontur(1.2f, OUT);
     g.ellipse(212, 145, 9, 5, pfote == 1 ? FARBE(0x2A2630) : WEISS);

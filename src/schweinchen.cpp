@@ -117,7 +117,15 @@ static void strohhaus(Gfx &g, float x, float y, float kaputt, float t) {
   g.polygon(d, 3, FARBE(0xD8B048));
   g.konturAus();
   for (int i = 0; i < 9; i++) g.linie(x - 26 + i * 6 + w, y - 44, x - 27 + i * 6 + w, y - 2, 1, FARBE(0xB8984E));
+  // Strohbuendel auf dem Dach, Halme haengen an der Traufe heraus
+  for (int r = 0; r < 4; r++) {
+    float yy = y - 76 + r * 9, hb = 6 + r * 9;
+    for (float hx = -hb; hx <= hb; hx += 4) g.linie(x + hx + w, yy, x + hx * 1.1f + w + 1, yy + 8, 1, FARBE(0xB8903A), 180);
+  }
+  for (int i = 0; i < 14; i++) g.linie(x - 36 + i * 5.4f + w, y - 44, x - 37 + i * 5.4f + w, y - 39 - (i % 3), 1, FARBE(0xC8A040));
   g.rundRechteck(x - 8 + w, y - 26, 16, 26, 6, FARBE(0xA8823E));
+  g.kreis(x + 4 + w, y - 13, 1.4f, OUT);
+  g.ellipse(x + 20 + w, y - 30, 6, 5, FARBE(0x5A4A2A));  // rundes Guckloch
 }
 static void holzhaus(Gfx &g, float x, float y, float kaputt, float t) {
   if (kaputt >= 1) return;
@@ -128,20 +136,35 @@ static void holzhaus(Gfx &g, float x, float y, float kaputt, float t) {
   g.polygon(d, 3, HOLZ_D);
   g.konturAus();
   for (int i = 0; i < 5; i++) g.linie(x - 32 + w, y - 46 + i * 10, x + 32 + w, y - 46 + i * 10, 1.2f, HOLZ_D);
-  g.rundRechteck(x - 9 + w, y - 28, 18, 28, 6, HOLZ_D);
-  g.rundRechteck(x + 14 + w, y - 40, 12, 12, 2, FARBE(0x8FD3FF));
+  for (int i = 0; i < 12; i++) g.kreis(x - 28 + zufall(i + 40) * 56 + w, y - 44 + zufall(i + 60) * 40, 1, HOLZ_D);  // Aeste
+  for (int i = 1; i < 6; i++) {  // Bretter auf dem Dach
+    float k = i / 6.0f;
+    g.linie(x + w * 2 - k * 40, y - 86 + k * 38, x + w * 2, y - 86, 1, HOLZ, 150);
+    g.linie(x + w * 2 + k * 40, y - 86 + k * 38, x + w * 2, y - 86, 1, HOLZ, 150);
+  }
+  holztuer(g, x - 9 + w, y, 18, 28, HOLZ_D, true);
+  fenster(g, x + 14 + w, y - 40, 12, 12, 0, false, false);
+  g.rechteck(x - 30 + w, y - 40, 10, 14, HOLZ_D);  // Fensterladen
 }
 static void steinhaus(Gfx &g, float x, float y, float t, float rauch) {
   g.kontur(1.6f, OUT);
-  g.rechteck(x - 40, y - 60, 80, 60, FARBE(0xC0503A));
-  float d[] = {x - 48, y - 58, x, y - 98, x + 48, y - 58};
-  g.polygon(d, 3, FARBE(0x8E3A2A));
   g.rechteck(x + 18, y - 98, 12, 28, FARBE(0x9A4A3A));  // Schornstein
+  g.rechteck(x + 16, y - 102, 16, 5, FARBE(0x7E3626));
+  g.rechteck(x - 40, y - 60, 80, 60, FARBE(0xE8D8C8));
   g.konturAus();
-  for (int r = 0; r < 6; r++) for (int c = 0; c < 5; c++) g.rechteck(x - 40 + c * 16 + (r & 1) * 8, y - 58 + r * 10, 15, 1.2f, FARBE(0xE8D8C8));
-  g.rundRechteck(x - 10, y - 32, 20, 32, 8, HOLZ);
-  g.rundRechteck(x - 32, y - 46, 14, 14, 2, FARBE(0xFFD27A));
-  g.rundRechteck(x + 18, y - 46, 14, 14, 2, FARBE(0xFFD27A));
+  // Ziegelsteine mit hellen Fugen, jeder ein wenig anders
+  for (int r = 0; r < 6; r++)
+    for (int c = 0; c < 6; c++) {
+      float bx = x - 40 + c * 16 - (r & 1) * 8;
+      float bw = fminf(fminf(15, bx + 15 - (x - 40)), x + 40 - bx) - 1;
+      if (bw < 2) continue;
+      g.rechteck(fmaxf(bx, x - 40) + 0.5f, y - 59 + r * 10, bw, 8.6f,
+                 mischeFarbe(FARBE(0xC0503A), FARBE(0x8E2E22), zufall(r * 7 + c)));
+    }
+  ziegeldach(g, x - 40, x + 40, y - 58, 40, FARBE(0x6E5A5A));
+  holztuer(g, x - 10, y, 20, 32, HOLZ, true);
+  fenster(g, x - 32, y - 46, 14, 14, 1, true, true);
+  fenster(g, x + 18, y - 46, 14, 14, 1, true, true);
   for (int i = 0; i < 3 && rauch > 0; i++) {
     float k = fmodf(t * 0.4f + i * 0.33f, 1);
     g.kreis(x + 24 + sinf(k * 5 + i) * 6, y - 102 - k * 40, 4 + k * 6, FARBE(0xE8E4EE), (uint8_t)(150 * (1 - k) * rauch));

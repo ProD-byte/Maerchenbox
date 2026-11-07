@@ -248,14 +248,20 @@ static void raeuberhaus(Gfx &g, float t, float nacht, float scherben) {
   mond(g, 248, 32, 10);
   boden(g, 200, FARBE(0x2F4A40));
   for (int i = 0; i < 3; i++) tanne(g, i * 30 - 6, 200, 0.8f, FARBE(0x1F3B45));
-  g.kontur(1.8f, OUT);
-  g.rechteck(70, 100, 190, 100, FARBE(0x8E7A6A));
-  float d[] = {60, 102, 165, 54, 270, 102};
-  g.polygon(d, 3, FARBE(0x4E3A3A));
+  schornstein(g, 230, 80, t, 1, nacht);
+  hauswand(g, 70, 100, 190, 100, FARBE(0x8E7A6A), false);
+  for (int r = 0; r < 8; r++) g.linie(72, 106 + r * 11, 258, 106 + r * 11, 1, FARBE(0x5E4E44), 140);  // Bohlen
+  ziegeldach(g, 70, 260, 102, 48, FARBE(0x4E3A3A));
+  holztuer(g, 196, 200, 30, 50, FARBE(0x3E2E26), true);
+  // Fass neben der Tuer
+  g.kontur(1.2f, OUT);
+  g.rundRechteck(232, 178, 18, 22, 4, FARBE(0x6E4A30));
   g.konturAus();
-  g.rundRechteck(196, 150, 30, 50, 10, FARBE(0x3E2E26));
+  g.rechteck(232, 184, 18, 2, OUT, 150);
+  g.rechteck(232, 194, 18, 2, OUT, 150);
   // das helle Fenster
   g.kontur(1.6f, OUT);
+  g.rundRechteck(96, 114, 84, 64, 4, HOLZ_D);
   g.rundRechteck(100, 118, 76, 56, 4, FARBE(0xFFD27A));
   g.konturAus();
   g.kreis(138, 146, 60, FARBE(0xFFD27A), 40);

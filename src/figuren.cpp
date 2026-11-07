@@ -933,11 +933,12 @@ void ziegeldach(Gfx &g, float xl, float xr, float y, float hoehe, Farbe c, float
   g.konturAus();
   // Ziegelreihen
   int reihen = (int)(hoehe / 7);
+  const float fuge = fmaxf(6, (xr - xl) / 14);
   for (int r = 1; r <= reihen; r++) {
     float k = r / (float)(reihen + 1), yy = y - hoehe + k * hoehe;
     float hb = (xr - xl + 2 * ue) / 2 * k;
     g.linie(xm - hb + 2, yy, xm + hb - 2, yy, 1, dunkel, 200);
-    for (float zx = xm - hb + 4 + (r & 1) * 3; zx < xm + hb - 3; zx += 6) g.linie(zx, yy, zx, yy - 5, 0.8f, dunkel, 140);
+    for (float zx = xm - hb + 4 + (r & 1) * fuge * 0.5f; zx < xm + hb - 3; zx += fuge) g.linie(zx, yy, zx, yy - 5, 0.8f, dunkel, 140);
   }
   float l[] = {xl - ue, y + 2, xm, y - hoehe, xm - 3, y - hoehe + 4, xl - ue + 3, y + 2};
   g.polygon(l, 4, hell, 160);  // Licht an der linken Kante
@@ -976,7 +977,7 @@ void schornstein(Gfx &g, float x, float y, float t, float rauch, float nacht) {
   g.rechteck(x - 8, y - 30, 16, 5, FARBE(0x8E3A26));
   g.konturAus();
   for (int r = 0; r < 4; r++) g.linie(x - 6, y - 20 + r * 6, x + 6, y - 20 + r * 6, 0.8f, FARBE(0x7A2E1E));
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4 && rauch > 0.02f; i++) {
     float k = fmodf(t * 0.35f + i * 0.25f, 1);
     g.kreis(x + k * 14 + sinf(t + i) * 2, y - 34 - k * 34, 3 + k * 6, mischeFarbe(WEISS, FARBE(0x8E8AA8), nacht),
             (uint8_t)(150 * (1 - k) * rauch));

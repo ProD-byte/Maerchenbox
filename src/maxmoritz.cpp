@@ -312,25 +312,12 @@ static void maikaefer(Gfx &g, float x, float y, float s, float t, float flug = 0
 // ---------- Kulissen ----------
 static void haus(Gfx &g, float x, float y, float w, float h, Farbe wand, Farbe dach, float t, bool schorn = true,
                  float rauch = 0) {
-  g.kontur(1.6f, OUT);
-  g.rechteck(x, y - h, w, h, wand);
-  float d[] = {x - 8, y - h + 2, x + w / 2, y - h - w * 0.5f, x + w + 8, y - h + 2};
-  g.polygon(d, 3, dach);
-  g.konturAus();
-  for (int i = 0; i < 4; i++)  // Fachwerk
-    g.linie(x + 4 + i * (w - 8) / 3, y - h + 2, x + 4 + i * (w - 8) / 3, y - 2, 1.5f, FARBE(0x6E4A2A), 160);
-  g.linie(x, y - h * 0.55f, x + w, y - h * 0.55f, 1.5f, FARBE(0x6E4A2A), 160);
-  g.rundRechteck(x + w * 0.18f, y - h * 0.48f, w * 0.22f, h * 0.24f, 2, FARBE(0x8FD3FF));
-  g.rundRechteck(x + w * 0.6f, y - h * 0.48f, w * 0.22f, h * 0.24f, 2, FARBE(0x8FD3FF));
-  g.rundRechteck(x + w * 0.42f, y - h * 0.4f, w * 0.16f, h * 0.4f, w * 0.06f, HOLZ);
-  if (schorn) {
-    g.rechteck(x + w * 0.7f, y - h - w * 0.36f, w * 0.1f, w * 0.18f, FARBE(0x9A5A4A));
-    if (rauch > 0)
-      for (int i = 0; i < 4; i++) {
-        float k = fmodf(t * 0.4f + i * 0.25f, 1);
-        g.kreis(x + w * 0.75f + sinf(k * 5 + i) * 6, y - h - w * 0.4f - k * 40, 4 + k * 6, FARBE(0xE8E4EE), (uint8_t)(140 * (1 - k) * rauch));
-      }
-  }
+  if (schorn) schornstein(g, x + w * 0.75f, y - h - w * 0.12f, t, rauch);
+  hauswand(g, x, y - h, w, h, wand, true);
+  ziegeldach(g, x, x + w, y - h + 2, w * 0.5f, dach);
+  fenster(g, x + w * 0.12f, y - h * 0.4f, w * 0.2f, h * 0.22f, 0, true, false);
+  fenster(g, x + w * 0.68f, y - h * 0.4f, w * 0.2f, h * 0.22f, 0, true, false);
+  holztuer(g, x + w * 0.4f, y, w * 0.2f, h * 0.5f, HOLZ, true);
 }
 
 static void zaun(Gfx &g, float x0, float x1, float y) {

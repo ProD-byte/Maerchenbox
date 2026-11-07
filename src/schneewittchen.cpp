@@ -248,17 +248,19 @@ static void wald(Gfx &g, float t, float nacht) {
 
 static void zwergHausAussen(Gfx &g, float t, float nacht) {
   wald(g, t, nacht);
-  g.kontur(1.8f, OUT);
-  g.rechteck(150, 130, 100, 70, FARBE(0xE8D0A0));
-  float d[] = {140, 132, 200, 92, 260, 132};
-  g.polygon(d, 3, FARBE(0xB05A3A));
-  g.konturAus();
-  g.rundRechteck(190, 160, 22, 40, 10, HOLZ);
-  for (int i = 0; i < 2; i++) {
-    g.rundRechteck(160 + i * 64, 144, 18, 16, 2, nacht > 0.3f ? FARBE(0xFFD27A) : FARBE(0x8FD3FF));
-    if (nacht > 0.3f) g.kreis(169 + i * 64, 152, 20, FARBE(0xFFD27A), (uint8_t)(50 * nacht));
+  schornstein(g, 232, 114, t, 1, nacht);
+  hauswand(g, 150, 130, 100, 70, FARBE(0xC8A070), false);
+  for (int r = 0; r < 5; r++) g.linie(152, 138 + r * 11, 236, 138 + r * 11, 1, FARBE(0x8E6A44), 150);  // Blockbohlen
+  ziegeldach(g, 150, 250, 132, 40, FARBE(0x6E8A3E));  // moosgruenes Dach
+  holztuer(g, 190, 200, 22, 40, HOLZ, true);
+  for (int i = 0; i < 2; i++) fenster(g, 160 + i * 64, 144, 16, 14, nacht > 0.3f ? 1 : 0, false, false);
+  // sieben Pilze vor dem Haus
+  for (int i = 0; i < 7; i++) {
+    float px = 150 + i * 15 + (i > 2) * 14, py = 204 + (i & 1) * 3;
+    g.rechteck(px - 1, py - 4, 2.5f, 5, WEISS);
+    g.ellipse(px, py - 5, 4, 2.6f, FARBE(0xD8402E));
+    g.kreis(px - 1, py - 6, 0.9f, WEISS);
   }
-  g.rechteck(226, 96, 12, 20, FARBE(0x8E6E5A));  // Schornstein
 }
 
 // Stube der Zwerge: sieben Tellerlein am Tisch, sieben Bettlein an der Wand

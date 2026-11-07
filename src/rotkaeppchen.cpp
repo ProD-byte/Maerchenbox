@@ -199,17 +199,24 @@ static void omaHaus(Gfx &g, float t, float tuerAuf) {
   sonne(g, 248, 30, 11, t);
   for (int i = 0; i < 3; i++) laubbaum(g, 30 + i * 108, 200, 1.4f, FARBE(0x3E9A4B));
   boden(g, 200);
-  g.kontur(1.8f, OUT);
-  g.rechteck(96, 120, 100, 80, FARBE(0xF1DDB0));
-  float d[] = {86, 122, 146, 80, 206, 122};
-  g.polygon(d, 3, FARBE(0x9A5A3A));
-  g.konturAus();
-  g.rundRechteck(112, 138, 22, 20, 2, FARBE(0x8FD3FF));
-  g.rundRechteck(160, 138, 22, 20, 2, FARBE(0x8FD3FF));
+  schornstein(g, 176, 98, t);
+  hauswand(g, 96, 120, 100, 80, FARBE(0xF1DDB0), true);
+  ziegeldach(g, 96, 196, 122, 42, FARBE(0x9A5A3A));
+  fenster(g, 110, 138, 20, 18);
+  fenster(g, 164, 138, 20, 18);
   // Tuer
   g.rundRechteck(134, 156, 26, 44, 10, FARBE(0x2E2620));
-  g.rundRechteck(134, 156, 26 * (1 - tuerAuf * 0.8f), 44, 10, HOLZ);
-  g.kreis(134 + 26 * (1 - tuerAuf * 0.8f) - 5, 180, 2, GOLD);
+  if (tuerAuf < 0.05f) holztuer(g, 134, 200, 26, 44, HOLZ);
+  else {
+    g.rundRechteck(134, 156, 26 * (1 - tuerAuf * 0.8f), 44, 10, HOLZ);
+    g.kreis(134 + 26 * (1 - tuerAuf * 0.8f) - 5, 180, 2, GOLD);
+  }
+  // Rosenstock an der Wand
+  for (int i = 0; i < 9; i++) {
+    float rx = 100 + (i % 3) * 5 + zufall(i + 3) * 4, ry = 160 + (i / 3) * 12;
+    g.kreis(rx, ry, 4, GRAS_D);
+    if (i & 1) g.kreis(rx + 1, ry - 1, 2.2f, FARBE(0xE8473D));
+  }
   for (int i = 0; i < 7; i++) g.kreis(10 + i * 14, 206 - (i & 1) * 3, 9, FARBE(0x4E8A3A));  // Nusshecke
   for (int i = 0; i < 6; i++) g.kreis(214 + i * 14, 206 - (i & 1) * 3, 9, FARBE(0x4E8A3A));
 }

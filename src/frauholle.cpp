@@ -154,14 +154,17 @@ static void hof(Gfx &g, float t) {
   himmel(g, 0, t, 196);
   sonne(g, 248, 30, 12, t);
   boden(g, 196);
-  g.kontur(1.8f, OUT);
-  g.rechteck(10, 120, 90, 76, FARBE(0xF1DDB0));
-  float d[] = {2, 122, 55, 84, 108, 122};
-  g.polygon(d, 3, FARBE(0xA8563A));
-  g.konturAus();
-  g.rundRechteck(44, 156, 22, 40, 9, HOLZ);
-  g.rundRechteck(18, 140, 18, 16, 2, FARBE(0x8FD3FF));
-  g.rundRechteck(76, 140, 18, 16, 2, FARBE(0x8FD3FF));
+  schornstein(g, 80, 98, t);
+  hauswand(g, 10, 120, 90, 76, FARBE(0xF1DDB0), true);
+  ziegeldach(g, 10, 100, 122, 40, FARBE(0xA8563A));
+  holztuer(g, 44, 196, 22, 40);
+  fenster(g, 18, 140, 18, 16);
+  fenster(g, 76, 140, 18, 16);
+  // Holzstoss an der Hauswand
+  for (int i = 0; i < 5; i++) {
+    g.kreis(108 + (i % 3) * 7 + (i / 3) * 3.5f, 192 - (i / 3) * 6, 3.4f, HOLZ_D);
+    g.kreis(108 + (i % 3) * 7 + (i / 3) * 3.5f, 192 - (i / 3) * 6, 1.8f, FARBE(0xE0B880));
+  }
   brunnen(g, 200, 214);
 }
 
