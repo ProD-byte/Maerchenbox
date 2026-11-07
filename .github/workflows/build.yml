@@ -87,7 +87,15 @@ jobs:
     runs-on: ubuntu-24.04
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.nochmal.outputs.page_url }}
     steps:
+      # GitHub Pages meldet ab und zu "Deployment failed, try again later" - dann nach einer Minute nochmal
       - id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Kurz warten
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 60
+      - id: nochmal
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
